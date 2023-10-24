@@ -5,6 +5,12 @@
     --light-green: #CBD4C2;
     --white: #FFFCFF;
 }
+
+html{
+    margin: 0;
+    padding: 0;
+}
+
 body {
     font-family: 'Roboto', sans-serif;
 
