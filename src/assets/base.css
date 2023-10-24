@@ -1,0 +1,23 @@
+@import '@mdi/font/css/materialdesignicons.min.css';
+
+:root {
+    --dark-green: #21351f;
+    --light-green: #CBD4C2;
+    --white: #FFFCFF;
+}
+body {
+    font-family: 'Roboto', sans-serif;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    height: 100vh;
+    width: 100vw;
+}
+
+#app {
+    height: 100%;
+    width: 100%;
+}
