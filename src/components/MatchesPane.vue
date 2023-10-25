@@ -16,10 +16,14 @@
 
 <template>
     <div id="matches-container">
-        <div class="upper matches"></div>
+        <div class="upper matches">
+            <h1 class="section-head">Chart</h1>
+        </div>
 
         <div id="lower-container">
-            <div class="lower matches" :class="{ expanded: showDetailsBar, collapsed: !showDetailsBar}"></div>
+            <div class="lower matches" :class="{ expanded: showDetailsBar, collapsed: !showDetailsBar}">
+                <h1 class="section-head">Selected Patient</h1>
+            </div>
 
             <div class="button-container matches">
             <v-btn icon @click="showDetailsBar = !showDetailsBar" :class="{ expanded: showDetailsBar, collapsed: !showDetailsBar}" class="btn umbrella matches" height="35px" width="35px" color="#21351f">
@@ -48,6 +52,7 @@
         flex-grow: 1;
         width: 100%;
         background-color: #c9e4c9;
+        padding-top: 48px;
     }
 
     #lower-container {
@@ -71,6 +76,7 @@
     .lower.matches.collapsed {
         height: 0vh;
         border-top: 0px solid transparent;
+        overflow: hidden;
     }
 
     .button-container.matches {
@@ -95,11 +101,11 @@
     }
 
     .btn.umbrella.matches.expanded {
-        top: -58px;
+        top: 55px;
         left: 10px;
     }
 
-    .btn.umbrella.matches.expanded {
+    .btn.umbrella.matches.collapsed {
         top: 0px;
         left: 10px;
     }

@@ -27,3 +27,14 @@ body {
     height: 100%;
     width: 100%;
 }
+
+h1.section-head {
+    font-size: larger;
+    color: #042c09;
+    padding-left: 1em;
+    padding-right: 1em;
+    text-align: center;
+
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
