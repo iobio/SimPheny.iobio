@@ -2,15 +2,11 @@
     export default {
         name: 'LeftBar',
         props: {
-            showLeftBar: {
-                type: Boolean,
-                default: true
-            }
             
         },
         data: function() {
             return {
-            
+                showLeftBar: true,
             }
         },
         methods: {
@@ -23,14 +19,14 @@
     <div class="section-container left-bar">
         <div id="left-bar-container" :class="{ expanded: showLeftBar, collapsed: !showLeftBar}"></div>
 
-        <div class="button-container left-bar">
+        <div class="button-container left-bar" :class="{ expanded: showLeftBar, collapsed: !showLeftBar}">
             <v-btn icon @click="showLeftBar = !showLeftBar" class="btn umbrella" height="35px" width="35px" color="#21351f">
-                <v-tooltip offset="3" location="bottom" activator="parent">
-                    <span v-if="!showLeftBar">Open patient details</span>
-                    <span v-if="showLeftBar">Close patient details</span>
+                <v-tooltip offset="3" location="right" activator="parent">
+                    <span v-if="!showLeftBar">Open target pt details</span>
+                    <span v-if="showLeftBar">Close target pt details</span>
                 </v-tooltip>
-                <v-icon v-if="showLeftBar" color="white">mdi-umbrella-outline</v-icon>
-                <v-icon v-if="!showLeftBar" color="white">mdi-umbrella-closed-outline</v-icon>
+                <v-icon v-if="showLeftBar" color="white">mdi-arrow-left-circle-outline</v-icon>
+                <v-icon v-if="!showLeftBar" color="white">mdi-arrow-right-circle-outline</v-icon>
             </v-btn>
         </div>
     </div>
@@ -59,7 +55,7 @@
         padding: 0;
     }
     #left-bar-container.expanded {
-        width: 27vw;
+        width: 30vw;
         border-right: 2px solid #21351f;
         box-shadow: 5px 0px 5px -2px rgba(0,0,0,0.2);
     }
@@ -72,6 +68,10 @@
         right: -45px;
         position: absolute;
         overflow: visible;
+        transition: all .45s ease-in-out;
+    }
+    .button-container.left-bar.expanded {
+        right: 10px;
     }
     .btn.umbrella {
         z-index: 9990;
@@ -81,4 +81,5 @@
         width: 35px;
         position: absolute;
     }
+
 </style>
