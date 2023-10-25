@@ -42,8 +42,8 @@
         <div class="button-container left-bar" :class="{ expanded: showLeftBar, collapsed: !showLeftBar}">
             <v-btn icon @click="showLeftBar = !showLeftBar" class="btn toggle" height="35px" width="35px" color="#21351f">
                 <v-tooltip offset="3" location="right" activator="parent">
-                    <span v-if="!showLeftBar">Open target pt details</span>
-                    <span v-if="showLeftBar">Close target pt details</span>
+                    <span v-if="!showLeftBar">Expand patient details</span>
+                    <span v-if="showLeftBar">Collapse patient details</span>
                 </v-tooltip>
                 <v-icon v-if="showLeftBar" color="white">mdi-arrow-left-circle-outline</v-icon>
                 <v-icon v-if="!showLeftBar" color="white">mdi-arrow-right-circle-outline</v-icon>

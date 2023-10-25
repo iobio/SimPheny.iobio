@@ -8,7 +8,7 @@
     },
     data: function() {
       return {
-        showDetailsBar: true,
+        showDetailsBar: false,
       }
     },
   }
@@ -28,8 +28,8 @@
             <div class="button-container matches">
             <v-btn icon @click="showDetailsBar = !showDetailsBar" :class="{ expanded: showDetailsBar, collapsed: !showDetailsBar}" class="btn umbrella matches" height="35px" width="35px" color="#21351f">
                 <v-tooltip offset="3" location="right" activator="parent">
-                    <span v-if="!showDetailsBar">Expand match pt details</span>
-                    <span v-if="showDetailsBar">Collapse match pt details</span>
+                    <span v-if="!showDetailsBar">Expand match details</span>
+                    <span v-if="showDetailsBar">Collapse match details</span>
                 </v-tooltip>
                 <v-icon v-if="showDetailsBar" color="white">mdi-arrow-down-circle-outline</v-icon>
                 <v-icon v-if="!showDetailsBar" color="white">mdi-arrow-up-circle-outline</v-icon>
