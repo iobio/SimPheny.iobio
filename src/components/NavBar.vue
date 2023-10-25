@@ -26,9 +26,6 @@
             <v-toolbar-title>Pheno-Matcher.iobio</v-toolbar-title>
         </v-app-bar>
     </div>
-
-    <LeftBar></LeftBar>
-
 </template>
 
 <style>
