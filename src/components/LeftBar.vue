@@ -8,7 +8,8 @@
             return {
                 showLeftBar: true,
                 showHpoDrawer: true,
-                panels: [1,1,0]
+                panels: [1,1,0],
+                tab: 'phenotypes'
             }
         },
         methods: {
@@ -21,7 +22,23 @@
     <div class="section-container left-bar">
         <div id="left-bar-container" :class="{ expanded: showLeftBar, collapsed: !showLeftBar}">
             <div class="tab-container left-bar">
-                <h1 class="section-head">Tabs</h1>
+                <h1 class="section-head">Patient Information</h1>
+                <v-tabs v-model="tab" fixed-tabs height="30px">
+                    <v-tab value="phenotypes" variant="text">Phenotypes</v-tab>
+                    <v-tab value="variants" variant="text">Variants</v-tab>
+                </v-tabs>
+
+                <div id="tab-content-container" class="left-bar">
+                    <v-window v-model="tab">
+                        <v-window-item value="phenotypes">
+                            Phenotypes
+                        </v-window-item>
+
+                        <v-window-item value="variants">
+                            Variants
+                        </v-window-item>
+                    </v-window>
+                </div>
             </div>
 
             <div id="hpo-drawer" :class="{ expanded: showHpoDrawer, collapsed: !showHpoDrawer}">
@@ -111,6 +128,32 @@
         transition: all .45s ease-in-out;
     }
 
+    .tab-container.left-bar .v-tab {
+        text-transform: none;
+        font-weight: bold;
+        border-top: #21351f 1px solid;
+        border-left: #21351f 1px solid;
+        border-right: #21351f 1px solid;
+        border-bottom: #21351f 2px solid;
+        border-radius: 5px 5px 0px 0px;
+        transition: all .15s ease-in-out;
+    }
+
+    .tab-container.left-bar .v-tab--selected {
+        background-color: #f0f4ef;
+        border-bottom: #21351f 0px solid;
+        color: #133910;
+    }
+
+    .tab-container.left-bar .v-tab--selected .v-tab__slider {
+        visibility: hidden;
+    }
+
+    #tab-content-container.left-bar {
+        height: 100%;
+        padding: 10px;
+    }
+
     #hpo-drawer {
         width: 100%;
         background-color: #d5f4d3;
@@ -118,11 +161,11 @@
         border-top: 2px solid #21351f;
         transition: all .45s ease-in-out;
         position: relative;
-
     }
 
     #hpo-drawer.expanded {
         height: 40%;
+        box-shadow: 0px -5px 5px -2px rgba(0,0,0,0.2);
     }
     #hpo-drawer.collapsed {
         height: 0%;
