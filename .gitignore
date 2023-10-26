@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+public/SimilarityMatrix.csv
+public/UdnPatients.csv
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
