@@ -25,7 +25,7 @@
         async mounted() {
             this.udnPatientsUrl = "./UdnPatients.csv";
             this.similarityMatrixUrl = "./SimilarityMatrix.csv";
-            this.targetPatient = new TargetPatient('UDN244411', ['HP:0000475', 'HP:0000577', 'HP:0000589', 'HP:0000609', 'HP:0000687', 'HP:0001249', 'HP:0001250', 'HP:0001263', 'HP:0001337', 'HP:0001344', 'HP:0001347', 'HP:0001647', 'HP:0001773', 'HP:0002070', 'HP:0002099']);
+            this.targetPatient = new TargetPatient('UDN244411');
 
             if (this.targetPatient.id){
                 let { patientMap, similarityMap, rankedList } = await grabData(this.udnPatientsUrl, this.similarityMatrixUrl, this.targetPatient.id);

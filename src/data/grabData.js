@@ -1,11 +1,16 @@
 import MatchPatient from "../models/MatchPatient";
+import Phenotype from "../models/Phenotype";
+
+const hpoDbURL = "http://localhost:8911/id/"
+const hpoDbURLAll = "http://localhost:8911/all/"
 
 export default async function grabData(patientsCsvUrl, similarityCsvUrl, patientID) {
+  
   // Parse the CSV files
   const patientsMatrix = await parseFromFile(patientsCsvUrl);
 
   // Create a map of patient IDs to patient objects
-  let patientMap = createPatientMap(patientsMatrix);
+  let patientMap = await createPatientMap(patientsMatrix);
   let similarityMap = null;
   let rankedList = null;
 
@@ -18,8 +23,12 @@ export default async function grabData(patientsCsvUrl, similarityCsvUrl, patient
   return { patientMap, similarityMap, rankedList };
 }
 //Create a map of match patients with their ID as a key and then the patient object
-function createPatientMap(matrix) {
+async function createPatientMap(matrix) {
+  var hpoIdMap = {}
+  hpoIdMap = await getAllPhenotypes(hpoDbURLAll)
+
   let patientMap = {};
+  var notAdded = 0;
   for (let i = 1; i < matrix.length; i++) {
     let row = matrix[i];
     let patient = new MatchPatient(row[0]);
@@ -28,10 +37,42 @@ function createPatientMap(matrix) {
     patient.setGenesList(row[2]);
     patient.setClinicalDiagnosis(row[3]);
     patient.setHpoIdList(row[4]);
-    patient.setHpoTermList(row[5])
 
+    let patientHpoIds = patient.getHpoIdList()
+    let patientPhenList = []
+    
+    if (!patientHpoIds || patientHpoIds === "NONE") {
+      notAdded++;
+      continue;
+    }
+
+    for (let id of patientHpoIds) {
+        id = id.trim()
+        if (!(hpoIdMap.hasOwnProperty(id))) {
+          let phen = await getPhenotype(id, hpoDbURL);
+
+          if (phen) {
+            hpoIdMap[id] = phen;
+            let newPhenotype = new Phenotype(phen["id"], phen["name"], phen["definition"], phen["comment"] , phen["synonyms"]);
+            patientPhenList.push(newPhenotype);
+          } else {
+            hpoIdMap[id] = null;
+            notAdded++;
+          }
+        } else {
+          //look it up on the hpoIdMap
+          let phen = hpoIdMap[id]
+          if (phen) {
+            let newPhenotype = new Phenotype(id, phen["name"], phen["definition"], phen["comment"] , phen["synonyms"]);
+            patientPhenList.push(newPhenotype);
+          }
+        }
+    }
+
+    patient.setPhenotypeList(patientPhenList)
     patientMap[row[0]] = patient;
   }
+  console.log("Not added: ", notAdded)
   return patientMap;
 }
 
@@ -82,4 +123,14 @@ async function parseFromFile(url) {
   const matrix = lines.map(line => line.split(",").map(cell => cell.replace(/;/g, ",")));
 
   return matrix;
+}
+
+async function getPhenotype(id, url) {
+  const response = await fetch(url + encodeURI(id));
+  return response.json();
+}
+
+async function getAllPhenotypes(url) {
+  const response = await fetch(url);
+  return response.json();
 }

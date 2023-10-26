@@ -2,6 +2,7 @@
 
 export default function LinearChart() {
 
+
     function chart(container, matchesArray, targetPatient) {
 
     }

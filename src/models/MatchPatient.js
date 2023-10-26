@@ -10,7 +10,7 @@ class MatchPatient {
         this.hpoIdList = [];
         this.hpoTermList = [];
 
-        this.variantsList = [];
+        this.phenotypeList = []
     }
 
     getId() {
@@ -73,14 +73,12 @@ class MatchPatient {
         }
         this.hpoTermList = hpoTermList;
     }
-    getVariantsList() {
-        return this.variantsList;
+
+    getPhenotypeList() {
+        return this.phenotypeList;
     }
-    setVariantsList(variantsList) {
-        if (typeof variantsList === "string") {
-            variantsList = variantsList.split(",");
-        }
-        this.variantsList = variantsList;
+    setPhenotypeList(phenotypeList) {
+        this.phenotypeList = phenotypeList;
     }
 }
 export default MatchPatient;

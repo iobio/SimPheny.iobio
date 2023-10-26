@@ -1,5 +1,5 @@
 class TargetPatient {
-    constructor(id, userInputHpoIdList, userInputGenesList=[]) {
+    constructor(id, userInputHpoIdList=[], userInputGenesList=[]) {
         this.id = id;
         this.userInputGenesList = userInputGenesList;
         this.userInputHpoIdList = userInputHpoIdList;
@@ -12,7 +12,7 @@ class TargetPatient {
         this.hpoIdList = [];
         this.hpoTermList = [];
 
-        this.variantsList = [];
+        this.phenotypeList = [];
     }
 
     getId() {
@@ -87,18 +87,19 @@ class TargetPatient {
     setUserInputHpoIdList(userInputHpoIdList) {
         this.userInputHpoIdList = userInputHpoIdList;
     }
-    getVariantsList() {
-        return this.variantsList;
+
+    getPhenotypeList() {
+        return this.phenotypeList;
     }
-    setVariantsList(variantsList) {
-        if (typeof variantsList === "string") {
-            variantsList = variantsList.split(",");
-        }
-        this.variantsList = variantsList;
+    setPhenotypeList(phenotypeList) {
+        this.phenotypeList = phenotypeList;
     }
 
     setFromPatientObject(patient) {
-        this.similarityScore = patient.getSimilarityScore();
+        if (patient.getSimilarityScore()) {
+            this.similarityScore = patient.getSimilarityScore();
+        } 
+
         this.rank = patient.getRank();
         this.dx = patient.getDx();
 
