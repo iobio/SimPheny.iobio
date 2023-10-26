@@ -31,7 +31,7 @@
                 <div id="tab-content-container" class="left-bar">
                     <v-window v-model="tab">
                         <v-window-item value="phenotypes">
-                            <div class="list-item left-bar" v-if="targetPatient" v-for="term in targetPatient.getHpoIdList()">
+                            <div class="list-item left-bar" v-if="targetPatient" v-for="term in targetPatient.getHpoTermList()">
                                 <input type="checkbox">
                                 <span>{{ term }}</span>
                             </div>
@@ -78,8 +78,14 @@
 
 <style>
     .list-item.left-bar {
+        padding-left: 5px;
+        padding-right: 5px;
         display: flex;
         flex-direction: row;
+        border-bottom: 1px #f4f6f4 solid;
+    }
+    .list-item.left-bar:hover {
+        background-color: #bfc8bf;
     }
     .list-item.left-bar input {
         margin-right: 10px; 

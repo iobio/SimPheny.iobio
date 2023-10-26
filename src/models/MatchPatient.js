@@ -9,6 +9,8 @@ class MatchPatient {
         this.clinicalDiagnosis = null;
         this.hpoIdList = [];
         this.hpoTermList = [];
+
+        this.variantsList = [];
     }
 
     getId() {
@@ -66,7 +68,19 @@ class MatchPatient {
         return this.hpoTermList;
     }
     setHpoTermList(hpoTermList) {
+        if (typeof hpoTermList === "string") {
+            hpoTermList = hpoTermList.split(",");
+        }
         this.hpoTermList = hpoTermList;
+    }
+    getVariantsList() {
+        return this.variantsList;
+    }
+    setVariantsList(variantsList) {
+        if (typeof variantsList === "string") {
+            variantsList = variantsList.split(",");
+        }
+        this.variantsList = variantsList;
     }
 }
 export default MatchPatient;

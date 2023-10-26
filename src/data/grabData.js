@@ -28,6 +28,7 @@ function createPatientMap(matrix) {
     patient.setGenesList(row[2]);
     patient.setClinicalDiagnosis(row[3]);
     patient.setHpoIdList(row[4]);
+    patient.setHpoTermList(row[5])
 
     patientMap[row[0]] = patient;
   }

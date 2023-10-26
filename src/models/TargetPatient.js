@@ -11,6 +11,8 @@ class TargetPatient {
         this.clinicalDiagnosis = null;
         this.hpoIdList = [];
         this.hpoTermList = [];
+
+        this.variantsList = [];
     }
 
     getId() {
@@ -59,6 +61,9 @@ class TargetPatient {
         return this.hpoIdList;
     }
     setHpoIdList(hpoIdList) {
+        if (typeof hpoIdList === "string") {
+            hpoIdList = hpoIdList.split(",");
+        }
         this.hpoIdList = hpoIdList;
     }
     getHpoTermList() {
@@ -81,6 +86,15 @@ class TargetPatient {
     }
     setUserInputHpoIdList(userInputHpoIdList) {
         this.userInputHpoIdList = userInputHpoIdList;
+    }
+    getVariantsList() {
+        return this.variantsList;
+    }
+    setVariantsList(variantsList) {
+        if (typeof variantsList === "string") {
+            variantsList = variantsList.split(",");
+        }
+        this.variantsList = variantsList;
     }
 
     setFromPatientObject(patient) {
