@@ -104,7 +104,7 @@ class TargetPatient {
         this.dx = patient.getDx();
 
         if (this.genesList.length == 0 || this.genesList == null) {
-        this.genesList = patient.getGenesList();
+            this.genesList = patient.getGenesList();
         }
 
         this.clinicalDiagnosis = patient.getClinicalDiagnosis();
@@ -115,6 +115,10 @@ class TargetPatient {
 
         if (this.hpoTermList.length == 0 || this.hpoTermList == null) {
             this.hpoTermList = patient.getHpoTermList();
+        }
+
+        if (this.getPhenotypeList().length == 0 || this.getPhenotypeList() == null) {
+            this.phenotypeList = patient.getPhenotypeList();
         }
     }
 }

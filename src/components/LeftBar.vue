@@ -31,9 +31,9 @@
                 <div id="tab-content-container" class="left-bar">
                     <v-window v-model="tab">
                         <v-window-item value="phenotypes">
-                            <div class="list-item left-bar" v-if="targetPatient" v-for="hpoId in targetPatient.getHpoIdList()">
-                                <input type="checkbox">
-                                <span>{{ hpoId }}</span>
+                            <div class="list-item left-bar" v-if="targetPatient" v-for="phenotype in targetPatient.getPhenotypeList()">
+                                <input type="checkbox" v-model="phenotype.relevant">
+                                <span>{{ phenotype.hpoId + " - " + phenotype.term }}</span>
                             </div>
                         </v-window-item>
 
