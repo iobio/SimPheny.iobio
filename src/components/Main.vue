@@ -2,6 +2,8 @@
     import NavBar from './NavBar.vue'
     import LeftBar from './LeftBar.vue'
     import MatchesPane from './MatchesPane.vue'
+    import grabData from '../data/grabData.js'
+    import TargetPatient from '../models/TargetPatient.js'
 
     export default {
         name: 'Main',
@@ -9,7 +11,36 @@
             NavBar, 
             LeftBar,
             MatchesPane,
-        }
+        },
+        data() {
+            return {
+                patientMap: {},
+                similarityMap: {},
+                rankedList: [],
+                targetPatient: null,
+                similarityMatrixUrl: null,
+                udnPatientsUrl: null,
+            }
+        },
+        async mounted() {
+            this.udnPatientsUrl = "./UdnPatients.csv";
+            this.similarityMatrixUrl = "./SimilarityMatrix.csv";
+            this.targetPatient = new TargetPatient('UDN244411', ['HP:0000475', 'HP:0000577', 'HP:0000589', 'HP:0000609', 'HP:0000687', 'HP:0001249', 'HP:0001250', 'HP:0001263', 'HP:0001337', 'HP:0001344', 'HP:0001347', 'HP:0001647', 'HP:0001773', 'HP:0002070', 'HP:0002099']);
+
+            if (this.targetPatient.id){
+                let { patientMap, similarityMap, rankedList } = await grabData(this.udnPatientsUrl, this.similarityMatrixUrl, this.targetPatient.id);
+
+                this.patientMap = patientMap;
+                this.similarityMap = similarityMap;
+                this.rankedList = rankedList;
+
+                this.targetPatient.setFromPatientObject(patientMap[this.targetPatient.id]);
+                delete this.patientMap[this.targetPatient.id];
+            }
+        },
+        methods: {
+
+        },
     }
 </script>
 
@@ -17,7 +48,8 @@
     <NavBar></NavBar>
 
     <div id="main-content-container">
-        <LeftBar></LeftBar>
+        <LeftBar
+            :targetPatient="targetPatient"></LeftBar>
         <MatchesPane></MatchesPane>
     </div>
 </template>

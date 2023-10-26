@@ -2,7 +2,7 @@
     export default {
         name: 'LeftBar',
         props: {
-            
+            targetPatient: Object,
         },
         data: function() {
             return {
@@ -21,7 +21,7 @@
 <template>
     <div class="section-container left-bar">
         <div id="left-bar-container" :class="{ expanded: showLeftBar, collapsed: !showLeftBar}">
-            <div class="tab-container left-bar">
+            <div class="tab-container left-bar" :class="{ expanded: !showHpoDrawer, shortened: showHpoDrawer}">
                 <h1 class="section-head">Patient Information</h1>
                 <v-tabs v-model="tab" fixed-tabs height="30px">
                     <v-tab value="phenotypes" variant="text">Phenotypes</v-tab>
@@ -31,11 +31,18 @@
                 <div id="tab-content-container" class="left-bar">
                     <v-window v-model="tab">
                         <v-window-item value="phenotypes">
-                            Phenotypes
+                            <div class="list-item left-bar" v-if="targetPatient" v-for="term in targetPatient.getHpoIdList()">
+                                <input type="checkbox">
+                                <span>{{ term }}</span>
+                            </div>
                         </v-window-item>
 
                         <v-window-item value="variants">
-                            Variants
+                            <p v-if="!targetPatient || (targetPatient.getGenesList() == null || targetPatient.getGenesList().length == 0)">No variants to display for current patient.</p>
+                            <div class="list-item left-bar" v-else="targetPatient && targetPatient.getGenesList()" v-for="gene in targetPatient.getGenesList()">
+                                <input type="checkbox">
+                                <span>{{ gene }}</span>
+                            </div>
                         </v-window-item>
                     </v-window>
                 </div>
@@ -70,6 +77,13 @@
 </template>
 
 <style>
+    .list-item.left-bar {
+        display: flex;
+        flex-direction: row;
+    }
+    .list-item.left-bar input {
+        margin-right: 10px; 
+    }
     .section-container.left-bar {
         height: 100%;
         width: fit-content;
@@ -124,24 +138,30 @@
     }
 
     .tab-container.left-bar {
-        flex-grow: 1;
+        height: 60%;
         transition: all .45s ease-in-out;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .tab-container.left-bar.expanded {
+        height: 100%;
+    }
+    .tab-container.left-bar.shortened {
+        height: 60%;
     }
 
     .tab-container.left-bar .v-tab {
         text-transform: none;
         font-weight: bold;
-        border-top: #21351f 1px solid;
-        border-left: #21351f 1px solid;
-        border-right: #21351f 1px solid;
-        border-bottom: #21351f 2px solid;
         border-radius: 5px 5px 0px 0px;
         transition: all .15s ease-in-out;
+
+        max-height: 100%;
     }
 
     .tab-container.left-bar .v-tab--selected {
-        background-color: #f0f4ef;
-        border-bottom: #21351f 0px solid;
+        background-color: #e9ede9;
         color: #133910;
     }
 
@@ -150,13 +170,25 @@
     }
 
     #tab-content-container.left-bar {
-        height: 100%;
+        flex-grow: 1;
         padding: 10px;
+        padding-right: 0px;
+        background-color: #e9ede9;
+        height: 100%;
+        overflow-y: hidden;
+    }
+
+    #tab-content-container.left-bar .v-window {
+        height: 100%;
+    }
+
+    #tab-content-container.left-bar .v-window .v-window-item {
+        padding: 10px;
+        overflow: auto;
     }
 
     #hpo-drawer {
         width: 100%;
-        background-color: #d5f4d3;
         justify-self: flex-end;
         border-top: 2px solid #21351f;
         transition: all .45s ease-in-out;

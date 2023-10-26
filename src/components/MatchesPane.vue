@@ -22,7 +22,7 @@
 
         <div id="lower-container">
             <div class="lower matches" :class="{ expanded: showDetailsBar, collapsed: !showDetailsBar}">
-                <h1 class="section-head">Selected Patient</h1>
+                <h1 class="section-head">Selected Match</h1>
             </div>
 
             <div class="button-container matches">
@@ -45,13 +45,12 @@
         display: flex;
         flex-direction: column;
         flex-grow: 1;
-        background-color: #89ae8a;
     }
 
     .upper.matches {
         flex-grow: 1;
         width: 100%;
-        background-color: #c9e4c9;
+        background-color: #e9ede9;
         padding-top: 48px;
     }
 
@@ -63,7 +62,6 @@
 
     .lower.matches {
         width: 100%;
-        background-color: #89ae8a;
         transition: all .45s ease-in-out;
     }
 
