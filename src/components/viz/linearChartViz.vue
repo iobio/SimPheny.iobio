@@ -1,3 +1,11 @@
+<template>
+    <div id="linear-chart-container">
+        <div ref="lin-chart-container" id="lin-chart-viz" @click="selectMatch"></div>
+        <div id="lin-chart-tip"></div>
+    </div>
+
+</template>
+
 <script>
     import LinearChart from '../../d3/linearChart.d3';
     import * as d3 from 'd3';
@@ -53,18 +61,15 @@
                     this.linearChart(container, this.targetPatient, this.patientMap);
                 }
             },
+            selectMatch() {
+                //get the data from the point with the selected-match class
+                let selectedMatch = d3.select('.selected-match').data()[0];
+                this.$emit('selectMatch', selectedMatch);
+            }
         },
     }
 
 </script>
-
-<template>
-    <div id="linear-chart-container">
-        <div ref="lin-chart-container" id="lin-chart-viz"></div>
-        <div id="lin-chart-tip"></div>
-    </div>
-
-</template>
 
 <style>
     #linear-chart-container {

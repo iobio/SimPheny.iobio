@@ -1,34 +1,17 @@
-<script> 
-    import LinearChartViz from './viz/linearChartViz.vue';
-  export default {
-    name: 'MatchesPane',
-    components: {
-        LinearChartViz,
-    }, 
-    props: {
-        targetPatient: Object,
-        patientMap: Object,
-    },
-    data: function() {
-      return {
-        showDetailsBar: false,
-      }
-    },
-  }
-</script>
-
 <template>
     <div id="matches-container">
         <div class="upper matches">
             <h1 class="section-head">Chart</h1>
             <LinearChartViz
                 :targetPatient="targetPatient"
-                :patientMap="patientMap"></LinearChartViz>
+                :patientMap="patientMap"
+                @selectMatch="populateSelectedMatch"></LinearChartViz>
         </div>
 
         <div id="lower-container">
             <div class="lower matches" :class="{ expanded: showDetailsBar, collapsed: !showDetailsBar}">
                 <h1 class="section-head">Selected Match</h1>
+                <p>{{ selectedMatch }}</p>
             </div>
 
             <div class="button-container matches">
@@ -44,6 +27,34 @@
         </div>
     </div>
 </template>
+
+<script> 
+    import LinearChartViz from './viz/linearChartViz.vue';
+  export default {
+    name: 'MatchesPane',
+    components: {
+        LinearChartViz,
+    }, 
+    props: {
+        targetPatient: Object,
+        patientMap: Object,
+    },
+    data: function() {
+      return {
+        showDetailsBar: false,
+        selectedMatch: null,
+      }
+    },
+    methods: {
+        populateSelectedMatch(match) {
+            this.selectedMatch = match;
+            if (!this.showDetailsBar) {
+                this.showDetailsBar = true;
+            }
+        }
+    },
+  }
+</script>
 
 <style>
     #matches-container {
@@ -73,6 +84,8 @@
     .lower.matches {
         width: 100%;
         transition: all .45s ease-in-out;
+        height: 100%;
+        overflow-y: auto;
     }
 
     .lower.matches.expanded {

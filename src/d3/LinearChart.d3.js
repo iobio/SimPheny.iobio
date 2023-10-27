@@ -57,11 +57,30 @@ export default function LinearChart() {
 
         if (targetPatient && targetPatient.similarityScore) {
             // Put the target patient as a dot on the origin of the chart at the bottom.
-            let targetPoint = svg.append("g")
-                .attr("transform", `translate(${x(targetPatient.similarityScore)},${height - marginBottom})`);
-            targetPoint.append("circle")
-                .attr("r", 4)
-                .attr("fill", "red");
+            // let targetPoint = svg.append("g")
+            //     .attr("transform", `translate(${x(targetPatient.similarityScore)},${height - marginBottom})`);
+            // targetPoint.append("circle")
+            //     .attr("r", 4)
+            //     .attr("fill", "red");
+
+            // Put the target patient as a person mdi on the origin of the chart at the bottom.
+            var targetPoint = svg.append("g")
+            .attr("transform", `translate(${x(targetPatient.similarityScore) - 12},${(height - marginBottom) - 24})`);
+
+            targetPoint.append("foreignObject")
+                .attr("width", 24)
+                .attr("height", 24)
+                .html(`
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V22H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z" fill="red"/>
+                    </svg>
+                `)
+                .on("mouseover", function(event) {
+                    handleMouseOver(event, targetPatient);
+                })
+                .on("mouseout", function(event) {
+                    handleMouseOut(event, targetPatient);
+                });
         }
 
         if (matchesObj) {
@@ -119,14 +138,18 @@ export default function LinearChart() {
             tooltip.append("p")
                 .text("Similarity Score: " + d.similarityScore);
             //add the number of genes in common
-            tooltip.append("p")
+            if (d.genesInCommon) {
+                tooltip.append("p")
                 .text("Number of Genes in Common: " + d.genesInCommon.length);
 
-            if (d.genesInCommon.length > 0) {
-                //add the genes in common
-                tooltip.append("p")
-                    .text("Genes in Common: " + d.genesInCommon.join(", "));
+                if (d.genesInCommon.length > 0) {
+                    //add the genes in common
+                    tooltip.append("p")
+                        .text("Genes in Common: " + d.genesInCommon.join(", "));
+                }
             }
+
+
         }
         function handleMouseOut(event, d) {
             //remove the tooltip
@@ -138,7 +161,21 @@ export default function LinearChart() {
         }
 
         function handleClick(event, d) {
-            console.log(d);
+            let point = d3.select(event.currentTarget);
+            let classes = point.attr("class");
+
+            //if classes contains selected, remove it
+            if (classes && point.attr("class").includes("selected-match")) {
+                point.classed("selected-match", false);
+            } else {
+                //clear any other selected points
+                d3.selectAll("path").classed("selected-match", false);
+                //add the selected class to the point
+                point.classed("selected-match", true);
+            }
+
+            //Get the tooltip and hide it
+            d3.select("#lin-chart-tip").style("visibility", "hidden");
         }
 
         //Add the svg to the actual container
