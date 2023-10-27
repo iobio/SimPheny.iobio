@@ -209,6 +209,9 @@
         height: 0%;
         border-top: 0px solid transparent;
     }
+    #hpo-drawer.collapsed .section-head {
+        display: none;
+    }
 
     .button-container.hpo-drawer {
         width: 100%;

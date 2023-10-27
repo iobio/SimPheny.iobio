@@ -17,6 +17,8 @@ export default function LinearChart() {
     var marginLeft = 40;
     var chartId = "LinearChartD3";
 
+    var selectedMatch = null;
+
     function chart(container, targetPatient, matchesObj) {
         // Create the SVG container.
         const svg = d3.create("svg")
@@ -56,13 +58,6 @@ export default function LinearChart() {
             .call(yAxis);
 
         if (targetPatient && targetPatient.similarityScore) {
-            // Put the target patient as a dot on the origin of the chart at the bottom.
-            // let targetPoint = svg.append("g")
-            //     .attr("transform", `translate(${x(targetPatient.similarityScore)},${height - marginBottom})`);
-            // targetPoint.append("circle")
-            //     .attr("r", 4)
-            //     .attr("fill", "red");
-
             // Put the target patient as a person mdi on the origin of the chart at the bottom.
             var targetPoint = svg.append("g")
             .attr("transform", `translate(${x(targetPatient.similarityScore) - 12},${(height - marginBottom) - 24})`);
@@ -102,8 +97,16 @@ export default function LinearChart() {
                             return "green";
                         } else if (d.dx === 'undiagnosed') {
                             return "blue";
+                        } else if (selectedMatch && d.id === selectedMatch.id) {
+                            console.log("selected match active");
+                            return "red";
                         } else {
                             return "black";
+                        }
+                    })
+                    .attr("class", function(d) {
+                        if (selectedMatch && d.id === selectedMatch.id) {
+                            return "selected-match";
                         }
                     })
                     .attr("stroke-width", 6)
@@ -168,14 +171,36 @@ export default function LinearChart() {
             if (classes && point.attr("class").includes("selected-match")) {
                 point.classed("selected-match", false);
             } else {
+                //Get any already selected points and set them back to default style
+                d3.select(".selected-match")
+                    .style("stroke", function(d) {
+                        if (d.dx === 'diagnosed') {
+                            return "green";
+                        } else if (d.dx === 'undiagnosed') {
+                            return "blue";
+                        } else {
+                            return "black";
+                        }
+                    })
+                    .style("stroke-width", 6);
+
                 //clear any other selected points
                 d3.selectAll("path").classed("selected-match", false);
+
                 //add the selected class to the point
                 point.classed("selected-match", true);
             }
 
+            d3.select(".selected-match")
+                .raise()
+                .style("stroke", "red")
+                .style("stroke-width", 10);
+
             //Get the tooltip and hide it
-            d3.select("#lin-chart-tip").style("visibility", "hidden");
+            let tip = d3.select("#lin-chart-tip")
+            //clear the tool
+            tip.selectAll("p").remove();
+            tip.style("visibility", "hidden");
         }
 
         //Add the svg to the actual container
@@ -184,6 +209,11 @@ export default function LinearChart() {
 
     chart.setWidth = function(newWidth) {
         width = newWidth;
+        return chart;
+    }
+
+    chart.setSelectedMatch = function(newSelectedMatch) {
+        selectedMatch = newSelectedMatch;
         return chart;
     }
 

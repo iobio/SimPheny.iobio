@@ -16,6 +16,7 @@
         props: {
             targetPatient: Object,
             patientMap: Object,
+            selectedMatch: Object,
         },
         data: function() {
             return {
@@ -56,7 +57,8 @@
                     let width = container.clientWidth;
 
                     this.linearChart = LinearChart()
-                    .setWidth(width);
+                    .setWidth(width)
+                    .setSelectedMatch(this.selectedMatch);
 
                     this.linearChart(container, this.targetPatient, this.patientMap);
                 }

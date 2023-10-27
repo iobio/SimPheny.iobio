@@ -5,13 +5,32 @@
             <LinearChartViz
                 :targetPatient="targetPatient"
                 :patientMap="patientMap"
+                :selectedMatch="selectedMatch"
                 @selectMatch="populateSelectedMatch"></LinearChartViz>
         </div>
 
         <div id="lower-container">
             <div class="lower matches" :class="{ expanded: showDetailsBar, collapsed: !showDetailsBar}">
                 <h1 class="section-head">Selected Match</h1>
-                <p>{{ selectedMatch }}</p>
+                <div v-if="selectedMatch" class="column-container">
+                    <div class="column">
+                        <h4>Match Summary</h4>
+                        <p><b>ID:</b> {{ selectedMatch.id }}</p>
+                        <p><b>Rank:</b> {{ selectedMatch.rank }} <b>Score:</b> {{ Math.round(selectedMatch.similarityScore * 10000)/10000 }}</p>
+                        <p><b>Dx Status:</b> {{ selectedMatch.dx }}</p>
+                        <p><b>Variants:</b> {{ selectedMatch.genesList }}</p>
+                        <p><b>Clinical Dx:</b> {{ selectedMatch.clinicalDiagnosis }}</p>
+                    </div>
+                    <div class="column">
+                        <h4>Variants In Common</h4>
+                        <p v-if="selectedMatch.genesInCommon.length > 0">{{ selectedMatch.genesInCommon }}</p>
+                        <p v-if="selectedMatch.genesInCommon.length == 0">No variants in common</p>
+                    </div>
+                    <div class="column">
+                        <h4>Phenotypes</h4>
+                        <p v-for="phenotype in selectedMatch.phenotypeList"> {{ phenotype.hpoId }} {{ phenotype.term }}</p>
+                    </div>
+                </div>
             </div>
 
             <div class="button-container matches">
@@ -62,6 +81,7 @@
         display: flex;
         flex-direction: column;
         flex-grow: 1;
+        overflow: hidden;
     }
 
     .upper.matches {
@@ -85,7 +105,6 @@
         width: 100%;
         transition: all .45s ease-in-out;
         height: 100%;
-        overflow-y: auto;
     }
 
     .lower.matches.expanded {
@@ -98,6 +117,25 @@
         height: 0vh;
         border-top: 0px solid transparent;
         overflow: hidden;
+    }
+
+    .lower.matches .column-container {
+        width: 100%;
+        height: 90%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+        align-items: center;
+        overflow: hidden;
+        padding-bottom: 10px;
+    }
+    .lower.matches .column-container .column {
+        max-width: 31%;
+        height: 95%;
+        overflow-y: auto;
+    }
+    .lower.matches .column-container .column h4 {
+        margin-bottom: 10px;
     }
 
     .button-container.matches {
