@@ -37,7 +37,7 @@ class TargetPatient {
         return this.dx;
     }
     setDx(dx) {
-        this.dx = dx;
+        this.dx = dx.toLowerCase();
     }
     getGenesList() {
         return this.genesList;
@@ -49,6 +49,12 @@ class TargetPatient {
         if (genesList == "NONE") {
             genesList = []
         }
+        //remove leading and trailing whitespace
+        genesList = genesList.map(gene => gene.trim());
+        //if any of the genes are empty strings, or puncutation or NONE then remove them
+        let puncutation = /[.,\/#!$%\^&\*;:{}=\-_`~()]/g;
+        genesList = genesList.filter(gene => gene.length > 0 && gene !== "NONE" && gene !== "NA" && !puncutation.test(gene));
+        
         this.genesList = genesList;
     }
     getClinicalDiagnosis() {

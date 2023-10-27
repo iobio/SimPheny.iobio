@@ -25,17 +25,16 @@
         async mounted() {
             this.udnPatientsUrl = "./UdnPatients.csv";
             this.similarityMatrixUrl = "./SimilarityMatrix.csv";
-            this.targetPatient = new TargetPatient('UDN244411');
+            this.targetPatient = new TargetPatient('UDN612067');
 
             if (this.targetPatient.id){
-                let { patientMap, similarityMap, rankedList } = await grabData(this.udnPatientsUrl, this.similarityMatrixUrl, this.targetPatient.id);
+                let { targetPatient, patientMap, similarityMap, rankedList } = await grabData(this.udnPatientsUrl, this.similarityMatrixUrl, this.targetPatient.id);
 
                 this.patientMap = patientMap;
                 this.similarityMap = similarityMap;
                 this.rankedList = rankedList;
 
-                this.targetPatient.setFromPatientObject(patientMap[this.targetPatient.id]);
-                delete this.patientMap[this.targetPatient.id];
+                this.targetPatient = targetPatient;
             }
         },
         methods: {
@@ -50,7 +49,10 @@
     <div id="main-content-container">
         <LeftBar
             :targetPatient="targetPatient"></LeftBar>
-        <MatchesPane></MatchesPane>
+            
+        <MatchesPane
+            :targetPatient="targetPatient"
+            :patientMap="patientMap"></MatchesPane>
     </div>
 </template>
 

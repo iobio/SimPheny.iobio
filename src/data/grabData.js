@@ -1,4 +1,5 @@
 import MatchPatient from "../models/MatchPatient";
+import TargetPatient from "../models/TargetPatient";
 import Phenotype from "../models/Phenotype";
 
 const hpoDbURL = "http://localhost:8911/id/"
@@ -20,7 +21,28 @@ export default async function grabData(patientsCsvUrl, similarityCsvUrl, patient
   delete patientMap[""];
   delete similarityMap[""];
 
-  return { patientMap, similarityMap, rankedList };
+  //assign the target patient to that patient at the targetPatientID
+  var targetPatient = new TargetPatient(patientID);
+  targetPatient.setFromPatientObject(patientMap[patientID]);
+
+  //delete the target patient from the patientMap
+  delete patientMap[patientID];
+
+  for (patientID in patientMap) {
+    let patient = patientMap[patientID];
+    let inCommon = [];
+    let targetGenes = targetPatient.getGenesList();
+    let patientGenes = patient.getGenesList();
+    for (let gene of targetGenes) {
+      if (patientGenes.includes(gene)) {
+        inCommon.push(gene);
+      }
+    }
+    if (inCommon.length > 0) {
+      patient.setGenesInCommon(inCommon);
+    }
+  }
+  return { targetPatient, patientMap, similarityMap, rankedList };
 }
 //Create a map of match patients with their ID as a key and then the patient object
 async function createPatientMap(matrix) {
@@ -51,7 +73,7 @@ async function createPatientMap(matrix) {
         if (!(hpoIdMap.hasOwnProperty(id))) {
           let phen = await getPhenotype(id, hpoDbURL);
 
-          if (phen) {
+          if (phen && phen["name"] && phen["definition"] && phen["comment"] && phen["synonyms"]) {
             hpoIdMap[id] = phen;
             let newPhenotype = new Phenotype(phen["id"], phen["name"], phen["definition"], phen["comment"] , phen["synonyms"]);
             patientPhenList.push(newPhenotype);
@@ -62,7 +84,7 @@ async function createPatientMap(matrix) {
         } else {
           //look it up on the hpoIdMap
           let phen = hpoIdMap[id]
-          if (phen) {
+          if (phen && phen["name"] && phen["definition"] && phen["comment"] && phen["synonyms"]) {
             let newPhenotype = new Phenotype(id, phen["name"], phen["definition"], phen["comment"] , phen["synonyms"]);
             patientPhenList.push(newPhenotype);
           }
@@ -70,9 +92,10 @@ async function createPatientMap(matrix) {
     }
 
     patient.setPhenotypeList(patientPhenList)
+
     patientMap[row[0]] = patient;
   }
-  console.log("Not added: ", notAdded)
+  // console.log("Not added: ", notAdded)
   return patientMap;
 }
 
@@ -105,12 +128,13 @@ function createSimilarityMap(matrix, patientMap, targetPatientID) {
 
   for (let i = 0; i < tuples.length; i++) {
     let [patientID, simScore] = tuples[i];
-    //Create a map of the similarity scores for the target patient based on the similarity score matrix
-    similarityMap[patientID] = { simScore, rank: i + 1 };
+    patientID = patientID.trim().toUpperCase();
     if (!patientMap[patientID]) continue;
 
+    //Create a map of the similarity scores for the target patient based on the similarity score matrix
+    similarityMap[patientID] = { simScore, rank: i + 1 };
     patientMap[patientID].setSimilarityScore(simScore);
-    patientMap[patientID].setRank(i + 1);
+    patientMap[patientID].setRank(i + 1); 
   }
   return [similarityMap, patientMap, tuples];
 }
@@ -119,6 +143,10 @@ async function parseFromFile(url) {
   const response = await fetch(url);
   const csv = await response.text();
   const lines = csv.split("\n");
+  //remove any other new line like characters
+  for (let i = 0; i < lines.length; i++) {
+    lines[i] = lines[i].replace(/\r/g, "");
+  }
 
   const matrix = lines.map(line => line.split(",").map(cell => cell.replace(/;/g, ",")));
 

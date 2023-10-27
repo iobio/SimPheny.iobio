@@ -1,0 +1,104 @@
+<script>
+    import LinearChart from '../../d3/linearChart.d3';
+    import * as d3 from 'd3';
+
+    export default {
+        name: 'LinearChartViz',
+
+        props: {
+            targetPatient: Object,
+            patientMap: Object,
+        },
+        data: function() {
+            return {
+                linearChart: null,
+            }
+        },
+        mounted() {
+            var linChartContainer = this.$refs['lin-chart-container'];
+
+            //add a listener for when the window is resized or the container is resized
+            const resizeObserver = new ResizeObserver(() => {
+                this.drawChart();
+            });
+
+            resizeObserver.observe(linChartContainer);
+
+            this.drawChart();
+        },
+        updated() {
+            this.drawChart();
+        },
+        beforeDestroy() {
+            //remove the resize observer
+            resizeObserver.unobserve(linChartContainer);
+        },
+        methods: {
+            drawChart() {
+                let container = this.$refs['lin-chart-container'];
+
+                //clear the chart if it already exists
+                if (this.linearChart) {
+                    //clear container
+                    d3.select(container).selectAll("*").remove();
+                }
+
+                if (container != null) {
+                    //width is based on the width of the container
+                    let width = container.clientWidth;
+
+                    this.linearChart = LinearChart()
+                    .setWidth(width);
+
+                    this.linearChart(container, this.targetPatient, this.patientMap);
+                }
+            },
+        },
+    }
+
+</script>
+
+<template>
+    <div id="linear-chart-container">
+        <div ref="lin-chart-container" id="lin-chart-viz"></div>
+        <div id="lin-chart-tip"></div>
+    </div>
+
+</template>
+
+<style>
+    #linear-chart-container {
+        height: 90%;
+        max-height: 500px;
+        width: 80%;
+        background-color: rgb(255, 255, 255);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        border-radius: 5px;
+    }
+    #lin-chart-viz {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    #lin-chart-tip {
+        position: absolute;
+        visibility: hidden;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 5px;
+        border-radius: 5px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: start;
+        height: fit-content;
+        width: fit-content;
+
+        font-size: small;
+    }
+</style>

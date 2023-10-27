@@ -1,10 +1,13 @@
-<script>
+<script> 
+    import LinearChartViz from './viz/linearChartViz.vue';
   export default {
     name: 'MatchesPane',
     components: {
-
+        LinearChartViz,
     }, 
     props: {
+        targetPatient: Object,
+        patientMap: Object,
     },
     data: function() {
       return {
@@ -18,6 +21,9 @@
     <div id="matches-container">
         <div class="upper matches">
             <h1 class="section-head">Chart</h1>
+            <LinearChartViz
+                :targetPatient="targetPatient"
+                :patientMap="patientMap"></LinearChartViz>
         </div>
 
         <div id="lower-container">
@@ -52,6 +58,10 @@
         width: 100%;
         background-color: #e9ede9;
         padding-top: 48px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
 
     #lower-container {
