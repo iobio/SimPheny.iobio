@@ -2,7 +2,7 @@
     import NavBar from './NavBar.vue'
     import LeftBar from './LeftBar.vue'
     import MatchesPane from './MatchesPane.vue'
-    import grabData from '../data/grabData.js'
+    import grabData, { getUdnIds } from '../data/grabData.js'
     import TargetPatient from '../models/TargetPatient.js'
 
     export default {
@@ -20,31 +20,48 @@
                 targetPatient: null,
                 similarityMatrixUrl: null,
                 udnPatientsUrl: null,
+                udnPatientIds: [],
+                showPtSelectOverlay: false,
             }
         },
         async mounted() {
             this.udnPatientsUrl = "./UdnPatients.csv";
             this.similarityMatrixUrl = "./SimilarityMatrix.csv";
-            this.targetPatient = new TargetPatient('UDN293752');
+            this.udnPatientIds = await getUdnIds(this.similarityMatrixUrl);
 
-            if (this.targetPatient.id){
+            if (this.targetPatient != null) {
+                this.getMatches();
+            } else {
+                this.showPtSelectOverlay = true;
+            }
+        },
+        methods: {
+            async getMatches(){
                 let { targetPatient, patientMap, similarityMap, rankedList } = await grabData(this.udnPatientsUrl, this.similarityMatrixUrl, this.targetPatient.id);
 
                 this.patientMap = patientMap;
                 this.similarityMap = similarityMap;
                 this.rankedList = rankedList;
 
-                this.targetPatient = targetPatient;
-            }
-        },
-        methods: {
+                this.targetPatient.setFromPatientObject(targetPatient);
 
+            },
+            async setPatientAndGetMatches(patient) {
+                this.targetPatient = new TargetPatient(patient.id);
+                this.targetPatient.setFromPatientObject(patient);
+                this.showPtSelectOverlay = false;
+                await this.getMatches();
+            }
         },
     }
 </script>
 
 <template>
-    <NavBar></NavBar>
+    <NavBar
+        :udnPatientIdsList="udnPatientIds"
+        :showPtSelectOverlay="showPtSelectOverlay"
+        :targetPatient="targetPatient"
+        @set-target-patient="setPatientAndGetMatches"></NavBar>
 
     <div id="main-content-container">
         <LeftBar

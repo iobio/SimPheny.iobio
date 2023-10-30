@@ -224,7 +224,6 @@
         overflow: visible;
     }
     .btn.toggle.hpo-drawer {
-        z-index: 9990;
         top: -58px;
         left: 10px;
 

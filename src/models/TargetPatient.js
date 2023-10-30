@@ -102,12 +102,12 @@ class TargetPatient {
     }
 
     setFromPatientObject(patient) {
+        this.rank = patient.getRank();
+        this.dx = patient.getDx();
+        
         if (patient.getSimilarityScore()) {
             this.similarityScore = patient.getSimilarityScore();
         } 
-
-        this.rank = patient.getRank();
-        this.dx = patient.getDx();
 
         if (this.genesList.length == 0 || this.genesList == null) {
             this.genesList = patient.getGenesList();
@@ -123,7 +123,7 @@ class TargetPatient {
             this.hpoTermList = patient.getHpoTermList();
         }
 
-        if (this.getPhenotypeList().length == 0 || this.getPhenotypeList() == null) {
+        if (this.phenotypeList.length == 0 || this.phenotypeList == null) {
             this.phenotypeList = patient.getPhenotypeList();
         }
     }

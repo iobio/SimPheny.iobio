@@ -151,7 +151,6 @@
         overflow: visible;
     }
     .btn.umbrella.matches {
-        z-index: 9990;
         top: -58px;
         left: 10px;
 

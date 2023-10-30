@@ -2,7 +2,8 @@ import MatchPatient from "../models/MatchPatient";
 import TargetPatient from "../models/TargetPatient";
 import Phenotype from "../models/Phenotype";
 
-const hpoDbURL = "http://localhost:8911/id/"
+const hpoDbIdURL = "http://localhost:8911/id/"
+const hpoDbNameURL = "http://localhost:8911/name/"
 const hpoDbURLAll = "http://localhost:8911/all/"
 
 export default async function grabData(patientsCsvUrl, similarityCsvUrl, patientID) {
@@ -71,7 +72,7 @@ async function createPatientMap(matrix) {
     for (let id of patientHpoIds) {
         id = id.trim()
         if (!(hpoIdMap.hasOwnProperty(id))) {
-          let phen = await getPhenotype(id, hpoDbURL);
+          let phen = await getPhenotypeWithId(id, hpoDbIdURL);
 
           if (phen && phen["name"] && phen["definition"] && phen["comment"] && phen["synonyms"]) {
             hpoIdMap[id] = phen;
@@ -152,12 +153,38 @@ async function parseFromFile(url) {
   return matrix;
 }
 
-async function getPhenotype(id, url) {
-  const response = await fetch(url + encodeURI(id));
+export async function getUdnIds(similarityCsvUrl) {
+  const response = await fetch(similarityCsvUrl);
+  const csv = await response.text();
+  //just take the first row which will contain all the patient ids and put that into a list remove any blank ones
+  const lines = csv.split("\n");
+  let udnIds = lines[0].split(",");
+  udnIds = udnIds.filter(id => (id.length > 0) && (id !== " "));
+
+  return udnIds;
+}
+
+export async function getPhenotypeWithId(id) {
+  let hpoDbIdURL = "http://localhost:8911/id/"
+  const response = await fetch(hpoDbIdURL + encodeURI(id));
+  //if the response is not ok then return null
+  if (!response.ok) {
+    return null;
+  }
   return response.json();
 }
 
-async function getAllPhenotypes(url) {
+export async function getPhenotypeWithName(name) {
+  let hpoDbNameURL = "http://localhost:8911/name/"
+  const response = await fetch(hpoDbNameURL + encodeURI(name));
+  //if the response is not ok then return null
+  if (!response.ok) {
+    return null;
+  }
+  return response.json();
+}
+
+export async function getAllPhenotypes(url) {
   const response = await fetch(url);
   return response.json();
 }
