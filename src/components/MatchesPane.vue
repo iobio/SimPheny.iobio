@@ -67,8 +67,10 @@
     methods: {
         populateSelectedMatch(match) {
             this.selectedMatch = match;
-            if (!this.showDetailsBar) {
+            if (!this.showDetailsBar && this.selectedMatch) {
                 this.showDetailsBar = true;
+            } else if (!this.selectedMatch) {
+                this.showDetailsBar = false;
             }
         }
     },
