@@ -40,6 +40,13 @@ export default function LinearChart() {
         svg.append("g")
             .call(xAxis);
 
+        // x axis label
+        svg.append("text")
+            .attr("transform", `translate(${width / 2},${height + 2})`)
+            .style("text-anchor", "middle")
+            .style("font-size", "13px")
+            .text("Similarity Score");
+
         // Create the y scale.
         const y = d3.scaleLinear()
             .domain([yMin, yMax])
@@ -56,6 +63,20 @@ export default function LinearChart() {
         // Add the y axis to the svg.
         svg.append("g")
             .call(yAxis);
+
+        // y axis label
+        svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0)
+            .attr("x", 0 - (height / 2))
+            .attr("dy", ".75em")
+            .style("text-anchor", "middle")
+            .style("font-size", "13px")
+            .text("Number of Genes in Common");
+
+        //adjust the x and y axis to allow for the labels
+        svg.attr("viewBox", [0, 0, width, height + 10]);
+
 
         if (targetPatient && targetPatient.similarityScore) {
             // Put the target patient as a person mdi on the origin of the chart at the bottom.
