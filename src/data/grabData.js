@@ -95,7 +95,6 @@ async function createPatientMap(matrix) {
 
     patientMap[row[0]] = patient;
   }
-  // console.log("Not added: ", notAdded)
   return patientMap;
 }
 

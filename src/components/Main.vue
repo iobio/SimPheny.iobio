@@ -25,7 +25,7 @@
         async mounted() {
             this.udnPatientsUrl = "./UdnPatients.csv";
             this.similarityMatrixUrl = "./SimilarityMatrix.csv";
-            this.targetPatient = new TargetPatient('UDN612067');
+            this.targetPatient = new TargetPatient('UDN293752');
 
             if (this.targetPatient.id){
                 let { targetPatient, patientMap, similarityMap, rankedList } = await grabData(this.udnPatientsUrl, this.similarityMatrixUrl, this.targetPatient.id);

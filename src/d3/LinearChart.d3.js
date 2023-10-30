@@ -93,23 +93,23 @@ export default function LinearChart() {
                         L ${x(d.similarityScore)},${y(d.genesInCommon.length)}
                     `)
                     .attr("stroke", function(d) {
-                        if (d.dx === 'diagnosed') {
-                            return "green";
+                        if (selectedMatch && d.id === selectedMatch.id) {
+                            return "red";
                         } else if (d.dx === 'undiagnosed') {
                             return "blue";
-                        } else if (selectedMatch && d.id === selectedMatch.id) {
-                            console.log("selected match active");
-                            return "red";
+                        } else if (d.dx === 'diagnosed') {
+                                return "green";
                         } else {
                             return "black";
                         }
                     })
-                    .attr("class", function(d) {
+                    .attr("stroke-width", function(d) {
                         if (selectedMatch && d.id === selectedMatch.id) {
-                            return "selected-match";
+                            return 10;
+                        } else {
+                            return 6;
                         }
                     })
-                    .attr("stroke-width", 6)
                     .attr("stroke-linecap", "round")
                     .on("mouseover", function(event, d) {
                         //make the circle bigger
@@ -120,7 +120,13 @@ export default function LinearChart() {
                     .on("mouseout", function(event, d) {
                         //make the circle smaller
                         d3.select(this)
-                            .attr("stroke-width", 6);
+                            .attr("stroke-width", function(d) {
+                                if (selectedMatch && d.id === selectedMatch.id) {
+                                    return 10;
+                                } else {
+                                    return 6;
+                                }
+                            });
                         handleMouseOut(event, d);
                     })
                     .on("click", function(event, d) {
@@ -182,15 +188,13 @@ export default function LinearChart() {
                             return "black";
                         }
                     })
-                    .style("stroke-width", 6);
-
-                //clear any other selected points
-                d3.selectAll("path").classed("selected-match", false);
+                    .style("stroke-width", 6)
+                    .classed("selected-match", false);
 
                 //add the selected class to the point
                 point.classed("selected-match", true);
             }
-
+            
             d3.select(".selected-match")
                 .raise()
                 .style("stroke", "red")
@@ -198,6 +202,7 @@ export default function LinearChart() {
 
             //Get the tooltip and hide it
             let tip = d3.select("#lin-chart-tip")
+
             //clear the tool
             tip.selectAll("p").remove();
             tip.style("visibility", "hidden");
