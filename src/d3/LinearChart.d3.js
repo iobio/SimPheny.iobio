@@ -92,6 +92,13 @@ export default function LinearChart() {
                         M ${x(d.similarityScore)},${y(d.genesInCommon.length)}
                         L ${x(d.similarityScore)},${y(d.genesInCommon.length)}
                     `)
+                    .classed("selected-match", function(d) {
+                        if (selectedMatch && d.id === selectedMatch.id) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    })
                     .attr("stroke", function(d) {
                         if (selectedMatch && d.id === selectedMatch.id) {
                             return "red";
@@ -171,12 +178,10 @@ export default function LinearChart() {
 
         function handleClick(event, d) {
             let point = d3.select(event.currentTarget);
-            let classes = point.attr("class");
+            let selected = point.classed("selected-match");
 
             //if classes contains selected, remove it
-            if (classes && point.attr("class").includes("selected-match")) {
-                point.classed("selected-match", false);
-            } else {
+            if (selected) {
                 //Get any already selected points and set them back to default style
                 d3.select(".selected-match")
                     .style("stroke", function(d) {
@@ -191,14 +196,29 @@ export default function LinearChart() {
                     .style("stroke-width", 6)
                     .classed("selected-match", false);
 
+            } else {
+                //Get any already selected points and set them back to default style
+                d3.select(".selected-match")
+                .style("stroke", function(d) {
+                    if (d.dx === 'diagnosed') {
+                        return "green";
+                    } else if (d.dx === 'undiagnosed') {
+                        return "blue";
+                    } else {
+                        return "black";
+                    }
+                })
+                .style("stroke-width", 6)
+                .classed("selected-match", false);
+
                 //add the selected class to the point
                 point.classed("selected-match", true);
-            }
-            
-            d3.select(".selected-match")
+
+                d3.select(".selected-match")
                 .raise()
                 .style("stroke", "red")
                 .style("stroke-width", 10);
+            }
 
             //Get the tooltip and hide it
             let tip = d3.select("#lin-chart-tip")
