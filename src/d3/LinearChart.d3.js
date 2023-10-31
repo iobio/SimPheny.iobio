@@ -199,6 +199,12 @@ export default function LinearChart() {
         }
 
         function handleMouseOver(event, d) {
+            //clear and remove the tooltip
+            d3.select("#lin-chart-tip")
+                .selectAll("p").remove();
+            d3.select("#lin-chart-tip")
+                .style("visibility", "hidden");
+
             //make a tooltip
             let tooltip = d3.select("#lin-chart-tip")
                 .style("left", (event.pageX + 10) + "px")
@@ -225,15 +231,24 @@ export default function LinearChart() {
 
         }
         function handleMouseOut(event, d) {
-            //remove the tooltip
+            //clear and hide the tooltip
             d3.select("#lin-chart-tip")
-                .selectAll("p")
-                .remove();
+                .selectAll("p").remove();
+
             d3.select("#lin-chart-tip")
                 .style("visibility", "hidden");
         }
 
         function handleClick(event, d) {
+            //Clear and remove the tooltip but delay it so that the click event can be handled
+            setTimeout(function() {
+                d3.select("#lin-chart-tip")
+                    .selectAll("p").remove();
+
+                d3.select("#lin-chart-tip")
+                    .style("visibility", "hidden");
+            }, 100);
+
             let point = d3.select(event.currentTarget);
             let selected = point.classed("selected-match");
 
@@ -276,13 +291,6 @@ export default function LinearChart() {
                 .style("stroke", "red")
                 .style("stroke-width", 10);
             }
-
-            //Get the tooltip and hide it
-            let tip = d3.select("#lin-chart-tip")
-
-            //clear the tool
-            tip.selectAll("p").remove();
-            tip.style("visibility", "hidden");
         }
 
         //Add the svg to the actual container

@@ -126,7 +126,7 @@
         #lin-chart-tip 
             position: absolute
             visibility: hidden
-            background-color: rgba(0, 0, 0, 0.8)
+            background-color: rgba(0, 0, 0, 0.7)
             color: white
             padding: 5px
             border-radius: 5px
