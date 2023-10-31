@@ -7,7 +7,6 @@ export default function LinearChart() {
 
     var xMin = 1;
     var xMax = 0;
-
     var yMin = 0;
     var yMax = 5;
 
@@ -29,7 +28,7 @@ export default function LinearChart() {
         // Create the x scale.
         const x = d3.scaleLinear()
             .domain([xMin, xMax])
-            .range([marginLeft, width - marginRight]);
+            .range([marginLeft + 20, width - marginRight]);
         
         // Create the x axis.
         const xAxis = g => g
@@ -78,12 +77,42 @@ export default function LinearChart() {
         svg.attr("viewBox", [0, 0, width, height + 10]);
 
 
-        if (targetPatient && targetPatient.similarityScore) {
-            // Put the target patient as a person mdi on the origin of the chart at the bottom.
-            var targetPoint = svg.append("g")
-            .attr("transform", `translate(${x(targetPatient.similarityScore) - 12},${(height - marginBottom) - 24})`);
+        // if (targetPatient && targetPatient.similarityScore) {
+        //     // Put the target patient as a person mdi on the origin of the chart at the bottom.
+        //     var targetPoint = svg.append("g")
+        //     .attr("transform", `translate(${x(targetPatient.similarityScore) - 12},${(height - marginBottom) - 24})`);
 
-            targetPoint.append("foreignObject")
+        //     targetPoint.append("foreignObject")
+        //         .attr("width", 24)
+        //         .attr("height", 24)
+        //         .html(`
+        //             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        //                 <path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V22H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z" fill="red"/>
+        //             </svg>
+        //         `)
+        //         .on("mouseover", function(event) {
+        //             handleMouseOver(event, targetPatient);
+        //         })
+        //         .on("mouseout", function(event) {
+        //             handleMouseOut(event, targetPatient);
+        //         });
+        // }
+
+        //put a vertical line at the origin of the chart that is slightly longer than the Y axis on both top and bottom
+        svg.append("g")
+            .append("path")
+                .attr("d", d => `
+                    M ${marginLeft},${marginTop}
+                    L ${marginLeft},${height - marginBottom}
+                `)
+                .attr("stroke", "black")
+                .attr("stroke-width", 1)
+                .attr("stroke-linecap", "square");
+
+        //put the person mdi at the origin of the chart at the bottom
+        svg.append("g")
+            .attr("transform", `translate(${marginLeft - 12},${(height - marginBottom) + 1})`)
+            .append("foreignObject")
                 .attr("width", 24)
                 .attr("height", 24)
                 .html(`
@@ -97,7 +126,14 @@ export default function LinearChart() {
                 .on("mouseout", function(event) {
                     handleMouseOut(event, targetPatient);
                 });
-        }
+
+        // put a label that says "Target Patient" at the origin of the chart at the bottom
+        svg.append("g")
+            .attr("transform", `translate(${marginLeft + 4},${(height - marginBottom) + 30})`)
+            .append("text")
+                .text("Target Patient")
+                .attr("font-size", "10px")
+                .attr("fill", "red");
 
         if (matchesObj) {
             //make a group for all the matches
@@ -260,6 +296,23 @@ export default function LinearChart() {
 
     chart.setSelectedMatch = function(newSelectedMatch) {
         selectedMatch = newSelectedMatch;
+        return chart;
+    }
+
+    chart.setXMin = function(newXMin) {
+        xMin = newXMin;
+        return chart;
+    }
+    chart.setXMax = function(newXMax) {
+        xMax = newXMax;
+        return chart;
+    }
+    chart.setYMin = function(newYMin) {
+        yMin = newYMin;
+        return chart;
+    }
+    chart.setYMax = function(newYMax) {
+        yMax = newYMax;
         return chart;
     }
 

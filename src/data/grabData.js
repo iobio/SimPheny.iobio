@@ -15,6 +15,7 @@ export default async function grabData(patientsCsvUrl, similarityCsvUrl, patient
   let patientMap = await createPatientMap(patientsMatrix);
   let similarityMap = null;
   let rankedList = null;
+  let chartScales = { xMin: 0, xMax: 0, yMin: 0, yMax: 0}
 
   const similarityMatrix = await parseFromFile(similarityCsvUrl);
   [similarityMap, patientMap, rankedList] = createSimilarityMap(similarityMatrix, patientMap, patientID);
@@ -28,6 +29,8 @@ export default async function grabData(patientsCsvUrl, similarityCsvUrl, patient
 
   //delete the target patient from the patientMap
   delete patientMap[patientID];
+  let maxGenesInCommon = 0;
+  let minGenesInCommon = 90000;
 
   for (patientID in patientMap) {
     let patient = patientMap[patientID];
@@ -40,10 +43,30 @@ export default async function grabData(patientsCsvUrl, similarityCsvUrl, patient
       }
     }
     if (inCommon.length > 0) {
+      if (inCommon.length > maxGenesInCommon) {
+        maxGenesInCommon = inCommon.length;
+      }
       patient.setGenesInCommon(inCommon);
     }
+    if (inCommon.length < minGenesInCommon) {
+      minGenesInCommon = inCommon.length;
+    }
   }
-  return { targetPatient, patientMap, similarityMap, rankedList };
+
+  rankedList = rankedList.slice(1); // Remove the target patient which should be at the top
+  //We are going to get the x min and max from the ranked list and the patient map
+  let min = rankedList[rankedList.length - 1][0];
+  chartScales.xMin = patientMap[min].getSimilarityScore();
+
+  let max = rankedList[0][0];
+  chartScales.xMax = patientMap[max].getSimilarityScore();
+
+  //Set the y min and max based on the number of genes in common
+  chartScales.yMin = minGenesInCommon;
+  chartScales.yMax = maxGenesInCommon;
+
+
+  return { targetPatient, patientMap, similarityMap, rankedList, chartScales};
 }
 //Create a map of match patients with their ID as a key and then the patient object
 async function createPatientMap(matrix) {

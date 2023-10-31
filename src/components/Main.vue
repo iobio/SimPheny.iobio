@@ -22,6 +22,7 @@
                 udnPatientsUrl: null,
                 udnPatientIds: [],
                 showPtSelectOverlay: false,
+                chartScales: null,
             }
         },
         async mounted() {
@@ -37,11 +38,12 @@
         },
         methods: {
             async getMatches(){
-                let { targetPatient, patientMap, similarityMap, rankedList } = await grabData(this.udnPatientsUrl, this.similarityMatrixUrl, this.targetPatient.id);
+                let { targetPatient, patientMap, similarityMap, rankedList, chartScales } = await grabData(this.udnPatientsUrl, this.similarityMatrixUrl, this.targetPatient.id);
 
                 this.patientMap = patientMap;
                 this.similarityMap = similarityMap;
                 this.rankedList = rankedList;
+                this.chartScales = chartScales;
 
                 this.targetPatient.setFromPatientObject(targetPatient);
 
@@ -69,7 +71,8 @@
             
         <MatchesPane
             :targetPatient="targetPatient"
-            :patientMap="patientMap"></MatchesPane>
+            :patientMap="patientMap"
+            :chartScales="chartScales"></MatchesPane>
     </div>
 </template>
 

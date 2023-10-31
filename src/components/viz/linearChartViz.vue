@@ -21,6 +21,7 @@
             targetPatient: Object,
             patientMap: Object,
             selectedMatch: Object,
+            chartScales: Object,
         },
         data: function() {
             return {
@@ -71,13 +72,17 @@
                     d3.select(container).selectAll("*").remove();
                 }
 
-                if (container != null) {
+                if (container != null && this.targetPatient && this.chartScales) {
                     //width is based on the width of the container
                     let width = container.clientWidth;
 
                     this.linearChart = LinearChart()
                     .setWidth(width)
-                    .setSelectedMatch(this.selectedMatch);
+                    .setSelectedMatch(this.selectedMatch)
+                    .setXMax(this.chartScales.xMin)
+                    .setXMin(this.chartScales.xMax)
+                    .setYMax(this.chartScales.yMax)
+                    .setYMin(this.chartScales.yMin);
 
                     this.linearChart(container, this.targetPatient, this.patientMap);
                 }

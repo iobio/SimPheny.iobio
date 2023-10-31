@@ -6,7 +6,8 @@
                 :targetPatient="targetPatient"
                 :patientMap="patientMap"
                 :selectedMatch="selectedMatch"
-                @selectMatch="populateSelectedMatch"></LinearChartViz>
+                @selectMatch="populateSelectedMatch"
+                :chartScales="chartScales"></LinearChartViz>
         </div>
 
         <div id="lower-container">
@@ -57,6 +58,7 @@
     props: {
         targetPatient: Object,
         patientMap: Object,
+        chartScales: Object,
     },
     data: function() {
       return {
