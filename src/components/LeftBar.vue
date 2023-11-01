@@ -13,7 +13,12 @@
                         <v-window-item value="phenotypes">
                             <div class="list-item left-bar" v-if="targetPatient" v-for="phenotype in targetPatient.getPhenotypeList()">
                                 <input type="checkbox" v-model="phenotype.relevant">
-                                <span @click="getGenesForPhenotype(phenotype)" class="phenotype-span left-bar">{{ phenotype.hpoId + " - " + phenotype.term }}</span>
+                                <span 
+                                    @click="getGenesForPhenotype(phenotype)" 
+                                    :class="{ selected: selectedPhenotype && selectedPhenotype.hpoId == phenotype.hpoId }" 
+                                    class="phenotype-span left-bar">
+                                    {{ phenotype.hpoId + " - " + phenotype.term }}
+                                </span>
                             </div>
                         </v-window-item>
 
@@ -29,7 +34,6 @@
             </div>
 
             <div id="hpo-drawer" :class="{ expanded: showHpoDrawer, collapsed: !showHpoDrawer}">
-                <h1 class="section-head">HPO Annotations</h1>
                 <div class="button-container hpo-drawer">
                     <v-btn icon @click="showHpoDrawer = !showHpoDrawer" :class="{ expanded: showHpoDrawer, collapsed: !showHpoDrawer}" class="btn toggle hpo-drawer" height="35px" width="35px" color="#21351f">
                         <v-tooltip offset="3" location="right" activator="parent">
@@ -39,6 +43,19 @@
                         <v-icon v-if="showHpoDrawer" color="white">mdi-arrow-down-circle-outline</v-icon>
                         <v-icon v-if="!showHpoDrawer" color="white">mdi-arrow-up-circle-outline</v-icon>
                     </v-btn>
+                </div>
+                <div id="hpo-content-container">
+                    <h1 class="section-head">HPO Annotations</h1>
+
+                    <h4><span>Gene Name</span><span>Frequency</span><span>DiseaseId</span></h4>
+
+                    <div id="annotations-list-container">
+                            <div class="hpo-list-div" v-if="selectedPhenotypeGenes" v-for="gene in selectedPhenotypeGenes">
+                                <span>{{ gene.gene_symbol }}</span>
+                                <span>{{ gene.frequency }}</span>
+                                <span>{{ gene.disease_id }}</span>
+                            </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -58,6 +75,7 @@
 
 <script>
     import * as hpoDb from '../data/grabData.js'
+    import * as d3 from 'd3';
 
     export default {
         name: 'LeftBar',
@@ -72,21 +90,28 @@
                 tab: 'phenotypes',
                 selectedPhenotype: null,
                 selectedGene: null,
+                selectedPhenotypeGenes: [],
             }
         },
         methods: {
             async getGenesForPhenotype(phenotype){
+                if (this.selectedPhenotype == phenotype) {
+                    this.selectedPhenotype = null;
+                    return;
+                }
+                //otherwise, get genes for phenotype
                 this.selectedPhenotype = phenotype;
                 let res = await hpoDb.getGenesWithPhenotype(phenotype.hpoId);
-                console.log(res);
+                let geneList = res;
+                for (let i = 0; i < geneList.length; i++) {
+                    let gene = res[i];
+                    let geneRes = await hpoDb.getGene(gene.gene_id);
+                    geneList[i]["gene_symbol"] = geneRes["gene_symbol"];
+                }
+                this.selectedPhenotypeGenes = geneList;
             }
         },
         watch: {
-            selectedPhenotype: function(newVal, oldVal) {
-                if (newVal != null) {
-                    console.log(this.selectedPhenotype)
-                }
-            },
         }
     }
 </script>
@@ -107,9 +132,21 @@
     }
     .phenotype-span.left-bar {
         width: 100%;
+        padding: 2px 5px;
+        cursor: pointer;
+        border-radius: 3px;
+    }
+    .phenotype-span.left-bar.selected {
+        background-color: #9bb39a;
     }
     .gene-span.left-bar {
         width: 100%;
+        padding: 2px 5px;
+        cursor: pointer;
+        border-radius: 3px;
+    }
+    .gene-span.left-bar.selected {
+        background-color: #9bb39a;
     }
     .section-container.left-bar {
         height: 100%;
@@ -219,9 +256,11 @@
         justify-self: flex-end;
         border-top: 2px solid #21351f;
         transition: all .45s ease-in-out;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
         position: relative;
     }
-
     #hpo-drawer.expanded {
         height: 40%;
         box-shadow: 0px -5px 5px -2px rgba(0,0,0,0.2);
@@ -230,10 +269,37 @@
         height: 0%;
         border-top: 0px solid transparent;
     }
-    #hpo-drawer.collapsed .section-head {
-        display: none;
+    #hpo-drawer #hpo-content-container {
+        height: 100%;
+        widows: 100%;
+        overflow: hidden;
     }
-
+    #hpo-drawer h4 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        padding-top: 10px;
+        padding-bottom: 2px;
+        padding-left: 10px;
+        padding-right: 10px;
+        align-self: center;
+        width: 100%;
+    }
+    #hpo-drawer h4 span {
+        text-align: center;
+    }
+    #hpo-drawer #annotations-list-container {
+        height: 80%;
+        overflow-y: auto;
+        padding: 5px 10px;
+    }
+    #hpo-drawer #annotations-list-container .hpo-list-div {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+    #hpo-drawer #annotations-list-container .hpo-list-div span {
+        text-align: center;
+    }
     .button-container.hpo-drawer {
         width: 100%;
         height: 35px;

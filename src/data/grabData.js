@@ -239,3 +239,13 @@ export async function getPhenotypesWithGene(id=null, name=null){
     return response.json();
   }
 }
+
+export async function getGene(gene_id) {
+  let url = "http://localhost:8911/gene/"
+  const response = await fetch(url + encodeURI(gene_id));
+  //if the response is not ok then return null
+  if (!response.ok) {
+    return null;
+  }
+  return response.json();
+}
