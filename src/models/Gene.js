@@ -1,15 +1,22 @@
 //Will be a class with a name for now to just represent the variant gene name
 
 class Gene {
-    constructor(name) {
-        this.name = name;
-    }
+    constructor(gene_id=null, gene_symbol=null) {
+        this.gene_id = gene_id;
+        this.gene_symbol = gene_symbol;
 
-    getName() {
-        return this.name;
     }
-    setName(name) {
-        this.name = name;
+    getGeneId() {
+        return this.gene_id;
+    }
+    getGeneSymbol() {
+        return this.gene_symbol;
+    }
+    setGeneId(id) {
+        this.gene_id = id;
+    }
+    setGeneSymbol(symbol) {
+        this.gene_symbol = symbol;
     }
 }
 export default Gene;

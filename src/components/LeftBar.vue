@@ -46,11 +46,12 @@
                 </div>
                 <div id="hpo-content-container">
                     <h1 class="section-head">HPO Annotations</h1>
+                    <h5 v-if="selectedPhenotype"> {{ selectedPhenotype.term }}</h5>
 
-                    <h4><span>Gene Name</span><span>Frequency</span><span>DiseaseId</span></h4>
+                    <h4><span>Gene Name</span><span>Frequency</span><span>Disease Id</span></h4>
 
                     <div id="annotations-list-container">
-                            <div class="hpo-list-div" v-if="selectedPhenotypeGenes" v-for="gene in selectedPhenotypeGenes">
+                            <div class="hpo-list-div" v-if="selectedPhenotypeGenes && targetPatient" v-for="gene in selectedPhenotypeGenes" :class="{ inTarget: checkGeneInPatient(gene) }">
                                 <span>{{ gene.gene_symbol }}</span>
                                 <span>{{ gene.frequency }}</span>
                                 <span>{{ gene.disease_id }}</span>
@@ -85,7 +86,7 @@
         data: function() {
             return {
                 showLeftBar: true,
-                showHpoDrawer: true,
+                showHpoDrawer: false,
                 panels: [1,1,0],
                 tab: 'phenotypes',
                 selectedPhenotype: null,
@@ -97,21 +98,30 @@
             async getGenesForPhenotype(phenotype){
                 if (this.selectedPhenotype == phenotype) {
                     this.selectedPhenotype = null;
+                    this.selectedPhenotypeGenes = [];
+                    this.showHpoDrawer = false;
                     return;
                 }
                 //otherwise, get genes for phenotype
                 this.selectedPhenotype = phenotype;
                 let res = await hpoDb.getGenesWithPhenotype(phenotype.hpoId);
                 let geneList = res;
-                for (let i = 0; i < geneList.length; i++) {
-                    let gene = res[i];
-                    let geneRes = await hpoDb.getGene(gene.gene_id);
-                    geneList[i]["gene_symbol"] = geneRes["gene_symbol"];
-                }
                 this.selectedPhenotypeGenes = geneList;
+                if (!this.showHpoDrawer) {
+                    this.showHpoDrawer = true;
+                }
+            },
+            checkGeneInPatient(gene) {
+                if (this.targetPatient) {
+                    return this.targetPatient.genesList.includes(gene.gene_symbol);
+                }
+                return false;
             }
         },
         watch: {
+            selectedPhenotype: function(newVal, oldVal) {
+                console.log(this.selectedPhenotypeGenes)
+            }
         }
     }
 </script>
@@ -193,7 +203,6 @@
         right: 10px;
     }
     .btn.toggle {
-        z-index: 9990;
 
         margin-top: 53px;
         height: 35px;
@@ -202,7 +211,7 @@
     }
 
     .tab-container.left-bar {
-        height: 60%;
+        height: 50%;
         transition: all .45s ease-in-out;
         display: flex;
         flex-direction: column;
@@ -212,7 +221,7 @@
         height: 100%;
     }
     .tab-container.left-bar.shortened {
-        height: 60%;
+        height: 50%;
     }
 
     .tab-container.left-bar .v-tab {
@@ -261,8 +270,18 @@
         justify-content: space-between;
         position: relative;
     }
+    #hpo-drawer h5 {
+        width: 100%;
+        text-align: center;
+        padding-left: 40px;
+        padding-right: 40px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #0a5603;
+    }
     #hpo-drawer.expanded {
-        height: 40%;
+        height: 50%;
         box-shadow: 0px -5px 5px -2px rgba(0,0,0,0.2);
     }
     #hpo-drawer.collapsed {
@@ -279,26 +298,32 @@
         grid-template-columns: 1fr 1fr 1fr;
         padding-top: 10px;
         padding-bottom: 2px;
-        padding-left: 10px;
+        padding-left: 20px;
         padding-right: 10px;
         align-self: center;
         width: 100%;
+        border-bottom: #dde0dd 1px solid;
     }
     #hpo-drawer h4 span {
-        text-align: center;
+        text-align: start;
     }
     #hpo-drawer #annotations-list-container {
         height: 80%;
         overflow-y: auto;
         padding: 5px 10px;
+        padding-left: 20px;
     }
     #hpo-drawer #annotations-list-container .hpo-list-div {
         width: 100%;
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
     }
+    #hpo-drawer #annotations-list-container .hpo-list-div.inTarget {
+        color: red;
+    }
+    
     #hpo-drawer #annotations-list-container .hpo-list-div span {
-        text-align: center;
+        text-align: start;
     }
     .button-container.hpo-drawer {
         width: 100%;
