@@ -1,6 +1,5 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import * as d3 from 'd3';
 
 import './assets/base.css'
 import './assets/main.sass'

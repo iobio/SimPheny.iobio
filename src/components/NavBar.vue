@@ -1,3 +1,50 @@
+<template>
+    <div id="nav-bar">
+        <v-app-bar density="compact" color="#21351f">
+            <v-btn @click="showOverlay=true" v-if="!targetPatient" variant="outlined">Add/Select Patient</v-btn>
+            <v-btn @click="showOverlay=true" v-if="targetPatient" variant="outlined">Edit Patient</v-btn>
+            <v-toolbar-title>Pheno-Matcher.iobio</v-toolbar-title>
+        </v-app-bar>
+
+        <v-overlay id="add-select-patient" v-model="showOverlay" persistent>
+            <div id="add-select-dialog">
+                <v-btn class="close-button" @click="showOverlay = false" icon="mdi-close-circle-outline" height="35px" width="35px"></v-btn>
+                <h3>Input Target Patient Details</h3>
+                <div v-if="udnPatientIdsList" id="udn-id-input" class="input-container">
+                    <v-autocomplete
+                    v-model="udnId"
+                    :items="udnPatientIdsList"
+                    variant="solo-filled"
+                    label="UDN Patient Id" 
+                    density="compact"></v-autocomplete>
+                </div>
+
+                <!-- Phenotype List Input -->
+                <div class="input-container">
+                    <v-textarea 
+                        v-model="phenotypesText" 
+                        variant="solo-filled"
+                        label="Phenotypes" 
+                        density="compact" 
+                        no-resize
+                        hint="insert comma or semi-colon separated list of phenotypes"></v-textarea>
+                </div>
+                <!-- variant List Input -->
+                <div class="input-container">
+                    <v-textarea 
+                        v-model="variantsText" 
+                        variant="solo-filled"
+                        label="Variants" 
+                        density="compact"
+                        no-resize 
+                        hint="insert comma or semi-colon separated list of variants/genes"></v-textarea>
+                </div>
+                <v-btn @click="processPatient" :disabled="!phenotypesText || !(phenotypesText.length > 0)">Compare Patient</v-btn>
+            </div>
+        </v-overlay>
+    </div>
+</template>
+
 <script>
     import TargetPatient from '../models/TargetPatient.js'
     import Phenotype from '../models/Phenotype'
@@ -16,10 +63,9 @@
         data: function() {
             return {
                 showOverlay: this.showPtSelectOverlay,
-                udnId: null,
-                phenotypesText: null,
-                variantsText: null,
-
+                udnId: 'UDN125628',
+                phenotypesText: 'HP:0000135; HP:0000407; HP:0000787; HP:0000821; HP:0000824; HP:0000871; HP:0001250; HP:0001596; HP:0001876; HP:0002141; HP:0004370; HP:0100543',
+                variantsText: 'FAM182A; AWAT2; PEG3; KDM4C; DCAF8L1; NME7; MAEA; ARSH; ZNF804A; BEX5; ERC1; TMEM256; INTS4; SEC14L5; RPL23AP93; CHAF1B; PHKA2-AS1; AAMDC; RGPD3; CHMP4A; ANKRD33B; AFF2; NQO1',
             }
         },
         mounted: function() {
@@ -41,24 +87,24 @@
                         //if the term is an hpo id then lookup the term by id
                         let res = await getPhenotypeWithId(term);
                         if (res) {
-                            if (phenotypeMap[res.id] != null || phenotypeMap[res.name] != null) {
+                            if (phenotypeMap[res.term_id] != null || phenotypeMap[res.name] != null) {
                                 //dont add just continue because we already have this phenotype
                                 continue;
                             }
-                            phenotypeMap[res.id] = res.name;
-                            let phenotype = new Phenotype(res.id, res.name, res.definition, res.comment, res.synonyms);
+                            phenotypeMap[res.term_id] = res.name;
+                            let phenotype = new Phenotype(res.term_id, res.name, res.definition, res.comment, res.synonyms);
                             phenotypeList.push(phenotype);
                         }
                     } else {
                         //if the term is not an hpo id then lookup the term by name
                         let res = await getPhenotypeWithName(term);
                         if (res) {
-                            if (phenotypeMap[res.id] != null || phenotypeMap[res.name] != null) {
+                            if (phenotypeMap[res.term_id] != null || phenotypeMap[res.name] != null) {
                                 //dont add just continue because we already have this phenotype
                                 continue;
                             }
-                            phenotypeMap[res.name] = res.id;
-                            let phenotype = new Phenotype(res.id, res.name, res.definition, res.comment, res.synonyms);
+                            phenotypeMap[res.name] = res.term_id;
+                            let phenotype = new Phenotype(res.term_id, res.name, res.definition, res.comment, res.synonyms);
                             phenotypeList.push(phenotype);
                         }
                     }
@@ -91,53 +137,6 @@
         }
     }
 </script>
-
-<template>
-    <div id="nav-bar">
-        <v-app-bar density="compact" color="#21351f">
-            <v-btn @click="showOverlay=true" v-if="!targetPatient" variant="outlined">Add/Select Patient</v-btn>
-            <v-btn @click="showOverlay=true" v-if="targetPatient" variant="outlined">Edit Patient</v-btn>
-            <v-toolbar-title>Pheno-Matcher.iobio</v-toolbar-title>
-        </v-app-bar>
-
-        <v-overlay id="add-select-patient" v-model="showOverlay" persistent>
-            <div id="add-select-dialog">
-                <v-btn class="close-button" @click="showOverlay = false" icon="mdi-close-circle-outline" height="35px" width="35px"></v-btn>
-                <h3>Input Target Patient Details</h3>
-                <div v-if="udnPatientIdsList" id="udn-id-input" class="input-container">
-                    <v-autocomplete
-                    v-model="udnId"
-                    :items="udnPatientIdsList"
-                    variant="solo-filled"
-                    label="UDN Patient Id" 
-                    density="compact"></v-autocomplete>
-                </div>
-
-                <!-- Phenotype List Input -->
-                <div class="input-container">
-                    <v-textarea 
-                        v-model="phenotypesText" 
-                        variant="solo-filled"
-                        label="Phenotypes" 
-                        density="compact" 
-                        no-resize
-                        hint="insert comma or semi-colon separated list of phenotypes"></v-textarea>
-                </div>
-                <!-- Phenotype List Input -->
-                <div class="input-container">
-                    <v-textarea 
-                        v-model="variantsText" 
-                        variant="solo-filled"
-                        label="Variants" 
-                        density="compact" 
-                        no-resize 
-                        hint="insert comma or semi-colon separated list of variants/genes"></v-textarea>
-                </div>
-                <v-btn @click="processPatient" :disabled="!phenotypesText || !(phenotypesText.length > 0)">Compare Patient</v-btn>
-            </div>
-        </v-overlay>
-    </div>
-</template>
 
 <style lang="sass">
     #nav-bar

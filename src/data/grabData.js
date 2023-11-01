@@ -2,10 +2,6 @@ import MatchPatient from "../models/MatchPatient";
 import TargetPatient from "../models/TargetPatient";
 import Phenotype from "../models/Phenotype";
 
-const hpoDbIdURL = "http://localhost:8911/id/"
-const hpoDbNameURL = "http://localhost:8911/name/"
-const hpoDbURLAll = "http://localhost:8911/all/"
-
 export default async function grabData(patientsCsvUrl, similarityCsvUrl, patientID) {
   
   // Parse the CSV files
@@ -71,7 +67,7 @@ export default async function grabData(patientsCsvUrl, similarityCsvUrl, patient
 //Create a map of match patients with their ID as a key and then the patient object
 async function createPatientMap(matrix) {
   var hpoIdMap = {}
-  hpoIdMap = await getAllPhenotypes(hpoDbURLAll)
+  hpoIdMap = await getAllPhenotypes()
 
   let patientMap = {};
   var notAdded = 0;
@@ -95,7 +91,7 @@ async function createPatientMap(matrix) {
     for (let id of patientHpoIds) {
         id = id.trim()
         if (!(hpoIdMap.hasOwnProperty(id))) {
-          let phen = await getPhenotypeWithId(id, hpoDbIdURL);
+          let phen = await getPhenotypeWithId(id);
 
           if (phen && phen["name"] && phen["definition"] && phen["comment"] && phen["synonyms"]) {
             hpoIdMap[id] = phen;
@@ -187,9 +183,11 @@ export async function getUdnIds(similarityCsvUrl) {
   return udnIds;
 }
 
+//One off functions to get things from the hpo database
+
 export async function getPhenotypeWithId(id) {
-  let hpoDbIdURL = "http://localhost:8911/id/"
-  const response = await fetch(hpoDbIdURL + encodeURI(id));
+  let url = "http://localhost:8911/id/"
+  const response = await fetch(url + encodeURI(id));
   //if the response is not ok then return null
   if (!response.ok) {
     return null;
@@ -198,8 +196,8 @@ export async function getPhenotypeWithId(id) {
 }
 
 export async function getPhenotypeWithName(name) {
-  let hpoDbNameURL = "http://localhost:8911/name/"
-  const response = await fetch(hpoDbNameURL + encodeURI(name));
+  let url = "http://localhost:8911/name/"
+  const response = await fetch(url + encodeURI(name));
   //if the response is not ok then return null
   if (!response.ok) {
     return null;
@@ -207,7 +205,37 @@ export async function getPhenotypeWithName(name) {
   return response.json();
 }
 
-export async function getAllPhenotypes(url) {
+export async function getAllPhenotypes() {
+  let url = "http://localhost:8911/all/hpoTerms/"
   const response = await fetch(url);
   return response.json();
+}
+
+export async function getGenesWithPhenotype(id) {
+  /*
+  Takes a phenotype id and returns the genes associated with that phenotype
+  */
+  let url = "http://localhost:8911/id/getGenes/"
+  const response = await fetch(url + encodeURI(id));
+  //if the response is not ok then return null
+  if (!response.ok) {
+    return null;
+  }
+  return response.json();
+}
+
+export async function getPhenotypesWithGene(id=null, name=null){
+  /*
+  Takes a gene name or id and returns the phenotypes associated with that gene
+  */
+  //if there is an id then use that to get the phenotypes
+  if (id) {
+    let url = "http://localhost:8911/gene/getPhenotypes/"
+    const response = await fetch(url + encodeURI(id));
+    //if the response is not ok then return null
+    if (!response.ok) {
+      return null;
+    }
+    return response.json();
+  }
 }

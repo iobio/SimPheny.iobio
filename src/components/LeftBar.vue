@@ -1,23 +1,3 @@
-<script>
-    export default {
-        name: 'LeftBar',
-        props: {
-            targetPatient: Object,
-        },
-        data: function() {
-            return {
-                showLeftBar: true,
-                showHpoDrawer: true,
-                panels: [1,1,0],
-                tab: 'phenotypes'
-            }
-        },
-        methods: {
-
-        },
-    }
-</script>
-
 <template>
     <div class="section-container left-bar">
         <div id="left-bar-container" :class="{ expanded: showLeftBar, collapsed: !showLeftBar}">
@@ -33,7 +13,7 @@
                         <v-window-item value="phenotypes">
                             <div class="list-item left-bar" v-if="targetPatient" v-for="phenotype in targetPatient.getPhenotypeList()">
                                 <input type="checkbox" v-model="phenotype.relevant">
-                                <span>{{ phenotype.hpoId + " - " + phenotype.term }}</span>
+                                <span @click="getGenesForPhenotype(phenotype)" class="phenotype-span left-bar">{{ phenotype.hpoId + " - " + phenotype.term }}</span>
                             </div>
                         </v-window-item>
 
@@ -41,7 +21,7 @@
                             <p v-if="!targetPatient || (targetPatient.getGenesList() == null || targetPatient.getGenesList().length == 0)">No variants to display for current patient.</p>
                             <div class="list-item left-bar" v-else="targetPatient && targetPatient.getGenesList()" v-for="gene in targetPatient.getGenesList()">
                                 <input type="checkbox">
-                                <span>{{ gene }}</span>
+                                <span class="gene-span left-bar">{{ gene }}</span>
                             </div>
                         </v-window-item>
                     </v-window>
@@ -76,6 +56,41 @@
     </div>
 </template>
 
+<script>
+    import * as hpoDb from '../data/grabData.js'
+
+    export default {
+        name: 'LeftBar',
+        props: {
+            targetPatient: Object,
+        },
+        data: function() {
+            return {
+                showLeftBar: true,
+                showHpoDrawer: true,
+                panels: [1,1,0],
+                tab: 'phenotypes',
+                selectedPhenotype: null,
+                selectedGene: null,
+            }
+        },
+        methods: {
+            async getGenesForPhenotype(phenotype){
+                this.selectedPhenotype = phenotype;
+                let res = await hpoDb.getGenesWithPhenotype(phenotype.hpoId);
+                console.log(res);
+            }
+        },
+        watch: {
+            selectedPhenotype: function(newVal, oldVal) {
+                if (newVal != null) {
+                    console.log(this.selectedPhenotype)
+                }
+            },
+        }
+    }
+</script>
+
 <style>
     .list-item.left-bar {
         padding-left: 5px;
@@ -89,6 +104,12 @@
     }
     .list-item.left-bar input {
         margin-right: 10px; 
+    }
+    .phenotype-span.left-bar {
+        width: 100%;
+    }
+    .gene-span.left-bar {
+        width: 100%;
     }
     .section-container.left-bar {
         height: 100%;
