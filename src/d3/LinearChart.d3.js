@@ -76,28 +76,6 @@ export default function LinearChart() {
         //adjust the x and y axis to allow for the labels
         svg.attr("viewBox", [0, 0, width, height + 10]);
 
-
-        // if (targetPatient && targetPatient.similarityScore) {
-        //     // Put the target patient as a person mdi on the origin of the chart at the bottom.
-        //     var targetPoint = svg.append("g")
-        //     .attr("transform", `translate(${x(targetPatient.similarityScore) - 12},${(height - marginBottom) - 24})`);
-
-        //     targetPoint.append("foreignObject")
-        //         .attr("width", 24)
-        //         .attr("height", 24)
-        //         .html(`
-        //             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        //                 <path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V22H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z" fill="red"/>
-        //             </svg>
-        //         `)
-        //         .on("mouseover", function(event) {
-        //             handleMouseOver(event, targetPatient);
-        //         })
-        //         .on("mouseout", function(event) {
-        //             handleMouseOut(event, targetPatient);
-        //         });
-        // }
-
         //put a vertical line at the origin of the chart that is slightly longer than the Y axis on both top and bottom
         svg.append("g")
             .append("path")
@@ -222,9 +200,10 @@ export default function LinearChart() {
                 .text("Number of Genes in Common: " + d.genesInCommon.length);
 
                 if (d.genesInCommon.length > 0) {
+                    var geneList = d.genesInCommon.map(gene => gene.getGeneSymbol());
                     //add the genes in common
                     tooltip.append("p")
-                        .text("Genes in Common: " + d.genesInCommon.join(", "));
+                        .text("Genes in Common: " + geneList.join(", "));
                 }
             }
 
