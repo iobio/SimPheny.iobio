@@ -1,6 +1,7 @@
 import MatchPatient from "../models/MatchPatient";
 import TargetPatient from "../models/TargetPatient";
 import Phenotype from "../models/Phenotype";
+import Gene from "../models/Gene";
 
 export default async function grabData(patientsCsvUrl, similarityCsvUrl, patientID) {
   
@@ -76,9 +77,22 @@ async function createPatientMap(matrix) {
     let patient = new MatchPatient(row[0]);
     patient.setId(row[0]);
     patient.setDx(row[1]);
-    patient.setGenesList(row[2]);
     patient.setClinicalDiagnosis(row[3]);
     patient.setHpoIdList(row[4]);
+
+    //We want to create a gene object for each gene in the list and then add it to the patient
+    let geneList = []
+    if (row[2] && row[2] !== "NONE") {
+      let genes = row[2].split(";")
+      //use the gene list function to get the gene objects
+      geneList = await getGeneList(genes) //the function already should convert the list to a string
+      var newGeneList = []
+      for (let g of geneList) {
+        let gene = new Gene(g["gene_id"], g["gene_symbol"])
+        newGeneList.push(gene)
+      }
+    }
+    patient.setGenesList(newGeneList)
 
     let patientHpoIds = patient.getHpoIdList()
     let patientPhenList = []
@@ -240,9 +254,33 @@ export async function getPhenotypesWithGene(id=null, name=null){
   }
 }
 
-export async function getGene(gene_id) {
-  let url = "http://localhost:8911/gene/"
-  const response = await fetch(url + encodeURI(gene_id));
+export async function getGeneById(id) {
+  let url = "http://localhost:8911/gene/id/"
+  const response = await fetch(url + encodeURI(id));
+  //if the response is not ok then return null
+  if (!response.ok) {
+    return null;
+  }
+  return response.json();
+}
+
+export async function getGeneByName(name) {
+  let url = "http://localhost:8911/gene/name/"
+  const response = await fetch(url + encodeURI(name));
+  //if the response is not ok then return null
+  if (!response.ok) {
+    return null;
+  }
+  return response.json();
+}
+
+export async function getGeneList(geneNameList) {
+  let url = "http://localhost:8911/gene/names/"
+  //turn the list into a concatenated string
+  geneNameList = geneNameList.join(",")
+  //take out spaces
+  geneNameList = geneNameList.replace(/ /g, "");
+  const response = await fetch(url + encodeURI(geneNameList));
   //if the response is not ok then return null
   if (!response.ok) {
     return null;

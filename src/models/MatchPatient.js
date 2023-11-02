@@ -41,19 +41,30 @@ class MatchPatient {
     getGenesList() {
         return this.genesList;
     }
-    setGenesList(genesList) {
-        if (typeof genesList === "string") {
-            genesList = genesList.split(",");
+    async setGenesList(genesList) {
+        if (typeof genesList === "string" || genesList.every(item => typeof item === 'string')) {
+            //if it is a list of strings then we need to convert it to a string
+            if (genesList.every(item => typeof item === 'string')) {
+                genesList = genesList.join(",");
+            }
+            //make sure there are no spaces
+            genesList = genesList.replace(/\s/g, '');
+            genesList = genesList.replace(/;/g, ',');
+            //use database to get bulk gene list
+            try {
+                genesList = await hpoDb.getGeneList(genesList);
+
+                var newGeneList = [];
+                for (let g of genesList) {
+                    let gene = new Gene(g.gene_id, g.gene_symbol);
+                    newGeneList.push(gene);
+                }
+                genesList = newGeneList;
+            } catch (error) {
+                //set to empty list if there is an error
+                genesList = [];
+            }
         }
-        if (genesList == "NONE") {
-            genesList = []
-        }
-        //remove leading and trailing whitespace
-        genesList = genesList.map(gene => gene.trim());
-        //if any of the genes are empty strings, or puncutation or NONE then remove them
-        let puncutation = /[.,\/#!$%\^&\*;:{}=\-_`~()]/g;
-        genesList = genesList.filter(gene => gene.length > 0 && gene !== "NONE" && gene !== "NA" && !puncutation.test(gene));
-        
         this.genesList = genesList;
     }
     getClinicalDiagnosis() {

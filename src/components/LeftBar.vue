@@ -120,7 +120,10 @@
         },
         watch: {
             selectedPhenotype: function(newVal, oldVal) {
-                console.log(this.selectedPhenotypeGenes)
+
+            },
+            targetPatient: function(newVal, oldVal) {
+                console.log(newVal)
             }
         }
     }
