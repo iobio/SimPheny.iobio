@@ -5,6 +5,7 @@
             <p>No target patient defined.</p>
             <p>Input target patient to view matches.</p>
         </div>
+        <div v-if="targetPatient && showLoading" id="loading-container"><v-icon class="loading-icon">mdi-loading</v-icon><p>loading matches...</p></div>
         <div id="lin-chart-tip"></div>
     </div>
 
@@ -27,6 +28,7 @@
             return {
                 linearChart: null,
                 resizeObserver: null,
+                showLoading: true //this.patientMap,
             }
         },
         mounted() {
@@ -93,6 +95,15 @@
                 this.$emit('selectMatch', selectedMatch);
             }
         },
+        watch: {
+            patientMap: function(newVal, oldVal) {
+                if (newVal != null) {
+                    this.showLoading = false;
+                } else if (newVal == null || newVal == undefined) {
+                    this.showLoading = true;
+                }
+            }
+        }
     }
 
 </script>
@@ -106,6 +117,7 @@
         display: flex
         flex-direction: column
         justify-content: center
+        position: relative
 
         border-radius: 5px
         #lin-chart-viz 
@@ -137,5 +149,25 @@
             height: fit-content
             width: fit-content
 
-            font-size: small 
+            font-size: small
+        #loading-container
+            position: absolute
+            top: 50%
+            left: 45%
+            display: flex
+            flex-direction: column
+            justify-content: center
+            align-items: center
+            p
+                text-align: center
+                font-size: large
+                transform: translate(-20px, -10px)
+            .loading-icon
+                font-size: 50px
+                animation: spin 1s linear infinite
+    @keyframes spin 
+        from 
+            transform: translate(-50%, -50%) rotate(0deg)
+        to 
+            transform: translate(-50%, -50%) rotate(360deg) 
 </style>
