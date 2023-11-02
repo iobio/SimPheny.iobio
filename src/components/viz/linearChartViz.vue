@@ -6,9 +6,8 @@
             <p>Input target patient to view matches.</p>
         </div>
         <div v-if="targetPatient && showLoading" id="loading-container"><v-icon class="loading-icon">mdi-loading</v-icon><p>loading matches...</p></div>
-        <div id="lin-chart-tip"></div>
     </div>
-
+    <div id="lin-chart-tip"></div>
 </template>
 
 <script>
@@ -135,21 +134,6 @@
             p
                 text-align: center
                 font-size: large
-        #lin-chart-tip 
-            position: absolute
-            visibility: hidden
-            background-color: rgba(0, 0, 0, 0.7)
-            color: white
-            padding: 5px
-            border-radius: 5px
-            display: flex
-            flex-direction: column
-            justify-content: center
-            align-items: start
-            height: fit-content
-            width: fit-content
-
-            font-size: small
         #loading-container
             position: absolute
             top: 50%
@@ -165,6 +149,21 @@
             .loading-icon
                 font-size: 50px
                 animation: spin 1s linear infinite
+    #lin-chart-tip 
+        position: absolute
+        visibility: hidden
+        background-color: rgba(0, 0, 0, 0.7)
+        color: white
+        padding: 5px
+        border-radius: 5px
+        display: flex
+        flex-direction: column
+        justify-content: center
+        align-items: start
+        height: fit-content
+        width: fit-content
+
+        font-size: small
     @keyframes spin 
         from 
             transform: translate(-50%, -50%) rotate(0deg)
