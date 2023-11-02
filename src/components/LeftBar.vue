@@ -26,7 +26,7 @@
                             <p v-if="!targetPatient || (targetPatient.getGenesList() == null || targetPatient.getGenesList().length == 0)">No variants to display for current patient.</p>
                             <div class="list-item left-bar" v-else="targetPatient && targetPatient.getGenesList()" v-for="gene in targetPatient.getGenesList()">
                                 <input type="checkbox">
-                                <span class="gene-span left-bar">{{ gene.gene_symbol }}</span>
+                                <span @click="getPhenotypesForGene(gene)" class="gene-span left-bar">{{ gene.gene_symbol }}</span>
                             </div>
                         </v-window-item>
                     </v-window>
@@ -92,6 +92,7 @@
                 selectedPhenotype: null,
                 selectedGene: null,
                 selectedPhenotypeGenes: [],
+                selectedGenePhenotypes: [],
             }
         },
         methods: {
@@ -110,6 +111,24 @@
                 if (!this.showHpoDrawer) {
                     this.showHpoDrawer = true;
                 }
+            },
+            async getPhenotypesForGene(gene) {
+                if (this.selectedGene == gene) {
+                    this.selectedGene = null;
+                    this.selectedGenePhenotypes = [];
+                    this.showHpoDrawer = false;
+                    return
+                }
+                //otherwise, get phenotypes for the gene
+                this.selectedGene = gene;
+                let res = await hpoDb.getPhenotypesWithGene(gene.gene_id)
+                let phenotypeList = res;
+                this.selectedGenePhenotypes = phenotypeList;
+                console.log(this.selectedGenePhenotypes)
+                if (!this.showHpoDrawer) {
+                    this.showHpoDrawer = true;
+                }
+
             },
             checkGeneInPatient(gene) {
                 if (this.targetPatient) {

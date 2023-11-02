@@ -237,20 +237,17 @@ export async function getGenesWithPhenotype(id) {
   return response.json();
 }
 
-export async function getPhenotypesWithGene(id=null, name=null){
+export async function getPhenotypesWithGene(id){
   /*
-  Takes a gene name or id and returns the phenotypes associated with that gene
+  Takes a gene id and returns the phenotypes associated with that gene
   */
-  //if there is an id then use that to get the phenotypes
-  if (id) {
-    let url = "http://localhost:8911/gene/getPhenotypes/"
-    const response = await fetch(url + encodeURI(id));
-    //if the response is not ok then return null
-    if (!response.ok) {
-      return null;
-    }
-    return response.json();
+  let url = "http://localhost:8911/gene/getPhenotypes/"
+  const response = await fetch(url + encodeURI(id));
+  //if the response is not ok then return null
+  if (!response.ok) {
+    return null;
   }
+  return response.json();
 }
 
 export async function getGeneById(id) {

@@ -15,6 +15,7 @@
     import * as d3 from 'd3';
 
     export default {
+        emits: ['selectMatch'],
         name: 'LinearChartViz',
 
         props: {
@@ -27,7 +28,7 @@
             return {
                 linearChart: null,
                 resizeObserver: null,
-                showLoading: true //this.patientMap,
+                showLoading: this.patientMap,
             }
         },
         mounted() {
