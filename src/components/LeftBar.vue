@@ -123,7 +123,6 @@
 
             },
             targetPatient: function(newVal, oldVal) {
-                console.log(newVal)
             }
         }
     }

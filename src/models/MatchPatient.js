@@ -1,3 +1,5 @@
+import Gene from './Gene.js';
+
 class MatchPatient {
     constructor(id) {
         this.id = id;
@@ -42,14 +44,13 @@ class MatchPatient {
         return this.genesList;
     }
     async setGenesList(genesList) {
-        if (typeof genesList === "string" || genesList.every(item => typeof item === 'string')) {
+        if (typeof genesList === "string" || (Array.isArray(genesList) && genesList.every(item => typeof item === 'string'))) {
             //if it is a list of strings then we need to convert it to a string
-            if (genesList.every(item => typeof item === 'string')) {
+            if (Array.isArray(genesList) && genesList.every(item => typeof item === 'string')) {
                 genesList = genesList.join(",");
             }
             //make sure there are no spaces
-            genesList = genesList.replace(/\s/g, '');
-            genesList = genesList.replace(/;/g, ',');
+            genesList = genesList.replace(/\s|;/g, ',');
             //use database to get bulk gene list
             try {
                 genesList = await hpoDb.getGeneList(genesList);
@@ -64,6 +65,15 @@ class MatchPatient {
                 //set to empty list if there is an error
                 genesList = [];
             }
+        } else if (genesList == null || genesList.length == 0 || genesList == undefined) {
+            genesList = [];
+        } else if (typeof genesList == "object") {
+            var newGeneList = [];
+            for (let g of genesList) {
+                let gene = new Gene(g.gene_id, g.gene_symbol);
+                newGeneList.push(gene);
+            }
+            genesList = newGeneList;
         }
         this.genesList = genesList;
     }

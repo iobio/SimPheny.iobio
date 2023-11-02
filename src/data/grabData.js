@@ -35,7 +35,7 @@ export default async function grabData(patientsCsvUrl, similarityCsvUrl, patient
     let targetGenes = targetPatient.getGenesList();
     let patientGenes = patient.getGenesList();
     for (let gene of targetGenes) {
-      if (patientGenes.includes(gene)) {
+      if (patientGenes.some(patientGene => patientGene.getGeneId() === gene.getGeneId())) {
         inCommon.push(gene);
       }
     }
@@ -81,11 +81,10 @@ async function createPatientMap(matrix) {
     patient.setHpoIdList(row[4]);
 
     //We want to create a gene object for each gene in the list and then add it to the patient
-    let geneList = []
     if (row[2] && row[2] !== "NONE") {
       let genes = row[2].split(";")
       //use the gene list function to get the gene objects
-      geneList = await getGeneList(genes) //the function already should convert the list to a string
+      let geneList = await getGeneList(genes) //the function already should convert the list to a string
       var newGeneList = []
       for (let g of geneList) {
         let gene = new Gene(g["gene_id"], g["gene_symbol"])
