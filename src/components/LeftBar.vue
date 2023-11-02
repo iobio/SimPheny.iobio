@@ -26,7 +26,7 @@
                             <p v-if="!targetPatient || (targetPatient.getGenesList() == null || targetPatient.getGenesList().length == 0)">No variants to display for current patient.</p>
                             <div class="list-item left-bar" v-else="targetPatient && targetPatient.getGenesList()" v-for="gene in targetPatient.getGenesList()">
                                 <input type="checkbox">
-                                <span class="gene-span left-bar">{{ gene }}</span>
+                                <span class="gene-span left-bar">{{ gene.gene_symbol }}</span>
                             </div>
                         </v-window-item>
                     </v-window>

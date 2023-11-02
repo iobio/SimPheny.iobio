@@ -19,12 +19,12 @@
                         <p><b>ID:</b> {{ selectedMatch.id }}</p>
                         <p><b>Rank:</b> {{ selectedMatch.rank }} <b>Score:</b> {{ Math.round(selectedMatch.similarityScore * 10000)/10000 }}</p>
                         <p><b>Dx Status:</b> {{ selectedMatch.dx }}</p>
-                        <p><b>Variants:</b> {{ selectedMatch.genesList }}</p>
+                        <p><b>Variants:</b> {{ selectedMatch.genesList.map(gene => gene.gene_symbol) }}</p>
                         <p><b>Clinical Dx:</b> {{ selectedMatch.clinicalDiagnosis }}</p>
                     </div>
                     <div class="column">
                         <h4>Variants In Common</h4>
-                        <p v-if="selectedMatch.genesInCommon.length > 0">{{ selectedMatch.genesInCommon }}</p>
+                        <p v-if="selectedMatch.genesInCommon.length > 0">{{ selectedMatch.genesInCommon.map(gene => gene.gene_symbol) }}</p>
                         <p v-if="selectedMatch.genesInCommon.length == 0">No variants in common</p>
                     </div>
                     <div class="column">
