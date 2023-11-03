@@ -12,12 +12,17 @@
                     <v-window v-model="tab">
                         <v-window-item value="phenotypes">
                             <div class="list-item left-bar" v-if="targetPatient" v-for="phenotype in targetPatient.getPhenotypeList()">
-                                <input type="checkbox" v-model="phenotype.relevant">
+                                <input type="checkbox" v-model="phenotype.relevant"> 
                                 <span 
                                     @click="getGenesForPhenotype(phenotype)" 
                                     :class="{ selected: selectedPhenotype && selectedPhenotype.hpoId == phenotype.hpoId }" 
                                     class="phenotype-span left-bar">
                                     {{ phenotype.hpoId + " - " + phenotype.term }}
+                                </span>
+                                <span 
+                                    class="num-in-target" 
+                                        v-if="phenotypeAssociationsMap && phenotypeAssociationsMap[phenotype.hpoId].numInTarget > 0">
+                                        {{ phenotypeAssociationsMap[phenotype.hpoId].numInTarget }}
                                 </span>
                             </div>
                         </v-window-item>
@@ -25,8 +30,18 @@
                         <v-window-item value="variants">
                             <p v-if="!targetPatient || (targetPatient.getGenesList() == null || targetPatient.getGenesList().length == 0)">No variants to display for current patient.</p>
                             <div class="list-item left-bar" v-else="targetPatient && targetPatient.getGenesList()" v-for="gene in targetPatient.getGenesList()">
-                                <input type="checkbox">
-                                <span @click="getPhenotypesForGene(gene)" class="gene-span left-bar">{{ gene.gene_symbol }}</span>
+                                <input type="checkbox" v-model="gene.relevant">
+                                <span 
+                                    @click="getPhenotypesForGene(gene)"
+                                    :class="{ selected: selectedGene && selectedGene.gene_id == gene.gene_id }"  
+                                    class="gene-span left-bar">
+                                    {{ gene.gene_symbol }}
+                                </span>
+                                <span 
+                                    class="num-in-target" 
+                                    v-if="geneAssociationsMap && geneAssociationsMap[gene.gene_symbol].numInTarget > 0">
+                                    {{ geneAssociationsMap[gene.gene_symbol].numInTarget }}
+                                </span>
                             </div>
                         </v-window-item>
                     </v-window>
@@ -44,18 +59,38 @@
                         <v-icon v-if="!showHpoDrawer" color="white">mdi-arrow-up-circle-outline</v-icon>
                     </v-btn>
                 </div>
-                <div id="hpo-content-container">
-                    <h1 class="section-head">HPO Annotations</h1>
-                    <h5 v-if="selectedPhenotype"> {{ selectedPhenotype.term }}</h5>
-
-                    <h4><span>Gene Name</span><span>Frequency</span><span>Disease Id</span></h4>
+                <div id="hpo-content-container" class="tab-container left-bar">
+                    <h3>HPO Associations</h3>
+                    <v-tabs v-model="hpoTab" fixed-tabs height="30px">
+                        <v-tab value="phenToGene" variant="text">Genes</v-tab>
+                        <v-tab value="geneToPhen" variant="text">Phenotypes</v-tab>
+                    </v-tabs>
 
                     <div id="annotations-list-container">
-                            <div class="hpo-list-div" v-if="selectedPhenotypeGenes && targetPatient" v-for="gene in selectedPhenotypeGenes" :class="{ inTarget: checkGeneInPatient(gene) }">
-                                <span>{{ gene.gene_symbol }}</span>
-                                <span>{{ gene.frequency }}</span>
-                                <span>{{ gene.disease_id }}</span>
-                            </div>
+                        <div v-if="hpoTab == 'phenToGene'" class="hpo-anno-header">
+                                    <h3 v-if="selectedPhenotype"> Genes for {{ selectedPhenotype.term }}</h3>
+                                    <h4><span>Gene Name</span><span>Frequency</span><span>Disease Id</span></h4>
+                        </div>
+                        <div v-if="hpoTab == 'geneToPhen'" class="hpo-anno-header">
+                                    <h3 v-if="selectedGene"> Phenotypes for {{ selectedGene.gene_symbol }}</h3>
+                                    <h4><span>HPO Id</span><span>Term</span><span>Disease Id</span></h4>
+                        </div>
+                        <v-window v-model="hpoTab">
+                            <v-window-item value="phenToGene">
+                                <div class="hpo-list-div" v-if="selectedPhenotypeGenes && targetPatient" v-for="gene in selectedPhenotypeGenes" :class="{ inTarget: checkGeneInPatient(gene) }">
+                                    <span>{{ gene.gene_symbol }}</span>
+                                    <span>{{ gene.frequency }}</span>
+                                    <span>{{ gene.disease_id }}</span>
+                                </div>
+                            </v-window-item>
+                            <v-window-item value="geneToPhen">
+                                <div class="hpo-list-div" v-if="selectedGenePhenotypes && targetPatient" v-for="phenotype in selectedGenePhenotypes" :class="{ inTarget: checkPhenotypeInPatient(phenotype) }">
+                                    <span>{{ phenotype.term_id }}</span>
+                                    <span>{{ phenotype.name }}</span>
+                                    <span>{{ phenotype.disease_id }}</span>
+                                </div>
+                            </v-window-item>
+                        </v-window>
                     </div>
                 </div>
             </div>
@@ -89,10 +124,29 @@
                 showHpoDrawer: false,
                 panels: [1,1,0],
                 tab: 'phenotypes',
+                hpoTab: 'phenToGene',
                 selectedPhenotype: null,
                 selectedGene: null,
                 selectedPhenotypeGenes: [],
                 selectedGenePhenotypes: [],
+                phenotypeAssociationsMap: null,
+                geneAssociationsMap: null,
+            }
+        },
+        mounted: function(){
+            if (this.targetPatient && this.targetPatient.genesList.length > 0 && this.targetPatient.phenotypeList.length > 0) {
+                this.createAssociationsMaps(this.targetPatient).then(res => {
+                    this.phenotypeAssociationsMap = res[0];
+                    this.geneAssociationsMap = res[1];
+                });
+            }
+        },
+        updated: function() {
+            if (this.targetPatient && this.targetPatient.genesList.length > 0 && this.targetPatient.phenotypeList.length > 0) {
+                this.createAssociationsMaps(this.targetPatient).then(res => {
+                    this.phenotypeAssociationsMap = res[0];
+                    this.geneAssociationsMap = res[1];
+                });
             }
         },
         methods: {
@@ -111,6 +165,9 @@
                 if (!this.showHpoDrawer) {
                     this.showHpoDrawer = true;
                 }
+                if (this.hpoTab != 'phenToGene') {
+                    this.hpoTab = 'phenToGene';
+                }
             },
             async getPhenotypesForGene(gene) {
                 if (this.selectedGene == gene) {
@@ -124,25 +181,79 @@
                 let res = await hpoDb.getPhenotypesWithGene(gene.gene_id)
                 let phenotypeList = res;
                 this.selectedGenePhenotypes = phenotypeList;
-                console.log(this.selectedGenePhenotypes)
                 if (!this.showHpoDrawer) {
                     this.showHpoDrawer = true;
+                }
+                if (this.hpoTab != 'geneToPhen') {
+                    this.hpoTab = 'geneToPhen';
                 }
 
             },
             checkGeneInPatient(gene) {
                 if (this.targetPatient) {
-                    return this.targetPatient.genesList.includes(gene.gene_symbol);
+                    let patientGeneSymbols = this.targetPatient.genesList.map(gene => gene.gene_symbol);
+                    return patientGeneSymbols.includes(gene.gene_symbol);
                 }
                 return false;
+            },
+            checkPhenotypeInPatient(phenotype) {
+                if (this.targetPatient) {
+                    let phenIdsList = this.targetPatient.phenotypeList.map((phen) => phen.hpoId);
+                    return phenIdsList.includes(phenotype.term_id);
+                }
+                return false;
+            },
+            async createAssociationsMaps(targetPatient) {
+                let phenotypeAssociations = {};
+                let geneAssociations = {};
+
+                let geneSymbolList = targetPatient.genesList.map(gene => gene.gene_symbol);
+                let phenotypeIdList = targetPatient.phenotypeList.map(phenotype => phenotype.hpoId);
+
+                let phenotypePromises = targetPatient.phenotypeList.map(phenotype => 
+                    hpoDb.getGenesWithPhenotype(phenotype.hpoId).then(res => {
+                        phenotypeAssociations[phenotype.hpoId] = { genes: res };
+                        phenotypeAssociations[phenotype.hpoId]['numInTarget'] = res.filter(gene => 
+                            geneSymbolList.includes(gene.gene_symbol)
+                        ).length;
+                    })
+                    .catch(err => {
+                        console.log("getGenesWithPhen Error", err);
+                    })
+                );
+                
+                let genePromises = targetPatient.genesList.map(gene =>
+                    hpoDb.getPhenotypesWithGene(gene.gene_id).then(res => {
+                        geneAssociations[gene.gene_symbol] = { phenotypes: res };
+                        geneAssociations[gene.gene_symbol]['numInTarget'] = res.filter(phenotype =>     
+                        phenotypeIdList.includes(phenotype.term_id)
+                        ).length;
+                    })
+                    .catch(err => {
+                        console.log("getPhenotypesWithGene Error", err);
+                    })
+                );
+
+                // Wait for all promises to resolve before returning
+                await Promise.all(phenotypePromises.concat(genePromises));
+
+                return [phenotypeAssociations, geneAssociations];
             }
         },
         watch: {
             selectedPhenotype: function(newVal, oldVal) {
 
             },
-            targetPatient: function(newVal, oldVal) {
-            }
+            targetPatient: {
+                handler(newVal, oldVal) {
+                if (newVal && newVal.genesList.length > 0 && newVal.phenotypeList.length > 0) {
+                    this.createAssociationsMaps(newVal).then(res => {
+                        this.phenotypeAssociationsMap = res[0];
+                        this.geneAssociationsMap = res[1];
+                    });
+                }
+            }, deep: true
+        }
         }
     }
 </script>
@@ -161,9 +272,33 @@
     .list-item.left-bar input {
         margin-right: 10px; 
     }
+    .list-item.left-bar .num-in-target {
+        width: 1.55em;
+        height: 1.55em;
+        font-size: 10pt;
+        padding: 0%;
+        margin: 0%;
+        border-radius: 50%;
+        background-color: #4d5a4f;
+        border: 1px solid #c2cfc4;
+        color: white;
+        text-align: center;
+        line-height: 1.4em;
+        align-self: center;
+        z-index: 2;
+        transition: all .1s ease-in-out;
+        cursor: pointer;
+    }
+    .list-item.left-bar .num-in-target:hover {
+        background-color: #81977f;
+        width: 1.8em;
+        height: 1.8em;
+        line-height: 1.6em;
+    }
     .phenotype-span.left-bar {
         width: 100%;
         padding: 2px 5px;
+        margin-right: 5px;
         cursor: pointer;
         border-radius: 3px;
     }
@@ -173,6 +308,7 @@
     .gene-span.left-bar {
         width: 100%;
         padding: 2px 5px;
+        margin-right: 5px;
         cursor: pointer;
         border-radius: 3px;
     }
@@ -291,7 +427,7 @@
         justify-content: space-between;
         position: relative;
     }
-    #hpo-drawer h5 {
+    #hpo-drawer h3 {
         width: 100%;
         text-align: center;
         padding-left: 40px;
@@ -299,7 +435,12 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        color: #0a5603;
+        color: #042c09;
+    }
+    #hpo-drawer #annotations-list-container h3 {
+        color: #0d6b04;
+        font-style: italic;
+        font-size: 1em;
     }
     #hpo-drawer.expanded {
         height: 50%;
@@ -317,7 +458,7 @@
     #hpo-drawer h4 {
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
-        padding-top: 10px;
+        padding-top: 5px;
         padding-bottom: 2px;
         padding-left: 20px;
         padding-right: 10px;
@@ -329,18 +470,28 @@
         text-align: start;
     }
     #hpo-drawer #annotations-list-container {
-        height: 80%;
+        height: 85%;
         overflow-y: auto;
-        padding: 5px 10px;
-        padding-left: 20px;
+        padding: 0px 0px 0px 0px;
+    }
+    #hpo-drawer #annotations-list-container .hpo-anno-header {
+        position: sticky;
+        top: 0px;
+        background-color: #e9ede9;
+        width: 100%;
+        z-index: 1;
     }
     #hpo-drawer #annotations-list-container .hpo-list-div {
         width: 100%;
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
+        padding-left: 20px;
     }
     #hpo-drawer #annotations-list-container .hpo-list-div.inTarget {
         color: red;
+        background-color: rgb(253, 190, 190);
+        border-radius: 3px;
+        border: 1px solid rgb(245, 215, 215);
     }
     
     #hpo-drawer #annotations-list-container .hpo-list-div span {
@@ -364,6 +515,7 @@
         width: 35px;
         position: absolute;
         transition: all .45s ease-in-out;
+        z-index: 2;
     }
 
     .btn.toggle.hpo-drawer.expanded {
