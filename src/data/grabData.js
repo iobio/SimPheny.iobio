@@ -31,23 +31,34 @@ export default async function grabData(patientsCsvUrl, similarityCsvUrl, patient
 
   for (patientID in patientMap) {
     let patient = patientMap[patientID];
-    let inCommon = [];
+    let genesInCommon = [];
+    let phenInCommon = [];
     let targetGenes = targetPatient.getGenesList();
+    let targetPhen = targetPatient.getPhenotypeList();
     let patientGenes = patient.getGenesList();
+    let patientPhen = patient.getPhenotypeList();
+    //Genes In Common
     for (let gene of targetGenes) {
       if (patientGenes.some(patientGene => patientGene.getGeneId() === gene.getGeneId())) {
-        inCommon.push(gene);
+        genesInCommon.push(gene);
       }
     }
-    if (inCommon.length > 0) {
-      if (inCommon.length > maxGenesInCommon) {
-        maxGenesInCommon = inCommon.length;
+    //Phenotypes In Common
+    for (let phen of targetPhen) {
+      if (patientPhen.some(patientPhen => patientPhen.getHpoId() === phen.getHpoId())) {
+        phenInCommon.push(phen);
       }
-      patient.setGenesInCommon(inCommon);
     }
-    if (inCommon.length < minGenesInCommon) {
-      minGenesInCommon = inCommon.length;
+    if (genesInCommon.length > 0) {
+      if (genesInCommon.length > maxGenesInCommon) {
+        maxGenesInCommon = genesInCommon.length;
+      }
+      patient.setGenesInCommon(genesInCommon);
     }
+    if (genesInCommon.length < minGenesInCommon) {
+      minGenesInCommon = genesInCommon.length;
+    }
+    patient.setPhenotypesInCommon(phenInCommon);
   }
 
   rankedList = rankedList.slice(1); // Remove the target patient which should be at the top
@@ -93,7 +104,8 @@ async function createPatientMap(matrix) {
     }
     patient.setGenesList(newGeneList)
 
-    let patientHpoIds = patient.getHpoIdList()
+    let patientHpoIds = patient.getHpoIdList().map(id => id.trim().toUpperCase());
+    patient.setHpoIdList(patientHpoIds)
     let patientPhenList = []
     
     if (!patientHpoIds || patientHpoIds === "NONE") {
@@ -117,8 +129,35 @@ async function createPatientMap(matrix) {
         } else {
           //look it up on the hpoIdMap
           let phen = hpoIdMap[id]
-          if (phen && phen["name"] && phen["definition"] && phen["comment"] && phen["synonyms"]) {
-            let newPhenotype = new Phenotype(id, phen["name"], phen["definition"], phen["comment"] , phen["synonyms"]);
+          if (phen) {
+            let newPhenotype = new Phenotype(id);
+            try {
+              newPhenotype.setTerm(phen["name"]);
+            } catch (e) {
+              newPhenotype.setTerm("None");
+            }
+
+            try {
+              newPhenotype.setDefitition(phen["definition"]);
+            }
+            catch (e) {
+              newPhenotype.setDefitition("None");
+            }
+
+            try {
+              newPhenotype.setComment(phen["comment"]);
+            }
+            catch (e) {
+              newPhenotype.setComment("None");
+            }
+
+            try {
+              newPhenotype.setSynonyms(phen["synonyms"]);
+            }
+            catch (e) {
+              newPhenotype.setSynonyms("None");
+            }
+
             patientPhenList.push(newPhenotype);
           }
         }
