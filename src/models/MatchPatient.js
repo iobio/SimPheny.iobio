@@ -14,6 +14,7 @@ class MatchPatient {
 
         this.phenotypeList = []
         this.genesInCommon = []
+        this.phenotypesInCommon = []
     }
 
     getId() {
@@ -114,6 +115,12 @@ class MatchPatient {
     }
     setGenesInCommon(genesInCommon) {
         this.genesInCommon = genesInCommon;
+    }
+    getPhenotypesInCommon() {
+        return this.phenotypesInCommon;
+    }
+    setPhenotypesInCommon(phenotypesInCommon) {
+        this.phenotypesInCommon = phenotypesInCommon;
     }
 }
 export default MatchPatient;

@@ -17,19 +17,37 @@
                     <div class="column">
                         <h4>Match Summary</h4>
                         <p><b>ID:</b> {{ selectedMatch.id }}</p>
-                        <p><b>Rank:</b> {{ selectedMatch.rank }} <b>Score:</b> {{ Math.round(selectedMatch.similarityScore * 10000)/10000 }}</p>
+                        <p><b>Rank:</b> {{ selectedMatch.rank }}</p>
+                        <p><b>Score:</b> {{ Math.round(selectedMatch.similarityScore * 10000)/10000 }}</p>
                         <p><b>Dx Status:</b> {{ selectedMatch.dx }}</p>
-                        <p><b>Variants:</b> {{ selectedMatch.genesList.map(gene => gene.gene_symbol) }}</p>
                         <p><b>Clinical Dx:</b> {{ selectedMatch.clinicalDiagnosis }}</p>
                     </div>
                     <div class="column">
-                        <h4>Variants In Common</h4>
-                        <p v-if="selectedMatch.genesInCommon.length > 0">{{ selectedMatch.genesInCommon.map(gene => gene.gene_symbol) }}</p>
-                        <p v-if="selectedMatch.genesInCommon.length == 0">No variants in common</p>
+                        <h4>Phenotypes</h4>
+                        <p v-for="phenotype in selectedMatch.phenotypeList"> {{ phenotype.hpoId + " " + phenotype.term }}</p>
+                        <br>
+                        <p><b>Variants:</b>
+                            <ul>
+                                <li v-for="gene in selectedMatch.genesList">{{ gene.gene_symbol }}</li>
+                            </ul>
+                        </p>
                     </div>
                     <div class="column">
-                        <h4>Phenotypes</h4>
-                        <p v-for="phenotype in selectedMatch.phenotypeList"> {{ phenotype.hpoId }} {{ phenotype.term }}</p>
+                        <h4>Variants In Common</h4>
+                        <p v-if="selectedMatch.genesInCommon.length > 0">
+                            <ul>
+                                <li v-for="gene in selectedMatch.genesInCommon">{{ gene.gene_symbol }}</li>
+                            </ul>    
+                        </p>
+                        <p v-if="selectedMatch.genesInCommon.length == 0">No variants in common</p>
+                        <br>
+                        <h4>Phenotypes In Common</h4>
+                        <p v-if="selectedMatch.phenotypesInCommon.length > 0">
+                            <ul>
+                                <li v-for="phenotype in selectedMatch.phenotypesInCommon">{{ phenotype.hpoId + " " + phenotype.term }}</li>
+                            </ul>    
+                        </p>
+                        <p v-if="selectedMatch.phenotypesInCommon.length == 0">No phenotypes in common</p>
                     </div>
                 </div>
             </div>
