@@ -1,5 +1,16 @@
 <template>
     <div id="linear-chart-container">
+        <button @click="showChartOptions = !showChartOptions" id="chart-options-btn">
+            <v-icon color="white">mdi-dots-horizontal-circle-outline</v-icon>
+        </button>
+
+        <div id="chart-options-container" :class="{ hidden: showChartOptions === false}">
+                <h3>Chart Options</h3>
+                <p>Show/Hide Undiagnosed</p>
+                <p>Use Genes In Common</p>
+                <p>Filter By</p>
+        </div>
+
         <div ref="lin-chart-container" id="lin-chart-viz" @click="selectMatch" v-if="targetPatient"></div>
         <div v-else id="lin-chart-alt-text">
             <p>No target patient defined.</p>
@@ -29,6 +40,7 @@
                 linearChart: null,
                 resizeObserver: null,
                 showLoading: this.patientMap,
+                showChartOptions: false,
             }
         },
         mounted() {
@@ -120,6 +132,38 @@
         position: relative
 
         border-radius: 5px
+        #chart-options-btn
+            background-color: #21351f
+            position: absolute
+            top: 0px
+            right: -45px
+            border-radius: 50%
+            height: 35px
+            width: 35px
+            z-index: 2
+        #chart-options-btn:hover
+            box-shadow: 0px 2px 4px -1px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)), 0px 4px 5px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)), 0px 1px 10px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.12))
+        #chart-options-container
+            position: absolute
+            top: 0px
+            right: 0px
+            border-radius: 5px
+            display: flex
+            flex-direction: column
+            justify-content: space-evenly
+            align-items: center
+            border: 1px solid #D4DAD4
+            width: 55%
+            height: 100%
+            background-color: #F0F0F0
+            opacity: 0.9
+            transition: all .45s ease-in-out
+            *
+                overflow: hidden
+        #chart-options-container.hidden
+            height: 0px
+            width: 0px
+            border: 0px solid transparent
         #lin-chart-viz 
             height: 100%
             width: 100%

@@ -1,7 +1,7 @@
 <template>
     <div id="matches-container">
         <div class="upper matches">
-            <h1 class="section-head">Chart</h1>
+            <h1 class="section-head">Matches Chart</h1>
             <LinearChartViz
                 :targetPatient="targetPatient"
                 :patientMap="patientMap"
