@@ -40,7 +40,7 @@ h1.section-head {
     padding-bottom: 3px;
 }
 
-@media screen and (max-width: 799px), screen and (max-height: 749px) {
+@media screen and (max-width: 900px), screen and (max-height: 749px) {
     body {
         font-size: .85rem;
     }

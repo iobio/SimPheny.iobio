@@ -303,7 +303,8 @@
         border-radius: 3px;
     }
     .phenotype-span.left-bar.selected {
-        background-color: #9bb39a;
+        background-color: #6c7b6b;
+        color: white;
     }
     .gene-span.left-bar {
         width: 100%;
@@ -313,7 +314,8 @@
         border-radius: 3px;
     }
     .gene-span.left-bar.selected {
-        background-color: #9bb39a;
+        background-color: #6c7b6b;
+        color: white;
     }
     .section-container.left-bar {
         height: 100%;
