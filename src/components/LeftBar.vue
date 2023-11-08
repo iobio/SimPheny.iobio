@@ -20,8 +20,10 @@
                                     {{ phenotype.hpoId + " - " + phenotype.term }}
                                 </span>
                                 <span 
-                                    class="num-in-target" 
-                                        v-if="phenotypeAssociationsMap && phenotypeAssociationsMap[phenotype.hpoId].numInTarget > 0">
+                                    class="num-in-target"
+                                    @mouseenter="showAssociationsPeek($event, phenotypeAssociationsMap[phenotype.hpoId].uniqueGenes, 'genes')"
+                                    @mouseleave="showAssociationsPeek($event, [], 'none')" 
+                                    v-if="phenotypeAssociationsMap && phenotypeAssociationsMap[phenotype.hpoId].numInTarget > 0">
                                         {{ phenotypeAssociationsMap[phenotype.hpoId].numInTarget }}
                                 </span>
                             </div>
@@ -38,7 +40,9 @@
                                     {{ gene.gene_symbol }}
                                 </span>
                                 <span 
-                                    class="num-in-target" 
+                                    class="num-in-target"
+                                    @mouseenter="showAssociationsPeek($event, geneAssociationsMap[gene.gene_symbol].uniquePhenotypes, 'phenotypes')"
+                                    @mouseleave="showAssociationsPeek($event, [], 'none')" 
                                     v-if="geneAssociationsMap && geneAssociationsMap[gene.gene_symbol].numInTarget > 0">
                                     {{ geneAssociationsMap[gene.gene_symbol].numInTarget }}
                                 </span>
@@ -69,17 +73,16 @@
                     <div id="annotations-list-container">
                         <div v-if="hpoTab == 'phenToGene'" class="hpo-anno-header">
                                     <h3 v-if="selectedPhenotype"> Genes for {{ selectedPhenotype.term }}</h3>
-                                    <h4><span>Gene Name</span><span>Frequency</span><span>Disease Id</span></h4>
+                                    <h4><span>Gene Name</span><span>#Diseases</span></h4>
                         </div>
                         <div v-if="hpoTab == 'geneToPhen'" class="hpo-anno-header">
                                     <h3 v-if="selectedGene"> Phenotypes for {{ selectedGene.gene_symbol }}</h3>
-                                    <h4><span>HPO Id</span><span>Term</span><span>Disease Id</span></h4>
+                                    <h4><span>HPO Id</span><span>Term</span><span>#Diseases</span></h4>
                         </div>
                         <v-window v-model="hpoTab">
                             <v-window-item value="phenToGene">
                                 <div class="hpo-list-div" v-if="selectedPhenotypeGenes && targetPatient" v-for="gene in selectedPhenotypeGenes" :class="{ inTarget: checkGeneInPatient(gene) }">
                                     <span>{{ gene.gene_symbol }}</span>
-                                    <span>{{ gene.frequency }}</span>
                                     <span>{{ gene.disease_id }}</span>
                                 </div>
                             </v-window-item>
@@ -87,7 +90,6 @@
                                 <div class="hpo-list-div" v-if="selectedGenePhenotypes && targetPatient" v-for="phenotype in selectedGenePhenotypes" :class="{ inTarget: checkPhenotypeInPatient(phenotype) }">
                                     <span>{{ phenotype.term_id }}</span>
                                     <span>{{ phenotype.name }}</span>
-                                    <span>{{ phenotype.disease_id }}</span>
                                 </div>
                             </v-window-item>
                         </v-window>
@@ -106,6 +108,8 @@
                 <v-icon v-if="!showLeftBar" color="white">mdi-arrow-right-circle-outline</v-icon>
             </v-btn>
         </div>
+
+        <div id="associations-peek"></div>
     </div>
 </template>
 
@@ -203,6 +207,37 @@
                 }
                 return false;
             },
+            showAssociationsPeek(event, list, type) {
+                let peek = d3.select("#associations-peek");
+                //clear out peek
+                peek.selectAll("p").remove();
+
+                if (type == 'genes') {
+                    for (let i = 0; i < list.length; i++) {
+                        let gene = list[i];
+                        let p = peek.append("p");
+                        p.html(gene.gene_symbol);
+                    }
+                    peek.style("top", event.target.offsetTop + 120 + "px");
+                    peek.style("left", event.target.offsetLeft + 35 + "px");
+                    peek.style("display", "block");
+                    peek.style("min-width", "100px");
+                } else if (type == 'phenotypes') {
+                    
+                    for (let i = 0; i < list.length; i++) {
+                        let phenotype = list[i];
+                        let p = peek.append("p");
+                        p.html(phenotype.name);
+                    }
+                    peek.style("top", event.target.offsetTop + 120 + "px");
+                    peek.style("left", event.target.offsetLeft + 35 + "px");
+                    peek.style("display", "block");
+                    peek.style("min-width", "200px")
+                } else {
+                    //hide the tip
+                    peek.style("display", "none");
+                }
+            },
             async createAssociationsMaps(targetPatient) {
                 let phenotypeAssociations = {};
                 let geneAssociations = {};
@@ -213,9 +248,20 @@
                 let phenotypePromises = targetPatient.phenotypeList.map(phenotype => 
                     hpoDb.getGenesWithPhenotype(phenotype.hpoId).then(res => {
                         phenotypeAssociations[phenotype.hpoId] = { genes: res };
-                        phenotypeAssociations[phenotype.hpoId]['numInTarget'] = res.filter(gene => 
-                            geneSymbolList.includes(gene.gene_symbol)
-                        ).length;
+                        
+                        let seen = new Set();
+                        let uniqueGenes = [];
+                        let genesIn = res.filter(gene => {
+                            if (geneSymbolList.includes(gene.gene_symbol) && !seen.has(gene.gene_symbol)) {
+                                seen.add(gene.gene_symbol);
+                                uniqueGenes.push(gene);
+                                return true;
+                            }
+                            return false;
+                        });
+
+                        phenotypeAssociations[phenotype.hpoId]['numInTarget'] = genesIn.length;
+                        phenotypeAssociations[phenotype.hpoId]['uniqueGenes'] = [...uniqueGenes];
                     })
                     .catch(err => {
                         console.log("getGenesWithPhen Error", err);
@@ -225,9 +271,19 @@
                 let genePromises = targetPatient.genesList.map(gene =>
                     hpoDb.getPhenotypesWithGene(gene.gene_id).then(res => {
                         geneAssociations[gene.gene_symbol] = { phenotypes: res };
-                        geneAssociations[gene.gene_symbol]['numInTarget'] = res.filter(phenotype =>     
-                        phenotypeIdList.includes(phenotype.term_id)
-                        ).length;
+                        let seen = new Set();
+                        let uniquePhenotypes = [];
+                        let phenotypesIn = res.filter(phenotype => {
+                            if (phenotypeIdList.includes(phenotype.term_id) && !seen.has(phenotype.term_id)) {
+                                seen.add(phenotype.term_id);
+                                uniquePhenotypes.push(phenotype);
+                                return true;
+                            }
+                            return false;
+                        });
+
+                        geneAssociations[gene.gene_symbol]['numInTarget'] = phenotypesIn.length;
+                        geneAssociations[gene.gene_symbol]['uniquePhenotypes'] = [...uniquePhenotypes];
                     })
                     .catch(err => {
                         console.log("getPhenotypesWithGene Error", err);
@@ -288,6 +344,25 @@
         z-index: 2;
         transition: all .1s ease-in-out;
         cursor: pointer;
+        position: relative;
+    }
+    #associations-peek {
+        position: absolute;
+        display: none;
+        background-color: white;
+        color: #133910;
+        border: #133910 1px solid;
+        opacity: .9;
+        border-radius: 5px;        
+        padding: 10px 5px;
+        z-index: 2;
+    }
+    #associations-peek p {
+        border-bottom: #a7b9a6 1px solid;
+        text-align: center;
+    }
+    #associations-peek p:last-of-type {
+        border-bottom: none;
     }
     .list-item.left-bar .num-in-target:hover {
         background-color: #81977f;
