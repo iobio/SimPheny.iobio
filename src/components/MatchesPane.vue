@@ -15,22 +15,31 @@
                 <h1 class="section-head">Selected Match</h1>
                 <div v-if="selectedMatch" class="column-container">
                     <div class="column">
-                        <h4>Match Summary</h4>
-                        <p><b>ID:</b> {{ selectedMatch.id }}</p>
-                        <p><b>Rank:</b> {{ selectedMatch.rank }}</p>
-                        <p><b>Score:</b> {{ Math.round(selectedMatch.similarityScore * 10000)/10000 }}</p>
-                        <p><b>Dx Status:</b> {{ selectedMatch.dx }}</p>
-                        <p><b>Clinical Dx:</b> {{ selectedMatch.clinicalDiagnosis }}</p>
+                        <h4>Summary</h4>
+                        <div id="summary-container">
+                            <p><b>ID:</b> {{ selectedMatch.id }}</p>
+                            <p><b>Rank:</b> {{ selectedMatch.rank }}</p>
+                            <p><b>Score:</b> {{ Math.round(selectedMatch.similarityScore * 10000)/10000 }}</p>
+                            <p><b>Dx Status:</b> {{ selectedMatch.dx }}</p>
+                            <p><b>Clinical Dx:</b> {{ selectedMatch.clinicalDiagnosis }}</p>
+                        </div>
                     </div>
                     <div class="column">
-                        <h4>Phenotypes</h4>
-                        <p v-for="phenotype in selectedMatch.phenotypeList"> {{ phenotype.hpoId + " " + phenotype.term }}</p>
-                        <br>
-                        <p><b>Variants:</b>
-                            <ul>
-                                <li v-for="gene in selectedMatch.genesList">{{ gene.gene_symbol }}</li>
-                            </ul>
-                        </p>
+                        <div class="sub">
+                            <h4>Phenotypes</h4>
+                            <div>
+                                <p v-for="phenotype in selectedMatch.phenotypeList"> {{ phenotype.hpoId + " " + phenotype.term }}</p>
+                            </div>
+                        </div>
+
+                        <div class="sub">
+                            <h4>Variants:</h4>
+                            <div>
+                                <ul>
+                                    <li v-for="gene in selectedMatch.genesList">{{ gene.gene_symbol }}</li>
+                                </ul>                                 
+                            </div>
+                        </div>
                     </div>
                     <div class="column">
                         <h4>Variants In Common</h4>
@@ -143,23 +152,61 @@
 
     .lower.matches .column-container {
         width: 100%;
-        height: 90%;
+        height: 95%;
         display: flex;
         flex-direction: row;
         justify-content: space-evenly;
-        align-items: center;
+        align-items: start;
         overflow: hidden;
-        padding-bottom: 10px;
+        padding-bottom: 5px;
     }
     .lower.matches .column-container .column {
-        max-width: 31%;
-        height: 95%;
+        max-width: 33%;
+        height: 97%;
         overflow-y: auto;
     }
-    .lower.matches .column-container .column h4 {
-        margin-bottom: 10px;
+    .lower.matches .column-container .column:first-of-type {
+        max-width: 27%;
     }
-
+    .lower.matches .column-container .column h4 {
+        margin-bottom: 5px;
+        margin-top: 10px;
+        background-color: #e9ede9;
+        padding-left: 10px;
+        border-radius: 3px;
+    }
+    .column-container .column #summary-container {
+        padding-left: 10px;
+    }
+    .lower.matches .column-container .column .sub:first-of-type {
+        width: 100%;
+        height: 62%;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+    }
+    .lower.matches .column-container .column .sub:last-of-type {
+        width: 100%;
+        height: 38%;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+    }
+    .lower.matches .column-container .column .sub:first-of-type div {
+        width: 100%;
+        padding-left: 10px;
+        overflow: auto;
+    }
+    .lower.matches .column-container .column .sub:last-of-type div {
+        width: 100%;
+        padding-left: 10px;
+        overflow: auto;
+    }
+    .lower.matches .column-container .column .sub div ul li {
+        list-style-type: none;
+    }
     .button-container.matches {
         width: 100%;
         height: 35px;
