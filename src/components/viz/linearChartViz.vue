@@ -51,6 +51,7 @@
                 resizeObserver: null,
                 showLoading: this.patientMap,
                 showChartOptions: false,
+                chartScalesFiltered: this.chartScales,
                 filteredPatientMap: this.patientMap,
                 filterOptions: {
                     showUndiagnosed: true,
@@ -112,10 +113,10 @@
                     this.linearChart = LinearChart()
                     .setWidth(width)
                     .setSelectedMatch(this.selectedMatch)
-                    .setXMax(this.chartScales.xMin)
-                    .setXMin(this.chartScales.xMax)
-                    .setYMax(this.chartScales.yMax)
-                    .setYMin(this.chartScales.yMin);
+                    .setXMax(this.chartScalesFiltered.xMin)
+                    .setXMin(this.chartScalesFiltered.xMax)
+                    .setYMax(this.chartScalesFiltered.yMax)
+                    .setYMin(this.chartScalesFiltered.yMin);
 
                     this.linearChart(container, this.targetPatient, this.filteredPatientMap);
                 }
@@ -127,6 +128,8 @@
             },
             applyFilters() {
                 let filteredPatientMap = { ...this.patientMap };
+                let newMinSimilartyScore = this.chartScales.xMin
+                let minOfPatients = 1;
 
                 for (let patientId in this.patientMap) {
                     if (!this.filterOptions.showUndiagnosed){
@@ -149,9 +152,19 @@
                             continue;
                         }
                     }
+                    //if we get here then the patient passed all the filters so we need to update the min similarity score
+                    if (this.patientMap[patientId].similarityScore && (parseFloat(this.patientMap[patientId].similarityScore) < minOfPatients)) {
+                        minOfPatients = parseFloat(this.patientMap[patientId].similarityScore);
+                    }
                 }
 
+                if (minOfPatients < 1) {
+                    this.chartScalesFiltered.xMin = minOfPatients;
+                } else {
+                    this.chartScalesFiltered.xMin = newMinSimilartyScore;
+                }
                 this.filteredPatientMap = filteredPatientMap;
+
                 this.drawChart();
                 this.showChartOptions = false;
             },
@@ -174,6 +187,15 @@
                         this.applyFilters();
                         this.showLoading = false;
                     } 
+                },
+                deep: true
+            },
+            chartScales: {
+                handler: function(newVal, oldVal) {
+                    if (this.chartScales) {
+                        this.chartScalesFiltered = this.chartScales;
+                        this.drawChart();
+                    }
                 },
                 deep: true
             }
