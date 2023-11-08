@@ -6,9 +6,19 @@
 
         <div id="chart-options-container" :class="{ hidden: showChartOptions === false}">
                 <h3>Chart Options</h3>
-                <p>Show/Hide Undiagnosed</p>
-                <p>Use Genes In Common</p>
-                <p>Filter By</p>
+                <p>Show Undiagnosed <input v-model="filterOptions.showUndiagnosed" type="checkbox" name="" id=""></p>
+                <p>Use Genes In Common <input v-model="filterOptions.useGenesInCommon" type="checkbox" name="" id=""></p>
+                <p>Filter By:
+                        <br>
+                        <input @click="selectFilter('rank')" type="radio" value="rank" name="filterBy">
+                        <label for="rank">Rank</label>
+                        <input @click="selectFilter('score')" type="radio" value="score" name="filterBy">
+                        <label for="score">Score</label> 
+                        <br>
+                        <span v-if="filterOptions.filterByRank">Max Rank: </span><input v-if="filterOptions.filterByRank" v-model="filterOptions.rankCutOff" type="number" name="" id="rank-filter">
+                        <span v-if="filterOptions.filterByScore">Min Score: </span><input v-if="filterOptions.filterByScore" v-model="filterOptions.scoreCutOff" type="number" name="" id="score-filter">
+                </p>
+                <button @click="applyFilters()">Apply</button>
         </div>
 
         <div ref="lin-chart-container" id="lin-chart-viz" @click="selectMatch" v-if="targetPatient"></div>
@@ -41,6 +51,15 @@
                 resizeObserver: null,
                 showLoading: this.patientMap,
                 showChartOptions: false,
+                filteredPatientMap: this.patientMap,
+                filterOptions: {
+                    showUndiagnosed: true,
+                    useGenesInCommon: true,
+                    filterByRank: false,
+                    filterByScore: false,
+                    rankCutOff: 0,
+                    scoreCutOff: 0,
+                }
             }
         },
         mounted() {
@@ -98,22 +117,65 @@
                     .setYMax(this.chartScales.yMax)
                     .setYMin(this.chartScales.yMin);
 
-                    this.linearChart(container, this.targetPatient, this.patientMap);
+                    this.linearChart(container, this.targetPatient, this.filteredPatientMap);
                 }
             },
             selectMatch() {
                 //get the data from the point with the selected-match class
                 let selectedMatch = d3.select('.selected-match').data()[0];
                 this.$emit('selectMatch', selectedMatch);
+            },
+            applyFilters() {
+                let filteredPatientMap = { ...this.patientMap };
+
+                for (let patientId in this.patientMap) {
+                    if (!this.filterOptions.showUndiagnosed){
+                        if (this.patientMap[patientId].dx === 'undiagnosed') {
+                            delete filteredPatientMap[patientId];
+                            continue;
+                        }
+                    }
+                    if (this.filterOptions.filterByRank){
+                        let maxRank = this.filterOptions.rankCutOff;
+                        if (this.patientMap[patientId].rank && (parseInt(this.patientMap[patientId].rank) > maxRank)) {
+                            delete filteredPatientMap[patientId];
+                            continue;
+                        }
+                    }
+                    if (this.filterOptions.filterByScore){
+                        let minScore = this.filterOptions.scoreCutOff;
+                        if (this.patientMap[patientId].similarityScore && (parseFloat(this.patientMap[patientId].similarityScore) < minScore)) {
+                            delete filteredPatientMap[patientId];
+                            continue;
+                        }
+                    }
+                }
+
+                this.filteredPatientMap = filteredPatientMap;
+                this.drawChart();
+                this.showChartOptions = false;
+            },
+            selectFilter(filter) {
+                if (filter == 'rank') {
+                    this.filterOptions.filterByRank = true;
+                    this.filterOptions.filterByScore = false;
+                } else if (filter == 'score') {
+                    this.filterOptions.filterByRank = false;
+                    this.filterOptions.filterByScore = true;
+                }
             }
         },
         watch: {
-            patientMap: function(newVal, oldVal) {
-                if (newVal != null) {
-                    this.showLoading = false;
-                } else if (newVal == null || newVal == undefined) {
-                    this.showLoading = true;
-                }
+            patientMap: {
+                handler: function(newVal, oldVal) {
+                    if (!this.patientMap && (newVal == null || newVal == undefined)) {
+                        this.showLoading = true;
+                    } else if (this.patientMap) {
+                        this.applyFilters();
+                        this.showLoading = false;
+                    } 
+                },
+                deep: true
             }
         }
     }
@@ -160,10 +222,27 @@
             transition: all .45s ease-in-out
             *
                 overflow: hidden
+            #rank-filter, #score-filter
+                width: 50%
+                border: 1px solid #D4DAD4
+                border-radius: 5px
+                text-align: center
+            button
+                background-color: #21351f
+                color: white
+                border: none
+                border-radius: 5px
+                padding: 5px
+                width: 30%
+                &:hover
+                    cursor: pointer
+                    background-color: #1a2e1a
         #chart-options-container.hidden
             height: 0px
             width: 0px
             border: 0px solid transparent
+            button
+                display: none
         #lin-chart-viz 
             height: 100%
             width: 100%
