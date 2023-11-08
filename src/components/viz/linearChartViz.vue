@@ -6,18 +6,42 @@
 
         <div id="chart-options-container" :class="{ hidden: showChartOptions === false}">
                 <h3>Chart Options</h3>
-                <p>Show Undiagnosed <input v-model="filterOptions.showUndiagnosed" type="checkbox" name="" id=""></p>
-                <p>Use Genes In Common <input v-model="filterOptions.useGenesInCommon" type="checkbox" name="" id=""></p>
-                <p>Filter By:
-                        <br>
-                        <input @click="selectFilter('rank')" type="radio" value="rank" name="filterBy">
-                        <label for="rank">Rank</label>
-                        <input @click="selectFilter('score')" type="radio" value="score" name="filterBy">
-                        <label for="score">Score</label> 
-                        <br>
-                        <span v-if="filterOptions.filterByRank">Max Rank: </span><input v-if="filterOptions.filterByRank" v-model="filterOptions.rankCutOff" type="number" name="" id="rank-filter">
-                        <span v-if="filterOptions.filterByScore">Min Score: </span><input v-if="filterOptions.filterByScore" v-model="filterOptions.scoreCutOff" type="number" name="" id="score-filter">
-                </p>
+
+                <div id="options-content">
+                    <div class="group">
+                        <p>Show Undiagnosed</p>
+                        <input v-model="filterOptions.showUndiagnosed" type="checkbox" name="" id="">
+                    </div>
+
+                    <div class="group"> 
+                        <p>Use Genes In Common</p>
+                        <input v-model="filterOptions.useGenesInCommon" type="checkbox" name="" id="" disabled="true">
+                    </div>
+
+                    
+                    <div  class="group" id="filter-by-radios">
+                        <p>Filter By:</p>
+                        <div>
+                            <input @click="selectFilter('rank')" type="radio" value="rank" name="filterBy">
+                            <label for="rank">Rank</label>
+                        </div>
+                        <div>
+                            <input @click="selectFilter('score')" type="radio" value="score" name="filterBy">
+                            <label for="score">Score</label>  
+                        </div>                 
+                    </div>   
+
+                    <div class="filter-num-input group">
+                        <p>Max Rank: </p>
+                        <input v-model="filterOptions.rankCutOff" type="number" name="" id="rank-filter" :disabled="!filterOptions.filterByRank">
+                    </div>
+
+                    <div class="filter-num-input group">
+                        <p>Min Score: </p>
+                        <input v-model="filterOptions.scoreCutOff" type="number" name="" id="score-filter" :disabled="!filterOptions.filterByScore">
+                    </div>
+                </div>
+
                 <button @click="applyFilters()">Apply</button>
         </div>
 
@@ -189,7 +213,7 @@
                     this.filterOptions.filterByRank = false;
                     this.filterOptions.filterByScore = true;
                 }
-            }
+            },
         },
         watch: {
             patientMap: {
@@ -242,8 +266,8 @@
             box-shadow: 0px 2px 4px -1px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)), 0px 4px 5px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)), 0px 1px 10px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.12))
         #chart-options-container
             position: absolute
-            top: 0px
-            right: 0px
+            top: 2px
+            right: -7px
             border-radius: 5px
             display: flex
             flex-direction: column
@@ -251,10 +275,46 @@
             align-items: center
             border: 1px solid #D4DAD4
             width: 55%
-            height: 100%
-            background-color: #F0F0F0
-            opacity: 0.9
+            max-width: 500px
+            height: 98%
+            background-color: white
+            opacity: 0.96
             transition: all .45s ease-in-out
+            box-shadow: 0px 2px 4px -1px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)), 0px 4px 5px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)), 0px 1px 10px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.12))
+            #options-content
+                display: flex
+                flex-direction: column
+                justify-content: space-between
+                align-items: center
+                text-align: center
+                width: 70%
+                .group
+                    width: 100%
+                    display: flex
+                    flex-direction: column
+                    justify-content: center
+                    border: 1px solid #D4DAD4
+                    border-radius: 5px
+                    margin-top: 5px
+                    margin-bottom: 5px
+                    padding: 5px
+                .filter-num-input
+                    display: flex
+                    flex-direction: column
+                    justify-content: center
+                    align-items: center
+                #filter-by-radios
+                    div
+                        width: 100%
+                        display: flex
+                        flex-direction: row
+                        justify-content: center
+                input
+                    margin-right: 5px
+                    cursor: pointer
+                input:disabled
+                    cursor: not-allowed
+                    text-decoration: line-through
             *
                 overflow: hidden
             #rank-filter, #score-filter
