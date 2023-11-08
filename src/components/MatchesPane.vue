@@ -15,14 +15,22 @@
                 <h1 class="section-head">Selected Match</h1>
                 <div v-if="selectedMatch" class="column-container">
                     <div class="column">
-                        <h4>Summary</h4>
-                        <div id="summary-container">
-                            <p><b>ID:</b> {{ selectedMatch.id }}</p>
-                            <p><b>Rank:</b> {{ selectedMatch.rank }}</p>
-                            <p><b>Score:</b> {{ Math.round(selectedMatch.similarityScore * 10000)/10000 }}</p>
-                            <p><b>Dx Status:</b> {{ selectedMatch.dx }}</p>
-                            <p><b>Clinical Dx:</b> {{ selectedMatch.clinicalDiagnosis }}</p>
+                        <h3>In Common with Target</h3>
+                        <h4>Variants In Common</h4>
+                        <div class="in-common-container" v-if="selectedMatch.genesInCommon.length > 0">
+                            <ul>
+                                <li v-for="gene in selectedMatch.genesInCommon">{{ gene.gene_symbol }}</li>
+                            </ul>    
                         </div>
+                        <div class="in-common-container" v-if="selectedMatch.genesInCommon.length == 0">No variants in common</div>
+                        <br>
+                        <h4>Phenotypes In Common</h4>
+                        <div class="in-common-container" v-if="selectedMatch.phenotypesInCommon.length > 0">
+                            <ul>
+                                <li v-for="phenotype in selectedMatch.phenotypesInCommon">{{ phenotype.hpoId + " " + phenotype.term }}</li>
+                            </ul>    
+                        </div>
+                        <p v-if="selectedMatch.phenotypesInCommon.length == 0">No phenotypes in common</p>
                     </div>
                     <div class="column">
                         <div class="sub">
@@ -42,21 +50,14 @@
                         </div>
                     </div>
                     <div class="column">
-                        <h4>Variants In Common</h4>
-                        <p v-if="selectedMatch.genesInCommon.length > 0">
-                            <ul>
-                                <li v-for="gene in selectedMatch.genesInCommon">{{ gene.gene_symbol }}</li>
-                            </ul>    
-                        </p>
-                        <p v-if="selectedMatch.genesInCommon.length == 0">No variants in common</p>
-                        <br>
-                        <h4>Phenotypes In Common</h4>
-                        <p v-if="selectedMatch.phenotypesInCommon.length > 0">
-                            <ul>
-                                <li v-for="phenotype in selectedMatch.phenotypesInCommon">{{ phenotype.hpoId + " " + phenotype.term }}</li>
-                            </ul>    
-                        </p>
-                        <p v-if="selectedMatch.phenotypesInCommon.length == 0">No phenotypes in common</p>
+                        <h4>Summary</h4>
+                        <div id="summary-container">
+                            <p><b>ID:</b> {{ selectedMatch.id }}</p>
+                            <p><b>Rank:</b> {{ selectedMatch.rank }}</p>
+                            <p><b>Score:</b> {{ Math.round(selectedMatch.similarityScore * 10000)/10000 }}</p>
+                            <p><b>Dx Status:</b> {{ selectedMatch.dx }}</p>
+                            <p><b>Clinical Dx:</b> {{ selectedMatch.clinicalDiagnosis }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -161,12 +162,18 @@
         padding-bottom: 5px;
     }
     .lower.matches .column-container .column {
-        max-width: 33%;
+        max-width: 34%;
         height: 97%;
-        overflow-y: auto;
+    }
+    .lower.matches .column-container .column:last-of-type {
+        max-width: 26%;
     }
     .lower.matches .column-container .column:first-of-type {
-        max-width: 27%;
+        border-right: #21351f 1px solid;
+        padding-right: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
     }
     .lower.matches .column-container .column h4 {
         margin-bottom: 5px;
@@ -175,12 +182,20 @@
         padding-left: 10px;
         border-radius: 3px;
     }
+    .lower.matches .column-container .column .in-common-container {
+        padding-left: 10px;
+        overflow-y: auto;
+    }
+    .lower.matches .column-container .column h3 {
+        width: 100%;
+        text-align: center;
+    }
     .column-container .column #summary-container {
         padding-left: 10px;
     }
     .lower.matches .column-container .column .sub:first-of-type {
         width: 100%;
-        height: 62%;
+        height: 60%;
         overflow: hidden;
         display: flex;
         flex-direction: column;
@@ -188,7 +203,7 @@
     }
     .lower.matches .column-container .column .sub:last-of-type {
         width: 100%;
-        height: 38%;
+        height: 31%;
         overflow: hidden;
         display: flex;
         flex-direction: column;
@@ -204,7 +219,7 @@
         padding-left: 10px;
         overflow: auto;
     }
-    .lower.matches .column-container .column .sub div ul li {
+    .lower.matches .column-container .column li {
         list-style-type: none;
     }
     .button-container.matches {
