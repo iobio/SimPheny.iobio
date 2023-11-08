@@ -129,7 +129,9 @@
             applyFilters() {
                 let filteredPatientMap = { ...this.patientMap };
                 let newMinSimilartyScore = this.chartScales.xMin
+                let newMaxSimilartyScore = this.chartScales.xMax
                 let minOfPatients = 1;
+                let maxOfPatients = 0;
 
                 for (let patientId in this.patientMap) {
                     if (!this.filterOptions.showUndiagnosed){
@@ -156,6 +158,10 @@
                     if (this.patientMap[patientId].similarityScore && (parseFloat(this.patientMap[patientId].similarityScore) < minOfPatients)) {
                         minOfPatients = parseFloat(this.patientMap[patientId].similarityScore);
                     }
+                    //update max
+                    if (this.patientMap[patientId].similarityScore && (parseFloat(this.patientMap[patientId].similarityScore) > maxOfPatients)) {
+                        maxOfPatients = parseFloat(this.patientMap[patientId].similarityScore);
+                    }
                 }
 
                 if (minOfPatients < 1) {
@@ -163,6 +169,13 @@
                 } else {
                     this.chartScalesFiltered.xMin = newMinSimilartyScore;
                 }
+
+                if (maxOfPatients > 0) {
+                    this.chartScalesFiltered.xMax = maxOfPatients;
+                } else {
+                    this.chartScalesFiltered.xMax = newMaxSimilartyScore;
+                }
+
                 this.filteredPatientMap = filteredPatientMap;
 
                 this.drawChart();
