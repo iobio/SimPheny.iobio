@@ -49,14 +49,14 @@ export default function LinearChart() {
         // Create the y scale.
         const y = d3.scaleLinear()
             .domain([yMin, yMax])
-            .range([height - marginBottom, marginTop]);
+            .range([(height - marginBottom) - (.25*(height - marginBottom)/2), marginTop + (.25*(height - marginBottom)/2)]);
 
         let tickValues = d3.range(yMin, yMax + 1);
 
         // Create the y axis.
         const yAxis = g => g
             .attr("transform", `translate(${marginLeft},0)`)
-            .call(d3.axisLeft(y).tickValues(tickValues))
+            .call(d3.axisLeft(y).tickValues(tickValues).tickFormat(d3.format("d")))
             .call(g => g.select(".domain").remove());
 
         // Add the y axis to the svg.
@@ -81,7 +81,7 @@ export default function LinearChart() {
             .append("path")
                 .attr("d", d => `
                     M ${marginLeft},${marginTop}
-                    L ${marginLeft},${height - marginBottom}
+                    L ${marginLeft},${(height - marginBottom)}
                 `)
                 .attr("stroke", "black")
                 .attr("stroke-width", 1)
