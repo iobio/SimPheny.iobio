@@ -188,6 +188,11 @@
     .lower.matches .column-container .column h3 {
         width: 100%;
         text-align: center;
+        background-color: #778475;
+        color: white;
+        border-radius: 3px;
+        padding-top: 5px;
+        padding-bottom: 5px;
     }
     .column-container .column #summary-container {
         padding-left: 10px;
