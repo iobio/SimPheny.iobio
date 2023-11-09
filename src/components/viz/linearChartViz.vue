@@ -73,7 +73,7 @@
             return {
                 linearChart: null,
                 resizeObserver: null,
-                showLoading: this.patientMap,
+                showLoading: true,
                 showChartOptions: false,
                 chartScalesFiltered: this.chartScales,
                 filteredPatientMap: this.patientMap,
@@ -218,9 +218,9 @@
         watch: {
             patientMap: {
                 handler: function(newVal, oldVal) {
-                    if (!this.patientMap && (newVal == null || newVal == undefined)) {
+                    if (newVal == null) {
                         this.showLoading = true;
-                    } else if (this.patientMap) {
+                    } else {
                         this.applyFilters();
                         this.showLoading = false;
                     } 

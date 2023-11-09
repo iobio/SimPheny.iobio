@@ -101,6 +101,7 @@
             } else if (!this.selectedMatch) {
                 this.showDetailsBar = false;
             }
+            // this.$emit('selectMatch', match);
         }
     },
   }
