@@ -1,6 +1,6 @@
 <template>
     <div class="section-container left-bar">
-        <div id="left-bar-container" :class="{ expanded: showLeftBar, collapsed: !showLeftBar}">
+        <div v-if="this.targetPtProp" id="left-bar-container" :class="{ expanded: showLeftBar, collapsed: !showLeftBar}">
             <div class="tab-container left-bar" :class="{ expanded: !showHpoDrawer, shortened: showHpoDrawer}">
                 <h1 class="section-head">Patient Information</h1>
                 <v-tabs v-model="tab" fixed-tabs height="30px">
@@ -11,11 +11,11 @@
                 <div id="tab-content-container" class="left-bar">
                     <v-window v-model="tab">
                         <v-window-item value="phenotypes">
-                            <div class="list-item left-bar" v-if="targetPatient" v-for="phenotype in targetPatient.getPhenotypeList()">
-                                <input type="checkbox" v-model="phenotype.relevant"> 
+                            <div class="list-item left-bar" v-if="targetPatient" v-for="phenotype in targetPatient.phenotypeList" :key="phenotype.hpoId">
+                                <input v-if="targetPhenotypes" @change="patientInfoChanged()" type="checkbox" v-model="targetPhenotypes[phenotype.hpoId].relevant"> 
                                 <span 
                                     @click="getGenesForPhenotype(phenotype)" 
-                                    :class="{ selected: selectedPhenotype && selectedPhenotype.hpoId == phenotype.hpoId }" 
+                                    :class="{ selected: selectedPhenotype && selectedPhenotype.hpoId == phenotype.hpoId, dontUse: targetPhenotypes[phenotype.hpoId].relevant == false}" 
                                     class="phenotype-span left-bar">
                                     {{ phenotype.hpoId + " - " + phenotype.term }}
                                 </span>
@@ -31,11 +31,11 @@
 
                         <v-window-item value="variants">
                             <p v-if="!targetPatient || (targetPatient.getGenesList() == null || targetPatient.getGenesList().length == 0)">No variants to display for current patient.</p>
-                            <div class="list-item left-bar" v-else="targetPatient && targetPatient.getGenesList()" v-for="gene in targetPatient.getGenesList()">
-                                <input type="checkbox" v-model="gene.relevant">
+                            <div class="list-item left-bar" v-else="targetPatient && targetPatient.getGenesList()" v-for="gene in targetPatient.genesList">
+                                <input v-if="targetGenes" @change="patientInfoChanged()" type="checkbox" v-model="targetGenes[gene.gene_symbol].relevant">
                                 <span 
                                     @click="getPhenotypesForGene(gene)"
-                                    :class="{ selected: selectedGene && selectedGene.gene_id == gene.gene_id }"  
+                                    :class="{ selected: selectedGene && selectedGene.gene_id == gene.gene_id, dontUse: targetGenes[gene.gene_symbol].relevant == false}"  
                                     class="gene-span left-bar">
                                     {{ gene.gene_symbol }}
                                 </span>
@@ -111,17 +111,26 @@
         </div>
 
         <div id="associations-peek"></div>
+
+        <div id="reload-revert-container" :class="{ hidden: !showReloadRevert}">
+            <p>Reload with new criteria?</p>
+            <div class="buttons">
+                <button @click="submitInfoChanged('reload')">Reload <v-icon>mdi-reload-alert</v-icon></button>
+                <button @click="submitInfoChanged('revert')">Revert <v-icon>mdi-arrow-u-left-top</v-icon></button>
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
-    import * as hpoDb from '../data/grabData.js'
+    import { VueElement } from 'vue';
+import * as hpoDb from '../data/grabData.js'
     import * as d3 from 'd3';
 
     export default {
         name: 'LeftBar',
         props: {
-            targetPatient: Object,
+            targetPtProp: Object,
         },
         data: function() {
             return {
@@ -136,25 +145,68 @@
                 selectedGenePhenotypes: [],
                 phenotypeAssociationsMap: null,
                 geneAssociationsMap: null,
-            }
-        },
-        mounted: function(){
-            if (this.targetPatient && this.targetPatient.genesList.length > 0 && this.targetPatient.phenotypeList.length > 0) {
-                this.createAssociationsMaps(this.targetPatient).then(res => {
-                    this.phenotypeAssociationsMap = res[0];
-                    this.geneAssociationsMap = res[1];
-                });
-            }
-        },
-        updated: function() {
-            if (this.targetPatient && this.targetPatient.genesList.length > 0 && this.targetPatient.phenotypeList.length > 0) {
-                this.createAssociationsMaps(this.targetPatient).then(res => {
-                    this.phenotypeAssociationsMap = res[0];
-                    this.geneAssociationsMap = res[1];
-                });
+                targetPatient: this.targetPtProp,
+                showReloadRevert: false,
+                targetPhenotypes: {},
+                targetGenes: {},
             }
         },
         methods: {
+            setTargetPhenotypes(phenList){
+                let copyPhenotypes = {};
+                for (let phen of phenList){
+                    copyPhenotypes[phen.hpoId] = { relevant: phen.relevant };
+                }
+                this.targetPhenotypes = copyPhenotypes;
+            },
+            setTargetGenes(geneList){
+                let copyGenes = {};
+                for (let gene of geneList){
+                    copyGenes[gene.gene_symbol] = { relevant: gene.relevant };
+                }
+                this.targetGenes = copyGenes;
+            },
+            patientInfoChanged() {
+                if (!this.showReloadRevert) {
+                    this.showReloadRevert = true;
+                }
+            },
+            submitInfoChanged(action) {
+                if (action == 'revert') {
+                    this.showReloadRevert = false;
+                    this.targetPatient = this.targetPtProp;
+                    this.setTargetPhenotypes(this.targetPatient.phenotypeList);
+                    this.setTargetGenes(this.targetPatient.genesList);
+                } else {
+                    let newGenesList = [];
+                    for (let gene of this.targetPatient.genesList) {
+                        if (this.targetGenes[gene.gene_symbol].relevant) {
+                            gene.relevant = true;
+                            newGenesList.push(gene);
+                        } else {
+                            gene.relevant = false;
+                            newGenesList.push(gene);
+                        }
+                        this.targetPatient.genesList = newGenesList;
+                    }
+                    let newPhenList = [];
+                    for (let phen of this.targetPatient.phenotypeList) {
+                        if (this.targetPhenotypes[phen.hpoId].relevant) {
+                            phen.relevant = true;
+                            newPhenList.push(phen);
+                        } else {
+                            phen.relevant = false;
+                            newPhenList.push(phen);
+                        }
+                        this.targetPatient.phenotypeList = newPhenList;
+                    }
+
+                    // this.setTargetPhenotypes(this.targetPatient.phenotypeList);
+                    // this.setTargetGenes(this.targetPatient.genesList)
+                    this.showReloadRevert = false;
+                    this.$emit('patientInfoChanged', this.targetPatient);
+                }
+            },
             async getGenesForPhenotype(phenotype){
                 if (this.selectedPhenotype == phenotype) {
                     this.selectedPhenotype = null;
@@ -336,17 +388,19 @@
             }
         },
         watch: {
-            selectedPhenotype: function(newVal, oldVal) {
-
-            },
-            targetPatient: {
-                handler(newVal, oldVal) {
-                if (newVal && newVal.genesList.length > 0 && newVal.phenotypeList.length > 0) {
-                    this.createAssociationsMaps(newVal).then(res => {
-                        this.phenotypeAssociationsMap = res[0];
-                        this.geneAssociationsMap = res[1];
-                    });
-                }
+            targetPtProp: {
+                handler(newVal) {
+                    if (newVal) {
+                        this.targetPatient = this.targetPtProp;
+                        this.setTargetPhenotypes(this.targetPatient.phenotypeList);
+                        this.setTargetGenes(this.targetPatient.genesList);
+                    }
+                    if (newVal && newVal.genesList.length > 0 && newVal.phenotypeList.length > 0) {
+                        this.createAssociationsMaps(this.targetPatient).then(res => {
+                            this.phenotypeAssociationsMap = res[0];
+                            this.geneAssociationsMap = res[1];
+                        });
+                    }
             }, deep: true
         }
         }
@@ -420,6 +474,10 @@
         background-color: #6c7b6b;
         color: white;
     }
+    .phenotype-span.left-bar.dontUse {
+        text-decoration: line-through;
+        color: #4d5a4f;
+    }
     .gene-span.left-bar {
         width: 100%;
         padding: 2px 5px;
@@ -430,6 +488,10 @@
     .gene-span.left-bar.selected {
         background-color: #6c7b6b;
         color: white;
+    }
+    .gene-span.left-bar.dontUse {
+        text-decoration: line-through;
+        color: #4d5a4f;
     }
     .section-container.left-bar {
         height: 100%;
@@ -670,4 +732,54 @@
         top: -52px;
         left: 10px;
     }
+</style>
+
+<style lang="sass">
+    #reload-revert-container
+        width: 70%
+        min-height: 100px
+        padding: 10px
+        border-radius: 5px
+        background-color: #21351f
+        position: absolute
+        display: flex
+        flex-direction: column
+        justify-content: space-evenly
+        align-items: center
+        bottom: 50vh
+        right: -71%
+        z-index: 3
+        box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75)
+        transition: all 0.5s ease
+        &.hidden
+            opacity: 0
+            visibility: hidden
+            bottom: 0%
+        p
+            color: white
+            width: 100%
+            text-align: center
+            text-transform: capitalize
+        .buttons
+            width: 100%
+            display: flex
+            flex-direction: row
+            justify-content: space-around
+            font-size: small
+            button
+                padding: 5px 10px
+                border-radius: 5px
+                border: 1px solid white
+            button:first-of-type
+                background-color: red
+                color: white
+            button:first-of-type:hover
+                background-color: #FF5C5C
+                cursor: pointer
+            button:nth-of-type(2)
+                background-color: #448849
+                color: white
+            button:nth-of-type(2):hover
+                background-color: #85C189
+                cursor: pointer
 </style>

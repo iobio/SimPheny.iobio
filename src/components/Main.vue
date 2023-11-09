@@ -1,3 +1,23 @@
+<template>
+    <NavBar
+        :udnPatientIdsList="udnPatientIds"
+        :showPtSelectOverlay="showPtSelectOverlay"
+        :targetPatient="targetPatient"
+        @set-target-patient="setPatientAndGetMatches"></NavBar>
+
+    <div id="main-content-container">
+        <LeftBar
+            :targetPtProp="targetPatient"
+            @patientInfoChanged="reloadMatches"></LeftBar>
+            
+        <MatchesPane
+            :targetPatient="targetPatient"
+            :patientMap="patientMap"
+            :chartScales="chartScales"></MatchesPane>
+
+    </div>
+</template>
+
 <script>
     import NavBar from './NavBar.vue'
     import LeftBar from './LeftBar.vue'
@@ -53,36 +73,20 @@
                 this.targetPatient.setFromPatientObject(patient);
                 this.showPtSelectOverlay = false;
                 await this.getMatches();
+            },
+            async reloadMatches(updatedPatient) {
+                this.targetPatient = updatedPatient;
             }
         },
     }
 </script>
 
-<template>
-    <NavBar
-        :udnPatientIdsList="udnPatientIds"
-        :showPtSelectOverlay="showPtSelectOverlay"
-        :targetPatient="targetPatient"
-        @set-target-patient="setPatientAndGetMatches"></NavBar>
-
-    <div id="main-content-container">
-        <LeftBar
-            :targetPatient="targetPatient"></LeftBar>
-            
-        <MatchesPane
-            :targetPatient="targetPatient"
-            :patientMap="patientMap"
-            :chartScales="chartScales"></MatchesPane>
-    </div>
-</template>
-
-<style>
-    #main-content-container {
-        height: 100%;
-        width: 100%;
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-start;
-        align-items: flex-start;
-    }
+<style lang="sass">
+    #main-content-container 
+        height: 100%
+        width: 100%
+        display: flex
+        flex-direction: row
+        justify-content: flex-start
+        align-items: flex-start
 </style>
