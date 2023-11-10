@@ -15,14 +15,16 @@
                 <h1 class="section-head">Selected Match</h1>
                 <div v-if="selectedMatch" class="column-container">
                     <div class="column">
-                        <h4>Genes In Common</h4>
-                        <div class="in-common-container" v-if="selectedMatch.genesInCommon.length > 0">
-                            <ul>
-                                <li v-for="gene in selectedMatch.genesInCommon">{{ gene.gene_symbol }}</li>
-                            </ul>    
+                        <h4>Summary</h4>
+                        <div id="summary-container">
+                            <p><b>ID:</b> {{ selectedMatch.id }}</p>
+                            <p><b>Rank:</b> {{ selectedMatch.rank }}</p>
+                            <p><b>Score:</b> {{ Math.round(selectedMatch.similarityScore * 10000)/10000 }}</p>
+                            <p><b>Dx Status:</b> {{ selectedMatch.dx }}</p>
+                            <p><b>Clinical Dx:</b> {{ selectedMatch.clinicalDiagnosis }}</p>
                         </div>
-                        <div class="in-common-container" v-if="selectedMatch.genesInCommon.length == 0">No genes in common</div>
                     </div>
+
                     <div class="column">
                         <div class="sub">
                             <h4>Phenotypes</h4>
@@ -39,16 +41,6 @@
                                     <li v-for="gene in selectedMatch.genesList">{{ gene.gene_symbol }}</li>
                                 </ul>                                 
                             </div>
-                        </div>
-                    </div>
-                    <div class="column">
-                        <h4>Summary</h4>
-                        <div id="summary-container">
-                            <p><b>ID:</b> {{ selectedMatch.id }}</p>
-                            <p><b>Rank:</b> {{ selectedMatch.rank }}</p>
-                            <p><b>Score:</b> {{ Math.round(selectedMatch.similarityScore * 10000)/10000 }}</p>
-                            <p><b>Dx Status:</b> {{ selectedMatch.dx }}</p>
-                            <p><b>Clinical Dx:</b> {{ selectedMatch.clinicalDiagnosis }}</p>
                         </div>
                     </div>
                 </div>
@@ -95,7 +87,6 @@
             } else if (!this.selectedMatch) {
                 this.showDetailsBar = false;
             }
-            console.log(this.targetPatient)
             // this.$emit('selectMatch', match);
         },
     },
@@ -168,20 +159,13 @@
         padding-bottom: 5px;
     }
     .lower.matches .column-container .column {
-        max-width: 34%;
-        min-width: 29%;
+        max-width: 55%;
+        min-width: 45%;
         height: 97%;
     }
-    .lower.matches .column-container .column:last-of-type {
+    .lower.matches .column-container .column:first-of-type {
         max-width: 26%;
         min-width: 20%;
-    }
-    .lower.matches .column-container .column:first-of-type {
-        border-right: #21351f 1px solid;
-        padding-right: 20px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-evenly;
     }
     .lower.matches .column-container .column h4 {
         margin-bottom: 5px;
@@ -189,10 +173,6 @@
         background-color: #e9ede9;
         padding-left: 10px;
         border-radius: 3px;
-    }
-    .lower.matches .column-container .column .in-common-container {
-        padding-left: 10px;
-        overflow-y: auto;
     }
     .column-container .column #summary-container {
         padding-left: 10px;
@@ -215,7 +195,6 @@
     }
     .lower.matches .column-container .column .sub:first-of-type div {
         width: 100%;
-        padding-left: 10px;
         overflow: auto;
     }
     .lower.matches .column-container .column .sub:last-of-type div {
@@ -223,8 +202,17 @@
         padding-left: 10px;
         overflow: auto;
     }
+    .column .sub .list-item {
+        border-bottom: 1px solid #b7beb7;
+        margin-bottom: 2px;
+        padding-left: 10px;
+    }
     .column .sub .list-item.inTarget {
-        color: red;
+        color: #2e482e;
+        background-color: #dae4da;
+        border-radius: 3px;
+        border: 1px solid #b7beb7;
+
     }
     .lower.matches .column-container .column li {
         list-style-type: none;
