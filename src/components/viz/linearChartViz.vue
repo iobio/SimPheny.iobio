@@ -217,7 +217,7 @@
         },
         watch: {
             patientMap: {
-                handler: function(newVal, oldVal) {
+                handler: function(newVal) {
                     if (newVal == null) {
                         this.showLoading = true;
                     } else {
@@ -228,7 +228,7 @@
                 deep: true
             },
             chartScales: {
-                handler: function(newVal, oldVal) {
+                handler: function() {
                     if (this.chartScales) {
                         this.chartScalesFiltered = this.chartScales;
                         this.drawChart();

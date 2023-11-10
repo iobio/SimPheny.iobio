@@ -15,14 +15,6 @@
                 <h1 class="section-head">Selected Match</h1>
                 <div v-if="selectedMatch" class="column-container">
                     <div class="column">
-                        <h3>In Common with Target</h3>
-                        <h4>Phenotypes In Common</h4>
-                        <div class="in-common-container" v-if="selectedMatch.phenotypesInCommon.length > 0">
-                            <ul>
-                                <li v-for="phenotype in selectedMatch.phenotypesInCommon">{{ phenotype.hpoId + " " + phenotype.term }}</li>
-                            </ul>    
-                        </div>
-                        <p v-if="selectedMatch.phenotypesInCommon.length == 0">No phenotypes in common</p>
                         <h4>Genes In Common</h4>
                         <div class="in-common-container" v-if="selectedMatch.genesInCommon.length > 0">
                             <ul>
@@ -35,7 +27,8 @@
                         <div class="sub">
                             <h4>Phenotypes</h4>
                             <div>
-                                <p v-for="phenotype in selectedMatch.phenotypeList"> {{ phenotype.hpoId + " " + phenotype.term }}</p>
+                                <p class="list-item inTarget" v-for="phenotype in selectedMatch.phenotypesInCommon"> {{ phenotype.hpoId + " " + phenotype.term }}</p>
+                                <p class="list-item" v-for="phenotype in notInTarget"> {{ phenotype.hpoId + " " + phenotype.term }}</p>
                             </div>
                         </div>
 
@@ -91,6 +84,7 @@
       return {
         showDetailsBar: false,
         selectedMatch: null,
+        notInTarget: [],
       }
     },
     methods: {
@@ -101,9 +95,21 @@
             } else if (!this.selectedMatch) {
                 this.showDetailsBar = false;
             }
+            console.log(this.targetPatient)
             // this.$emit('selectMatch', match);
-        }
+        },
     },
+    watch: {
+        selectedMatch: function() {
+            if (this.selectedMatch && this.targetPatient) {
+                this.notInTarget = this.selectedMatch.phenotypeList.filter(phenotype => {
+                    return !this.targetPatient.phenotypeList.some(targetPhenotype => {
+                        return targetPhenotype.hpoId == phenotype.hpoId;
+                    })
+                })
+            }
+        }
+    }
   }
 </script>
 
@@ -188,15 +194,6 @@
         padding-left: 10px;
         overflow-y: auto;
     }
-    .lower.matches .column-container .column h3 {
-        width: 100%;
-        text-align: center;
-        background-color: #778475;
-        color: white;
-        border-radius: 3px;
-        padding-top: 5px;
-        padding-bottom: 5px;
-    }
     .column-container .column #summary-container {
         padding-left: 10px;
     }
@@ -225,6 +222,9 @@
         width: 100%;
         padding-left: 10px;
         overflow: auto;
+    }
+    .column .sub .list-item.inTarget {
+        color: red;
     }
     .lower.matches .column-container .column li {
         list-style-type: none;
