@@ -23,13 +23,13 @@
                             </ul>    
                         </div>
                         <p v-if="selectedMatch.phenotypesInCommon.length == 0">No phenotypes in common</p>
-                        <h4>Variants In Common</h4>
+                        <h4>Genes In Common</h4>
                         <div class="in-common-container" v-if="selectedMatch.genesInCommon.length > 0">
                             <ul>
                                 <li v-for="gene in selectedMatch.genesInCommon">{{ gene.gene_symbol }}</li>
                             </ul>    
                         </div>
-                        <div class="in-common-container" v-if="selectedMatch.genesInCommon.length == 0">No variants in common</div>
+                        <div class="in-common-container" v-if="selectedMatch.genesInCommon.length == 0">No genes in common</div>
                     </div>
                     <div class="column">
                         <div class="sub">
@@ -40,7 +40,7 @@
                         </div>
 
                         <div class="sub">
-                            <h4>Variants:</h4>
+                            <h4>Genes:</h4>
                             <div>
                                 <ul>
                                     <li v-for="gene in selectedMatch.genesList">{{ gene.gene_symbol }}</li>
@@ -163,10 +163,12 @@
     }
     .lower.matches .column-container .column {
         max-width: 34%;
+        min-width: 29%;
         height: 97%;
     }
     .lower.matches .column-container .column:last-of-type {
         max-width: 26%;
+        min-width: 20%;
     }
     .lower.matches .column-container .column:first-of-type {
         border-right: #21351f 1px solid;

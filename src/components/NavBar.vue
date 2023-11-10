@@ -32,12 +32,12 @@
                 <!-- variant List Input -->
                 <div class="input-container">
                     <v-textarea 
-                        v-model="variantsText" 
+                        v-model="genesText" 
                         variant="solo-filled"
-                        label="Variants" 
+                        label="Genes" 
                         density="compact"
                         no-resize 
-                        hint="insert comma or semi-colon separated list of variants/genes"></v-textarea>
+                        hint="insert comma or semi-colon separated list of genes"></v-textarea>
                 </div>
                 <v-btn @click="processPatient" :disabled="!phenotypesText || !(phenotypesText.length > 0)">Compare Patient</v-btn>
             </div>
@@ -65,7 +65,7 @@
                 showOverlay: this.showPtSelectOverlay,
                 udnId: 'UDN287643',
                 phenotypesText: 'HP:0001188; HP:0001252; HP:0001263; HP:0001276; HP:0001290; HP:0001324; HP:0001332; HP:0002015; HP:0002058; HP:0002072; HP:0002134; HP:0002355; HP:0002376; HP:0003701; HP:0004305; HP:0006789; HP:0007183; HP:0010862',
-                variantsText: 'FAM86B1; LRCH3; SHC1; ARMCX4; KCNV2; C1QTNF1-AS1; LINC01473; CTBP1; MED11; UBE3A; DLC1; TBC1D5; RPL12P21; KIF26A; RNF17; OLFM3; SNHG14; KCTD19; MCM10; C6orf52; FCHO1; GPR176; CNTD1; PUM3; TIAL1',
+                genesText: 'FAM86B1; LRCH3; SHC1; ARMCX4; KCNV2; C1QTNF1-AS1; LINC01473; CTBP1; MED11; UBE3A; DLC1; TBC1D5; RPL12P21; KIF26A; RNF17; OLFM3; SNHG14; KCTD19; MCM10; C6orf52; FCHO1; GPR176; CNTD1; PUM3; TIAL1',
             }
         },
         mounted: function() {
@@ -111,17 +111,17 @@
                 }
                 patient.setPhenotypeList(phenotypeList);
 
-                //add variants
-                let variants = this.variantsText.split(/[,;]+/).map((variant) => {
+                //add genes
+                let genes = this.genesText.split(/[,;]+/).map((variant) => {
                     return variant.trim();
                 })
 
                 //make them all caps
-                variants = variants.map((variant) => {
+                genes = genes.map((variant) => {
                     return variant.toUpperCase();
                 });
                 //set the patient gene list
-                patient.setGenesList(variants);
+                patient.setGenesList(genes);
 
                 //set the target patient
                 this.$emit('set-target-patient', patient);

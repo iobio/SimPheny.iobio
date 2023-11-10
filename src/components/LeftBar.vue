@@ -5,7 +5,7 @@
                 <h1 class="section-head">Patient Information</h1>
                 <v-tabs v-model="tab" fixed-tabs height="30px">
                     <v-tab value="phenotypes" variant="text">Phenotypes</v-tab>
-                    <v-tab value="variants" variant="text">Variants</v-tab>
+                    <v-tab value="genes" variant="text">Genes</v-tab>
                 </v-tabs>
 
                 <div id="tab-content-container" class="left-bar">
@@ -29,8 +29,8 @@
                             </div>
                         </v-window-item>
 
-                        <v-window-item value="variants">
-                            <p v-if="!targetPatient || (targetPatient.getGenesList() == null || targetPatient.getGenesList().length == 0)">No variants to display for current patient.</p>
+                        <v-window-item value="genes">
+                            <p v-if="!targetPatient || (targetPatient.getGenesList() == null || targetPatient.getGenesList().length == 0)">No genes to display for current patient.</p>
                             <div class="list-item left-bar" v-else="targetPatient && targetPatient.getGenesList()" v-for="gene in targetPatient.genesList">
                                 <input v-if="targetGenes" @change="patientInfoChanged()" type="checkbox" v-model="targetGenes[gene.gene_symbol].relevant">
                                 <span 
