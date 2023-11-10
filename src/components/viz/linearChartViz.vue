@@ -33,12 +33,12 @@
 
                     <div class="filter-num-input group">
                         <p>Max Rank: </p>
-                        <input v-model="filterOptions.rankCutOff" type="number" name="" id="rank-filter" :disabled="!filterOptions.filterByRank">
+                        <input v-model="filterOptions.rankCutOff" step="5" type="number" name="" id="rank-filter" :disabled="!filterOptions.filterByRank">
                     </div>
 
                     <div class="filter-num-input group">
                         <p>Min Score: </p>
-                        <input v-model="filterOptions.scoreCutOff" type="number" name="" id="score-filter" :disabled="!filterOptions.filterByScore">
+                        <input v-model="filterOptions.scoreCutOff" step=".1" type="number" name="" id="score-filter" :disabled="!filterOptions.filterByScore">
                     </div>
                 </div>
 
@@ -83,7 +83,7 @@
                     filterByRank: false,
                     filterByScore: false,
                     rankCutOff: 0,
-                    scoreCutOff: 0,
+                    scoreCutOff: 0.0,
                 }
             }
         },
