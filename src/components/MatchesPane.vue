@@ -1,7 +1,6 @@
 <template>
     <div id="matches-container">
         <div class="upper matches">
-            <h1 class="section-head">Matches Chart</h1>
             <LinearChartViz
                 :targetPatient="targetPatient"
                 :patientMap="patientMap"
@@ -61,7 +60,7 @@
 </template>
 
 <script> 
-    import LinearChartViz from './viz/linearChartViz.vue';
+    import LinearChartViz from './viz/ChartViz.vue';
   export default {
     name: 'MatchesPane',
     components: {
@@ -116,7 +115,7 @@
     .upper.matches {
         flex-grow: 1;
         width: 100%;
-        background-color: #e9ede9;
+        background-color: #ffffff;
         padding-top: 48px;
         display: flex;
         flex-direction: column;

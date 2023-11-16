@@ -33,12 +33,24 @@
 
                     <div class="filter-num-input group">
                         <p>Max Rank: </p>
-                        <input v-model="filterOptions.rankCutOff" step="5" type="number" name="" id="rank-filter" :disabled="!filterOptions.filterByRank">
+                        <input 
+                        v-model="filterOptions.rankCutOff" 
+                        step="5" 
+                        type="number" 
+                        name="" 
+                        id="rank-filter" 
+                        :disabled="!filterOptions.filterByRank">
                     </div>
 
                     <div class="filter-num-input group">
                         <p>Min Score: </p>
-                        <input v-model="filterOptions.scoreCutOff" step=".1" type="number" name="" id="score-filter" :disabled="!filterOptions.filterByScore">
+                        <input 
+                        v-model="filterOptions.scoreCutOff" 
+                        step=".1" 
+                        type="number" 
+                        name="" 
+                        id="score-filter" 
+                        :disabled="!filterOptions.filterByScore">
                     </div>
                 </div>
 
@@ -50,13 +62,14 @@
             <p>No target patient defined.</p>
             <p>Input target patient to view matches.</p>
         </div>
-        <div v-if="targetPatient && showLoading" id="loading-container"><v-icon class="loading-icon">mdi-loading</v-icon><p>loading matches...</p></div>
+        <!-- <div v-if="targetPatient && showLoading" id="loading-container"><p><v-icon class="loading-icon">mdi-loading</v-icon></p><p>loading matches...</p></div> -->
     </div>
     <div id="lin-chart-tip"></div>
 </template>
 
 <script>
-    import LinearChart from '../../d3/linearChart.d3';
+    // import LinearChart from '../../d3/linearChart.d3';
+    import CircularChart from '../../d3/CircularChart.d3';
     import * as d3 from 'd3';
 
     export default {
@@ -71,7 +84,7 @@
         },
         data: function() {
             return {
-                linearChart: null,
+                chart: null,
                 resizeObserver: null,
                 showLoading: true,
                 showChartOptions: false,
@@ -88,8 +101,10 @@
             }
         },
         mounted() {
+        
             if (this.targetPatient) {
                 var linChartContainer = this.$refs['lin-chart-container'];
+                
 
                 //add a listener for when the window is resized or the container is resized
                 this.resizeObserver = new ResizeObserver(() => {
@@ -121,11 +136,22 @@
             }
         },
         methods: {
+            validateRank() {
+                let minRank = 1;
+                let maxRank = this.filteredPatientMap.keys().length;
+
+
+            },
+            validateScore() {
+                let minScore = 0;
+                let maxScore = 1;
+
+            },
             drawChart() {
                 let container = this.$refs['lin-chart-container'];
 
                 //clear the chart if it already exists
-                if (this.linearChart) {
+                if (this.chart) {
                     //clear container
                     d3.select(container).selectAll("*").remove();
                 }
@@ -133,16 +159,18 @@
                 if (container != null && this.targetPatient && this.chartScales) {
                     //width is based on the width of the container
                     let width = container.clientWidth;
+                    let height = container.clientHeight;
 
-                    this.linearChart = LinearChart()
-                    .setWidth(width)
+                    this.chart = CircularChart()
+                    .setWidth(height)
+                    .setHeight(height)
                     .setSelectedMatch(this.selectedMatch)
                     .setXMax(this.chartScalesFiltered.xMin)
-                    .setXMin(this.chartScalesFiltered.xMax)
+                    .setXMin(1-((1-this.chartScalesFiltered.xMax)/2))
                     .setYMax(this.chartScalesFiltered.yMax)
                     .setYMin(this.chartScalesFiltered.yMin);
 
-                    this.linearChart(container, this.targetPatient, this.filteredPatientMap);
+                    this.chart(container, this.targetPatient, this.filteredPatientMap);
                 }
             },
             selectMatch() {
@@ -244,14 +272,13 @@
 <style lang="sass">
     #linear-chart-container 
         height: 90%
-        max-height: 500px
-        width: 80%
+        max-height: 800px
         background-color: rgb(255, 255, 255)
         display: flex
         flex-direction: column
         justify-content: center
         position: relative
-
+        box-shadow: 0px 2px 4px -1px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)), 0px 4px 5px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)), 0px 1px 10px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.12))
         border-radius: 5px
         #chart-options-btn
             background-color: #21351f
@@ -340,13 +367,13 @@
                 display: none
         #lin-chart-viz 
             height: 100%
-            width: 100%
+            width: fit-content
             display: flex
             flex-direction: column
             justify-content: center
         #lin-chart-alt-text 
-            height: 100%
-            width: 100%
+            height: 80vh
+            width: 80vh
             display: flex
             flex-direction: column
             justify-content: center
@@ -354,19 +381,20 @@
                 text-align: center
                 font-size: large
         #loading-container
-            position: absolute
-            top: 50%
-            left: 45%
+            height: 80vh
+            width: 80vh
             display: flex
             flex-direction: column
-            justify-content: center
             align-items: center
-            p
+            p:nth-of-type(2)
                 text-align: center
                 font-size: large
-                transform: translate(-20px, -10px)
+                transform: translate(0px, -10px)
+            p:nth-of-type(1)
+                transform: translate(15px, 0px)
             .loading-icon
                 font-size: 50px
+                transform: translate(100px, -10px)
                 animation: spin 1s linear infinite
     #lin-chart-tip 
         position: absolute
