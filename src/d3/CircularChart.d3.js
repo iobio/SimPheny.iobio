@@ -84,43 +84,116 @@ export default function CircularChart() {
         for (let i = 0; i < xTicks.length; i++) {
             let tic = xTicks[i];
             //increase opacity as i increases
-            let opacity = 1- (i * 0.15);
+            let opacity = 1- ((i+2) * 0.11);
             
             //create the arc based on the tic
             let radius = radiusScale(tic);
-
+            //create a group for the arcSection and the rectangle
+            let arcSectionGroup = svg.append("g");
+            
             //if we arent at the last element
             if (i < xTicks.length - 1) {
                 //create the arc section
                 let arcSection = createArcSection(radius, radiusScale(xTicks[i + 1]));
+
                 //add the arc section to the svg
-                svg.append("path")
+                arcSectionGroup.append("path")
                     .attr("d", arcSection)
                     .attr("stroke", 'white')
                     .attr("stroke-width", 1)
                     .attr("stroke-linecap", "round")
-                    .attr("fill", "#C8D2C6")
-                    .attr("id", "arc-section")
+                    .attr("fill", "#996FA7")
+                    .attr("class", "arc-section")
                     .attr("opacity", opacity)
                     .attr("transform", `translate(${marginLeft},${height - marginBottom})`)
                     //the arc needs to be behind the points so that the mouseover event can be handled
                     .lower();
+
+                //put a rectangle with rounded edges at the end of the arc on the bottom of the arc
+                arcSectionGroup.append("rect")
+                        .attr("width", function() {
+                            //a function of the with of the arc
+                            return radiusScale(xTicks[i + 1]) - radiusScale(tic);
+                        })
+                        .attr("height", 10)
+                        .attr("fill", "#996FA7")
+                        .attr("rx", 2)
+                        .attr("ry", 2)
+                        .attr("stroke", "white")
+                        .attr("opacity", opacity)
+                        .attr("cursor", "pointer")
+                        .attr("transform", `translate(${marginLeft + radius},${height - marginBottom})`)
+                        .on("mouseover", function(event) {
+                            //change the color to purple
+                            d3.select(this)
+                                .attr("fill", "purple")
+                                .attr("opacity", 1);
+
+                            //select the parent then get the first child 
+                            let arcSection = d3.select(this.parentNode).select(".arc-section");
+                            arcSection.attr("fill", "purple")
+                        })
+                        .on("mouseout", function(event) {
+                            //change back to its original color
+                            d3.select(this)
+                                .attr("fill", "#996FA7")
+                                .attr("opacity", opacity);
+                            
+                            //select the parent then get the first child which is the arc section
+                            let arcSection = d3.select(this.parentNode).select(".arc-section");
+                            arcSection.attr("fill", "#996FA7")
+                        });
             } else if (i === xTicks.length - 1) {
                 //create the last which will have the radius and max radius
                 let arcSection = createArcSection(radius, maxRadius);
                 //add the arc section to the svg
-                svg.append("path")
+                arcSectionGroup.append("path")
                     .attr("d", arcSection)
                     .attr("stroke", 'white')
                     .attr("stroke-width", 1)
                     .attr("stroke-linecap", "round")
-                    .attr("fill", "#C8D2C6")
-                    .attr("id", "arc-section")
+                    .attr("fill", "#996FA7")
+                    .attr("class", "arc-section")
                     .attr("opacity", opacity)
                     .attr("transform", `translate(${marginLeft},${height - marginBottom})`)
                     //the arc needs to be behind the points so that the mouseover event can be handled
                     .lower();
-            }
+
+                //put a rectangle with rounded edges at the end of the arc on the bottom of the chart
+                arcSectionGroup.append("rect")
+                        .attr("width", function() {
+                            //a function of the with of the arc
+                            return maxRadius - radiusScale(tic);
+                        })
+                        .attr("height", 10)
+                        .attr("fill", "#996FA7")
+                        .attr("rx", 2)
+                        .attr("ry", 2)
+                        .attr("stroke", "white")
+                        .attr("opacity", opacity)
+                        .attr("cursor", "pointer")
+                        .attr("transform", `translate(${marginLeft + radius},${height - marginBottom})`)
+                        .on("mouseover", function(event) {
+                            //change the color to purple
+                            d3.select(this)
+                                .attr("fill", "purple")
+                                .attr("opacity", 1);
+
+                            //select the parent then get the first child which is the arc section
+                            let arcSection = d3.select(this.parentNode).select(".arc-section");
+                            arcSection.attr("fill", "purple")
+                        })
+                        .on("mouseout", function(event) {
+                            //change back to its original color
+                            d3.select(this)
+                                .attr("fill", "#996FA7")
+                                .attr("opacity", opacity);
+
+                            //select the parent then get the first child which is the arc section
+                            let arcSection = d3.select(this.parentNode).select(".arc-section");
+                            arcSection.attr("fill", "#996FA7")
+                        });
+            }   
         }
         //for each tic add a label
         svg.append("g")
@@ -135,7 +208,7 @@ export default function CircularChart() {
                     let coords = polarToCartesian(radius, 0, centerX, centerY);
                     return coords.x;
                 })
-                .attr("y", height - marginBottom + 15)
+                .attr("y", height - marginBottom + 18)
                 .attr("font-size", "10px")
                 .attr("text-anchor", "middle")
                 .attr("alignment-baseline", "middle")
@@ -173,44 +246,54 @@ export default function CircularChart() {
                     })
                     .attr("stroke", function(d) {
                         if (selectedMatch && d.id === selectedMatch.id) {
-                            return "red";
+                            if (d.dx === 'undiagnosed') {
+                                return "#8A05B6";
+                            } else if (d.dx === 'diagnosed') {
+                                    return "#099509";
+                            }
                         } else if (d.dx === 'undiagnosed') {
-                            return "#A756A7";
+                            return "#8A05B6";
                         } else if (d.dx === 'diagnosed') {
-                                return "green";
+                                return "#099509";
                         } else {
                             return "black";
                         }
                     })
                     .attr("stroke-width", function(d) {
+                        //size will be a function of how small the similarity score  where the smaller the score the smaller the circle
+                        let size = 4 + (d.similarityScore * 7);
+
                         if (selectedMatch && d.id === selectedMatch.id) {
-                            return 10;
+                            return size + 5;
                         } else {
-                            return 5;
+                            return size;
                         }
                     })
                     .attr("stroke-linecap", "round")
                     .on("mouseover", function(event, d) {
+                        let size = 4 + (d.similarityScore * 7);
                         //make the circle bigger
                         d3.select(this)
-                            .attr("stroke-width", 10);
+                            .attr("stroke-width", size + 5);
                         handleMouseOver(event, d);
                     })
                     .on("mouseout", function(event, d) {
                         //make the circle smaller
                         d3.select(this)
                             .attr("stroke-width", function(d) {
+                                let size = 4 + (d.similarityScore * 7);
+
                                 if (selectedMatch && d.id === selectedMatch.id) {
-                                    return 10;
+                                    return size + 5;
                                 } else {
-                                    return 5;
+                                    return size;
                                 }
                             });
                         handleMouseOut(event, d);
                     })
                     .on("click", function(event, d) {
                         handleClick(event, d);
-                    });
+                    }).raise();
         }
 
         function handleMouseOver(event, d) {
@@ -246,9 +329,9 @@ export default function CircularChart() {
                 .attr("d", arc)
                 .attr("stroke", function(d) {
                     if (dxValue === 'undiagnosed') {
-                        return "#A756A7";
+                        return "#8A05B6";
                     } else if (dxValue === 'diagnosed') {
-                            return "green";
+                            return "#099509";
                     } else {
                         return "black";
                     }
@@ -293,14 +376,22 @@ export default function CircularChart() {
                 d3.select(".selected-match")
                     .style("stroke", function(d) {
                         if (d.dx === 'diagnosed') {
-                            return "green";
+                            return "#099509";
                         } else if (d.dx === 'undiagnosed') {
-                            return "#A756A7";
+                            return "#8A05B6";
                         } else {
                             return "black";
                         }
                     })
-                    .style("stroke-width", 5)
+                    .style("stroke-width", function(d) {
+                        let size = 4 + (d.similarityScore * 7);
+                        
+                        if (selectedMatch && d.id === selectedMatch.id) {
+                            return size + 5;
+                        } else {
+                            return size;
+                        }
+                    })
                     .classed("selected-match", false);
 
             } else {
@@ -308,14 +399,22 @@ export default function CircularChart() {
                 d3.select(".selected-match")
                 .style("stroke", function(d) {
                     if (d.dx === 'diagnosed') {
-                        return "green";
+                        return "#099509";
                     } else if (d.dx === 'undiagnosed') {
-                        return "#A756A7";
+                        return "#8A05B6";
                     } else {
                         return "black";
                     }
                 })
-                .style("stroke-width", 5)
+                .style("stroke-width", function(d) {
+                    let size = 4 + (d.similarityScore * 7);
+                    
+                    if (selectedMatch && d.id === selectedMatch.id) {
+                        return size + 5;
+                    } else {
+                        return size;
+                    }
+                })
                 .classed("selected-match", false);
 
                 //add the selected class to the point
@@ -323,8 +422,24 @@ export default function CircularChart() {
 
                 d3.select(".selected-match")
                 .raise()
-                .style("stroke", "red")
-                .style("stroke-width", 10);
+                .style("stroke", function(d) {
+                    if (d.dx === 'diagnosed') {
+                        return "#099509";
+                    } else if (d.dx === 'undiagnosed') {
+                        return "#8A05B6";
+                    } else {
+                        return "black";
+                    }
+                })
+                .style("stroke-width", function(d) {
+                    let size = 4 + (d.similarityScore * 7);
+                    
+                    if (selectedMatch && d.id === selectedMatch.id) {
+                        return size + 7;
+                    } else {
+                        return size;
+                    }
+                });
             }
         }
 
