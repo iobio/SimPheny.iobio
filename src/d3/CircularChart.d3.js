@@ -62,110 +62,68 @@ export default function CircularChart() {
   
         for (let i = 0; i < xTicks.length; i++) {
             let tic = xTicks[i];
+            //create the arc based on the tic
+            var radius = radiusScale(tic);
+
+            if (i < xTicks.length - 1) {
+                var nextRadius = radiusScale(xTicks[i + 1]);
+            } else {
+                var nextRadius = maxRadius;
+            }
+
             //increase opacity as i increases
             let opacity = 1- ((i+2) * 0.11);
-            
-            //create the arc based on the tic
-            let radius = radiusScale(tic);
+
             //create a group for the arcSection and the rectangle
             let arcSectionGroup = svg.append("g");
-            
-            //if we arent at the last element
-            if (i < xTicks.length - 1) {
-                //create the arc section
-                let arcSection = createArcSection(radius, radiusScale(xTicks[i + 1]));
+        
+            //create the arc section
+            let arcSection = createArcSection(radius, nextRadius);
 
-                //add the arc section to the svg
-                arcSectionGroup.append("path")
-                    .attr("d", arcSection)
-                    .attr("stroke", 'white')
-                    .attr("fill", colors.chartMain)
-                    .attr("class", "arc-section")
-                    .attr("opacity", opacity)
-                    .attr("transform", `translate(${marginLeft},${height - marginBottom})`)
-                    //the arc needs to be behind the points so that the mouseover event can be handled
-                    .lower();
+            //add the arc section to the svg
+            arcSectionGroup.append("path")
+                .attr("d", arcSection)
+                .attr("stroke", 'white')
+                .attr("fill", colors.chartMain)
+                .attr("class", "arc-section")
+                .attr("opacity", opacity)
+                .attr("transform", `translate(${marginLeft},${height - marginBottom})`)
+                //the arc needs to be behind the points so that the mouseover event can be handled
+                .lower();
 
-                //put a rectangle with rounded edges at the end of the arc on the bottom of the arc
-                arcSectionGroup.append("rect")
-                        .attr("width", radiusScale(xTicks[i + 1]) - radiusScale(tic))
-                        .attr("height", 10)
+            //put a rectangle with rounded edges at the end of the arc on the bottom of the arc
+            arcSectionGroup.append("rect")
+                .attr("width", nextRadius - radius)
+                .attr("height", 10)
+                .attr("fill", colors.chartMain)
+                .attr("rx", 2)
+                .attr("ry", 2)
+                .attr("stroke", "white")
+                .attr("opacity", opacity)
+                .attr("cursor", "pointer")
+                .attr("transform", `translate(${marginLeft + radius},${height - marginBottom})`)
+                .on("mouseover", function(event) {
+                    //change the color to purple
+                    d3.select(this)
+                        .attr("fill", "purple")
+                        .attr("opacity", 1);
+
+                    //select the parent then get the first child 
+                    let arcSection = d3.select(this.parentNode).select(".arc-section");
+                    arcSection.attr("fill", "purple")
+                })
+                .on("mouseout", function(event) {
+                    //change back to its original color
+                    d3.select(this)
                         .attr("fill", colors.chartMain)
-                        .attr("rx", 2)
-                        .attr("ry", 2)
-                        .attr("stroke", "white")
-                        .attr("opacity", opacity)
-                        .attr("cursor", "pointer")
-                        .attr("transform", `translate(${marginLeft + radius},${height - marginBottom})`)
-                        .on("mouseover", function(event) {
-                            //change the color to purple
-                            d3.select(this)
-                                .attr("fill", "purple")
-                                .attr("opacity", 1);
-
-                            //select the parent then get the first child 
-                            let arcSection = d3.select(this.parentNode).select(".arc-section");
-                            arcSection.attr("fill", "purple")
-                        })
-                        .on("mouseout", function(event) {
-                            //change back to its original color
-                            d3.select(this)
-                                .attr("fill", colors.chartMain)
-                                .attr("opacity", opacity);
-                            
-                            //select the parent then get the first child which is the arc section
-                            let arcSection = d3.select(this.parentNode).select(".arc-section");
-                            arcSection.attr("fill", colors.chartMain)
-                        });
-            } else if (i === xTicks.length - 1) {
-                //create the last which will have the radius and max radius
-                let arcSection = createArcSection(radius, maxRadius);
-                //add the arc section to the svg
-                arcSectionGroup.append("path")
-                    .attr("d", arcSection)
-                    .attr("stroke", 'white')
-                    .attr("stroke-width", 1)
-                    .attr("stroke-linecap", "round")
-                    .attr("fill", colors.chartMain)
-                    .attr("class", "arc-section")
-                    .attr("opacity", opacity)
-                    .attr("transform", `translate(${marginLeft},${height - marginBottom})`)
-                    //the arc needs to be behind the points so that the mouseover event can be handled
-                    .lower();
-
-                //put a rectangle with rounded edges at the end of the arc on the bottom of the chart
-                arcSectionGroup.append("rect")
-                        .attr("width", () => maxRadius - radiusScale(tic))
-                        .attr("height", 10)
-                        .attr("fill", colors.chartMain)
-                        .attr("rx", 2)
-                        .attr("ry", 2)
-                        .attr("stroke", "white")
-                        .attr("opacity", opacity)
-                        .attr("cursor", "pointer")
-                        .attr("transform", `translate(${marginLeft + radius},${height - marginBottom})`)
-                        .on("mouseover", function(event) {
-                            //change the color to purple
-                            d3.select(this)
-                                .attr("fill", "purple")
-                                .attr("opacity", 1);
-
-                            //select the parent then get the first child which is the arc section
-                            let arcSection = d3.select(this.parentNode).select(".arc-section");
-                            arcSection.attr("fill", "purple")
-                        })
-                        .on("mouseout", function(event) {
-                            //change back to its original color
-                            d3.select(this)
-                                .attr("fill", colors.chartMain)
-                                .attr("opacity", opacity);
-
-                            //select the parent then get the first child which is the arc section
-                            let arcSection = d3.select(this.parentNode).select(".arc-section");
-                            arcSection.attr("fill", colors.chartMain)
-                        });
-            }   
+                        .attr("opacity", opacity);
+                    
+                    //select the parent then get the first child which is the arc section
+                    let arcSection = d3.select(this.parentNode).select(".arc-section");
+                    arcSection.attr("fill", colors.chartMain)
+                }); 
         }
+
         //Tic Labels
         svg.append("g")
             .selectAll("text")
@@ -190,24 +148,18 @@ export default function CircularChart() {
         }
 
         //Matches Group
-        let matches = svg.append("g")
+        let matchPoints = svg.append("g")
         //The array of matches objects
         let matchesArray = Object.values(matchesObj);
         //Add all the matches to their group and the svg
-        matches.append("g")
+        matchPoints.append("g")
             .selectAll("matches")
             .data(matchesArray)
             .enter()
             .append("path")
             .attr("d", d => determineShape(d))
             .attr("transform", d => determineXY(d, centerX, centerY, radiusScale))
-            .classed("selected-match", function(d) {
-                if (selectedMatch && d.id === selectedMatch.id) {
-                    return true;
-                } else {
-                    return false;
-                }
-            })
+            .classed("selected-match", d => selectedMatch && (d.id === selectedMatch.id) ? true : false)
             .attr("fill", d => determineFill(d, selectedMatch))
             .attr("stroke", d => determineStroke(d, selectedMatch))
             .attr("stroke-width", 1.5)
@@ -252,8 +204,10 @@ export default function CircularChart() {
                 .style("left", (event.pageX + 10) + "px")
                 .style("top", (event.pageY - 10) + "px")
                 .style("visibility", "visible");
+
             //add the similarity score
             let simScore = d.similarityScore;
+
             //make into a num round and then a string
             simScore = Number.parseFloat(simScore).toFixed(3);
             tooltip.append("p")
