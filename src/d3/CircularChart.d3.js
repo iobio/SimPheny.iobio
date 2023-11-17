@@ -1,5 +1,4 @@
 import * as d3 from "d3";
-import { h } from "vue";
 
 export default function CircularChart() {
 
@@ -8,10 +7,7 @@ export default function CircularChart() {
 
     var xMin = 1;
     var xMax = 0;
-    var yMin = 0;
-    var yMax = 5;
 
-    var marginTop = 30;
     var marginRight = 30;
     var marginBottom = 30;
     var marginLeft = 30;
@@ -229,10 +225,10 @@ export default function CircularChart() {
                     // Create an SVG element based on the condition
                     let symbol = d3.symbol()
                         .size(15);
-                    if (d.dx === 'diagnosed') { // Replace 'sharesGenes' with your actual condition
-                        symbol.type(d3.symbolSquare2).size(30);
-                    } else {
+                    if (d.dx === 'undiagnosed') { // Replace 'sharesGenes' with your actual condition
                         symbol.type(d3.symbolCircle);
+                    } else {
+                        symbol.type(d3.symbolSquare2).size(30);
                     }
                     if (d.genesInCommon.length > 0) {
                         symbol.size(50);
@@ -296,7 +292,6 @@ export default function CircularChart() {
                 .attr("stroke-width", 1.5)
                 .on("mouseover", function(event, d) {
                     let size = 2 + (d.similarityScore * 7);
-                    //make the circle bigger
                     d3.select(this)
                         .attr("stroke-width", 1.5);
                     handleMouseOver(event, d);
@@ -318,6 +313,31 @@ export default function CircularChart() {
                 .on("click", function(event, d) {
                     handleClick(event, d);
                 }).raise();
+
+            //if there is a selected match add the arc
+            if (selectedMatch) {
+                //calcluate the center x and y coordinates
+                let centerX = marginLeft;
+                let centerY = height - marginBottom;
+
+                //create the arc based on the similarity score
+                let radius = radiusScale(selectedMatch.similarityScore);
+                let arc = createArc(radius, centerX, centerY);
+
+                let dxValue = selectedMatch.dx;
+                let genesInCommon = selectedMatch.genesInCommon;
+                //add the arc to the svg
+                svg.append("path")
+                    .attr("d", arc)
+                    .attr("stroke", function(d) {
+                        return "#3855A5"
+                    })
+                    .attr("stroke-width", 1)
+                    .attr("fill", "none")
+                    .attr("id", "arc-path-for-selected")
+                    //the arc needs to be behind the points so that the mouseover event can be handled
+                    .lower();
+            }
         }
 
         function handleMouseOver(event, d) {
@@ -348,10 +368,14 @@ export default function CircularChart() {
             let arc = createArc(radius, centerX, centerY);
 
             let dxValue = d.dx;
+            let genesInCommon = d.genesInCommon;
             //add the arc to the svg
             svg.append("path")
                 .attr("d", arc)
                 .attr("stroke", function(d) {
+                    if (genesInCommon.length > 0) {
+                        return "#007991";
+                    }
                     if (dxValue === 'undiagnosed') {
                         return "#8A05B6";
                     } else if (dxValue === 'diagnosed') {
@@ -418,52 +442,72 @@ export default function CircularChart() {
                     })
                     .classed("selected-match", false);
 
+                    svg.select("#arc-path-for-selected").remove();
+
             } else {
                 //Get any already selected points and set them back to default style
                 d3.select(".selected-match")
-                .style("stroke", function(d) {
-                    if (d.dx === 'diagnosed') {
-                        return "#099509";
-                    } else if (d.dx === 'undiagnosed') {
-                        return "#8A05B6";
-                    } else {
-                        return "black";
-                    }
-                })
-                .style("stroke-width", function(d) {
-                    let size = 4 + (d.similarityScore * 7);
-                    
-                    if (selectedMatch && d.id === selectedMatch.id) {
-                        return 1.5;
-                    } else {
-                        return 1.5;
-                    }
-                })
-                .classed("selected-match", false);
+                    .style("stroke", function(d) {
+                        if (d.dx === 'diagnosed') {
+                            return "#099509";
+                        } else if (d.dx === 'undiagnosed') {
+                            return "#8A05B6";
+                        } else {
+                            return "black";
+                        }
+                    })
+                    .style("stroke-width", function(d) {
+                        let size = 4 + (d.similarityScore * 7);
+                        
+                        if (selectedMatch && d.id === selectedMatch.id) {
+                            return 1.5;
+                        } else {
+                            return 1.5;
+                        }
+                    })
+                    .classed("selected-match", false);
+                //delete the arc
+                svg.select("#arc-path-for-selected").remove();
 
                 //add the selected class to the point
                 point.classed("selected-match", true);
 
                 d3.select(".selected-match")
-                .raise()
-                .style("stroke", function(d) {
-                    if (d.dx === 'diagnosed') {
-                        return "#099509";
-                    } else if (d.dx === 'undiagnosed') {
-                        return "#8A05B6";
-                    } else {
-                        return "black";
-                    }
-                })
-                .style("stroke-width", function(d) {
-                    let size = 4 + (d.similarityScore * 7);
-                    
-                    if (selectedMatch && d.id === selectedMatch.id) {
-                        return 1.5;
-                    } else {
-                        return 1.5;
-                    }
-                });
+                    .raise()
+                    .style("stroke", function(d) {
+                        return "#3855A5"
+                    })
+                    .style("stroke-width", function(d) {
+                        let size = 4 + (d.similarityScore * 7);
+                        
+                        if (selectedMatch && d.id === selectedMatch.id) {
+                            return 1.5;
+                        } else {
+                            return 1.5;
+                        }
+                    });
+                
+                //calcluate the center x and y coordinates
+                let centerX = marginLeft;
+                let centerY = height - marginBottom;
+
+                //create the arc based on the similarity score
+                let radius = radiusScale(d.similarityScore);
+                let arc = createArc(radius, centerX, centerY);
+                
+                let dxValue = d.dx;
+                let genesInCommon = d.genesInCommon;
+                //add the arc to the svg
+                svg.append("path")
+                    .attr("d", arc)
+                    .attr("stroke", function(d) {
+                        return "#3855A5"
+                    })
+                    .attr("stroke-width", 1)
+                    .attr("fill", "none")
+                    .attr("id", "arc-path-for-selected")
+                    //the arc needs to be behind the points so that the mouseover event can be handled
+                    .lower();
             }
         }
 
@@ -492,14 +536,6 @@ export default function CircularChart() {
     }
     chart.setXMax = function(newXMax) {
         xMax = newXMax;
-        return chart;
-    }
-    chart.setYMin = function(newYMin) {
-        yMin = newYMin;
-        return chart;
-    }
-    chart.setYMax = function(newYMax) {
-        yMax = newYMax;
         return chart;
     }
 

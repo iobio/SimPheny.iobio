@@ -126,7 +126,6 @@
                     });
                     this.resizeObserver.observe(linChartContainer);
                 }
-                this.drawChart();
             }
         },
         beforeDestroy() {
@@ -166,9 +165,7 @@
                     .setHeight(height)
                     .setSelectedMatch(this.selectedMatch)
                     .setXMax(this.chartScalesFiltered.xMin)
-                    .setXMin(1-((1-this.chartScalesFiltered.xMax)/2))
-                    .setYMax(this.chartScalesFiltered.yMax)
-                    .setYMin(this.chartScalesFiltered.yMin);
+                    .setXMin(1-((1-this.chartScalesFiltered.xMax)/2));
 
                     this.chart(container, this.targetPatient, this.filteredPatientMap);
                 }
