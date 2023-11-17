@@ -221,79 +221,103 @@ export default function CircularChart() {
 
             //put all the MATCHES on the chart
             matches.append("g")
-                .selectAll("path")
+                .selectAll("matches")
                 .data(matchesArray)
-                .join("path")
-                    .attr("d", function(d) {
-                        //get the angle
-                        let angle = generateRandomAngle();
-                        //get the radius
-                        let radius = radiusScale(d.similarityScore);
-                        //calcluate the center x and y coordinates
-                        let centerX = marginLeft;
-                        let centerY = height - marginBottom;
-                        //get the x and y coordinates
-                        let coords = polarToCartesian(radius, angle, centerX, centerY);
-                        //return the path
-                        return `M ${coords.x},${coords.y} L ${coords.x},${coords.y}`;
-                    })
-                    .classed("selected-match", function(d) {
-                        if (selectedMatch && d.id === selectedMatch.id) {
-                            return true;
-                        } else {
-                            return false;
+                .enter()
+                .append("path")
+                .attr("d", function(d) {
+                    // Create an SVG element based on the condition
+                    let symbol = d3.symbol()
+                        .size(15);
+                    if (d.dx === 'diagnosed') { // Replace 'sharesGenes' with your actual condition
+                        symbol.type(d3.symbolSquare2).size(30);
+                    } else {
+                        symbol.type(d3.symbolCircle);
+                    }
+                    if (d.genesInCommon.length > 0) {
+                        symbol.size(50);
+                    }
+                    return symbol();
+                })
+                .attr("transform", function(d) {
+                    //get the angle
+                    let angle = generateRandomAngle();
+                    //get the radius
+                    let radius = radiusScale(d.similarityScore);
+                    //calcluate the center x and y coordinates
+                    let centerX = marginLeft;
+                    let centerY = height - marginBottom;
+                    //get the x and y coordinates
+                    let coords = polarToCartesian(radius, angle, centerX, centerY);
+                    //return the path
+                    return `translate(${coords.x},${coords.y})`;
+                })
+                .classed("selected-match", function(d) {
+                    if (selectedMatch && d.id === selectedMatch.id) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                })
+                .attr("fill", function(d) {
+                    if (d.genesInCommon.length > 0) {
+                        return "#33DDFF";
+                    } else if (d.dx === 'diagnosed') {
+                       return "#18F218"
+                    } else if (d.dx === 'undiagnosed') {
+                        return "#D765FC";
+                    } else {
+                        return "black";
+                    }
+                })
+                .attr("stroke", function(d) {
+                    if (d.genesInCommon.length > 0) {
+                        return "#007991";
+                    }
+
+                    if (selectedMatch && d.id === selectedMatch.id) {
+                        if (d.genesInCommon.length > 0) {
+                            return "#CBD10A";
                         }
-                    })
-                    .attr("stroke", function(d) {
-                        if (selectedMatch && d.id === selectedMatch.id) {
-                            if (d.dx === 'undiagnosed') {
-                                return "#8A05B6";
-                            } else if (d.dx === 'diagnosed') {
-                                    return "#099509";
-                            }
-                        } else if (d.dx === 'undiagnosed') {
+
+                        if (d.dx === 'undiagnosed') {
                             return "#8A05B6";
                         } else if (d.dx === 'diagnosed') {
                                 return "#099509";
-                        } else {
-                            return "black";
                         }
-                    })
-                    .attr("stroke-width", function(d) {
-                        //size will be a function of how small the similarity score  where the smaller the score the smaller the circle
-                        let size = 4 + (d.similarityScore * 7);
+                    } else if (d.dx === 'undiagnosed') {
+                        return "#8A05B6";
+                    } else if (d.dx === 'diagnosed') {
+                            return "#099509";
+                    } else {
+                        return "black";
+                    }
+                })
+                .attr("stroke-width", 1.5)
+                .on("mouseover", function(event, d) {
+                    let size = 2 + (d.similarityScore * 7);
+                    //make the circle bigger
+                    d3.select(this)
+                        .attr("stroke-width", 1.5);
+                    handleMouseOver(event, d);
+                })
+                .on("mouseout", function(event, d) {
+                    //make the circle smaller
+                    d3.select(this)
+                        .attr("stroke-width", function(d) {
+                            let size = 4 + (d.similarityScore * 7);
 
-                        if (selectedMatch && d.id === selectedMatch.id) {
-                            return size + 5;
-                        } else {
-                            return size;
-                        }
-                    })
-                    .attr("stroke-linecap", "round")
-                    .on("mouseover", function(event, d) {
-                        let size = 4 + (d.similarityScore * 7);
-                        //make the circle bigger
-                        d3.select(this)
-                            .attr("stroke-width", size + 5);
-                        handleMouseOver(event, d);
-                    })
-                    .on("mouseout", function(event, d) {
-                        //make the circle smaller
-                        d3.select(this)
-                            .attr("stroke-width", function(d) {
-                                let size = 4 + (d.similarityScore * 7);
-
-                                if (selectedMatch && d.id === selectedMatch.id) {
-                                    return size + 5;
-                                } else {
-                                    return size;
-                                }
-                            });
-                        handleMouseOut(event, d);
-                    })
-                    .on("click", function(event, d) {
-                        handleClick(event, d);
-                    }).raise();
+                            if (selectedMatch && d.id === selectedMatch.id) {
+                                return 1.5;
+                            } else {
+                                return 1.5;
+                            }
+                        });
+                    handleMouseOut(event, d);
+                })
+                .on("click", function(event, d) {
+                    handleClick(event, d);
+                }).raise();
         }
 
         function handleMouseOver(event, d) {
@@ -387,9 +411,9 @@ export default function CircularChart() {
                         let size = 4 + (d.similarityScore * 7);
                         
                         if (selectedMatch && d.id === selectedMatch.id) {
-                            return size + 5;
+                            return 1.5;
                         } else {
-                            return size;
+                            return 1.5;
                         }
                     })
                     .classed("selected-match", false);
@@ -410,9 +434,9 @@ export default function CircularChart() {
                     let size = 4 + (d.similarityScore * 7);
                     
                     if (selectedMatch && d.id === selectedMatch.id) {
-                        return size + 5;
+                        return 1.5;
                     } else {
-                        return size;
+                        return 1.5;
                     }
                 })
                 .classed("selected-match", false);
@@ -435,9 +459,9 @@ export default function CircularChart() {
                     let size = 4 + (d.similarityScore * 7);
                     
                     if (selectedMatch && d.id === selectedMatch.id) {
-                        return size + 7;
+                        return 1.5;
                     } else {
-                        return size;
+                        return 1.5;
                     }
                 });
             }
