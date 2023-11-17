@@ -68,7 +68,7 @@ export default function CircularChart() {
             if (i < xTicks.length - 1) {
                 var nextRadius = radiusScale(xTicks[i + 1]);
             } else {
-                var nextRadius = maxRadius;
+                var nextRadius = maxRadius; //the last tic should be the max radius
             }
 
             //increase opacity as i increases
@@ -179,8 +179,6 @@ export default function CircularChart() {
             let radius = radiusScale(selectedMatch.similarityScore);
             let arc = createArc(radius, centerX, centerY);
 
-            let dxValue = selectedMatch.dx;
-            let genesInCommon = selectedMatch.genesInCommon;
             //add the arc to the svg
             svg.append("path")
                 .attr("d", arc)
