@@ -221,6 +221,8 @@ export default function CircularChart() {
     return chart;
 }
 
+//USER INTERACTION FUNCTIONS ------------------------------------------------------------------------
+
 function mouseOverMatch(event, d, svg, radiusScale, centerX, centerY) {
     //clear and remove the tooltip
     d3.select("#lin-chart-tip")
@@ -258,6 +260,7 @@ function mouseOverMatch(event, d, svg, radiusScale, centerX, centerY) {
     //raise the hovered point to the top
     d3.select(event.currentTarget).raise();
 }
+
 function mouseOutMatch(event, d, svg, radiusScale, centerX, centerY) {
     //clear and hide the tooltip
     d3.select("#lin-chart-tip")
@@ -329,6 +332,7 @@ function clickMatch(event, d, svg, radiusScale, centerX, centerY) {
     }
 }
 
+//ARC HELPER FUNCTIONS ----------------------------------------------------------------------------------
 function generateRandomAngle() {
     //returns a random angle between 2 and 88 degrees
     let angle = 1 + Math.random() * (89 - 1);
@@ -380,6 +384,8 @@ function createArcSection(innerRadius, outerRadius) {
 
     return arcSection;
 }
+
+//CHART HELPER FUNCTIONS ----------------------------------------------------------------------------------
 
 function createOriginSymbols(svg, marginLeft, height, marginBottom) {
         //Add grey circle to the chart at the origin of the chart
