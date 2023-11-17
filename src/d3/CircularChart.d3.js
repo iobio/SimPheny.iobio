@@ -164,13 +164,13 @@ export default function CircularChart() {
             .attr("stroke", d => determineStroke(d, selectedMatch))
             .attr("stroke-width", 1.5)
             .on("mouseover", function(event, d) {
-                handleMouseOver(event, d);
+                mouseOverMatch(event, d, svg, radiusScale, centerX, centerY);
             })
             .on("mouseout", function(event, d) {
-                handleMouseOut(event, d);
+                mouseOutMatch(event, d, svg, radiusScale, centerX, centerY);
             })
             .on("click", function(event, d) {
-                handleClick(event, d);
+                clickMatch(event, d, svg, radiusScale, centerX, centerY);
             }).raise();
 
         //if there is a selected match add the arc
@@ -188,115 +188,6 @@ export default function CircularChart() {
                 .attr("id", "arc-path-for-selected")
                 //the arc needs to be behind the points so that the mouseover event can be handled
                 .lower();
-        }
-
-        function handleMouseOver(event, d) {
-            //clear and remove the tooltip
-            d3.select("#lin-chart-tip")
-                .selectAll("p").remove();
-            d3.select("#lin-chart-tip")
-                .style("visibility", "hidden");
-
-            //make a tooltip
-            let tooltip = d3.select("#lin-chart-tip")
-                .style("left", (event.pageX + 10) + "px")
-                .style("top", (event.pageY - 10) + "px")
-                .style("visibility", "visible");
-
-            //add the similarity score
-            let simScore = d.similarityScore;
-
-            //make into a num round and then a string
-            simScore = Number.parseFloat(simScore).toFixed(3);
-            tooltip.append("p")
-                .text("Score: " + simScore);
-
-            //create the arc based on the similarity score
-            let radius = radiusScale(d.similarityScore);
-            let arc = createArc(radius, centerX, centerY);
-
-            //add the arc to the svg
-            svg.append("path")
-                .attr("d", arc)
-                .attr("stroke", determineStroke(d))
-                .attr("stroke-width", 1)
-                .attr("fill", "none")
-                .attr("id", "arc-path-for-hover")
-                //the arc needs to be behind the points so that the mouseover event can be handled
-                .lower();
-            
-            //raise the hovered point to the top
-            d3.select(event.currentTarget).raise();
-        }
-        function handleMouseOut(event, d) {
-            //clear and hide the tooltip
-            d3.select("#lin-chart-tip")
-                .selectAll("p").remove();
-
-            d3.select("#lin-chart-tip")
-                .style("visibility", "hidden");
-
-            //remove the arc
-            svg.select("#arc-path-for-hover").remove();
-        }
-
-        function handleClick(event, d) {
-            //Clear and remove the tooltip but delay it so that the click event can be handled
-            setTimeout(function() {
-                d3.select("#lin-chart-tip")
-                    .selectAll("p").remove();
-
-                d3.select("#lin-chart-tip")
-                    .style("visibility", "hidden");
-            }, 100);
-
-            let clickedSvg = d3.select(event.currentTarget);
-            let clickedData = d;
-            let isSelected = clickedSvg.classed("selected-match");
-
-            if (isSelected) { //if the point clicked is already selected just deselect it
-                clickedSvg
-                    .style("stroke", determineStroke(clickedData))
-                    .attr("fill", determineFill(clickedData))
-                    .classed("selected-match", false);
-
-                    svg.select("#arc-path-for-selected").remove(); //remove the arc
-            } else {
-                //Get any already selected points and set them back to default style
-                let previouslySelected = d3.selectAll(".selected-match")
-                if (!previouslySelected.empty()){
-                    previouslySelected.each(function(d) {
-                        d3.select(this)
-                            .style("stroke", determineStroke(d))
-                            .attr("fill", determineFill(d))
-                            .classed("selected-match", false);
-                    });
-                    //delete the arc
-                    svg.select("#arc-path-for-selected").remove();
-                }
-
-                //add the selected class to the point
-                clickedSvg.classed("selected-match", true);
-
-                d3.select(".selected-match")
-                    .raise()
-                    .style("stroke", determineStroke(clickedData, clickedData))
-                    .attr("fill", determineFill(clickedData, clickedData));
-
-                //create the arc based on the similarity score
-                let radius = radiusScale(clickedData.similarityScore);
-                let arc = createArc(radius, centerX, centerY);
-                
-                //add the arc to the svg
-                svg.append("path")
-                    .attr("d", arc)
-                    .attr("stroke", colors.strokeBlue)
-                    .attr("stroke-width", 1)
-                    .attr("fill", "none")
-                    .attr("id", "arc-path-for-selected")
-                    //the arc needs to be behind the points so that the mouseover event can be handled
-                    .lower();
-            }
         }
 
         //Add the svg to the actual container
@@ -328,6 +219,114 @@ export default function CircularChart() {
     }
 
     return chart;
+}
+
+function mouseOverMatch(event, d, svg, radiusScale, centerX, centerY) {
+    //clear and remove the tooltip
+    d3.select("#lin-chart-tip")
+        .selectAll("p").remove();
+    d3.select("#lin-chart-tip")
+        .style("visibility", "hidden");
+
+    //make a tooltip
+    let tooltip = d3.select("#lin-chart-tip")
+        .style("left", (event.pageX + 10) + "px")
+        .style("top", (event.pageY - 10) + "px")
+        .style("visibility", "visible");
+
+    //add the similarity score
+    let simScore = d.similarityScore;
+
+    //make into a num round and then a string
+    simScore = Number.parseFloat(simScore).toFixed(3);
+    tooltip.append("p")
+        .text("Score: " + simScore);
+    //create the arc based on the similarity score
+    let radius = radiusScale(d.similarityScore);
+    let arc = createArc(radius, centerX, centerY);
+
+    //add the arc to the svg
+    svg.append("path")
+        .attr("d", arc)
+        .attr("stroke", determineStroke(d))
+        .attr("stroke-width", 1)
+        .attr("fill", "none")
+        .attr("id", "arc-path-for-hover")
+        //the arc needs to be behind the points so that the mouseover event can be handled
+        .lower();
+    
+    //raise the hovered point to the top
+    d3.select(event.currentTarget).raise();
+}
+function mouseOutMatch(event, d, svg, radiusScale, centerX, centerY) {
+    //clear and hide the tooltip
+    d3.select("#lin-chart-tip")
+        .selectAll("p").remove();
+
+    d3.select("#lin-chart-tip")
+        .style("visibility", "hidden");
+
+    //remove the arc
+    svg.select("#arc-path-for-hover").remove();
+}
+
+function clickMatch(event, d, svg, radiusScale, centerX, centerY) {
+    //Clear and remove the tooltip but delay it so that the click event can be handled
+    setTimeout(function() {
+        d3.select("#lin-chart-tip")
+            .selectAll("p").remove();
+
+        d3.select("#lin-chart-tip")
+            .style("visibility", "hidden");
+    }, 100);
+
+    let clickedSvg = d3.select(event.currentTarget);
+    let clickedData = d;
+    let isSelected = clickedSvg.classed("selected-match");
+
+    if (isSelected) { //if the point clicked is already selected just deselect it
+        clickedSvg
+            .style("stroke", determineStroke(clickedData))
+            .attr("fill", determineFill(clickedData))
+            .classed("selected-match", false);
+
+            svg.select("#arc-path-for-selected").remove(); //remove the arc
+    } else {
+        //Get any already selected points and set them back to default style
+        let previouslySelected = d3.selectAll(".selected-match")
+        if (!previouslySelected.empty()){
+            previouslySelected.each(function(d) {
+                d3.select(this)
+                    .style("stroke", determineStroke(d))
+                    .attr("fill", determineFill(d))
+                    .classed("selected-match", false);
+            });
+            //delete the arc
+            svg.select("#arc-path-for-selected").remove();
+        }
+
+        //add the selected class to the point
+        clickedSvg.classed("selected-match", true);
+
+        d3.select(".selected-match")
+            .raise()
+            .style("stroke", determineStroke(clickedData, clickedData))
+            .attr("fill", determineFill(clickedData, clickedData));
+
+        //create the arc based on the similarity score
+        let radius = radiusScale(clickedData.similarityScore);
+        let arc = createArc(radius, centerX, centerY);
+        
+        //add the arc to the svg
+        svg.append("path")
+            .attr("d", arc)
+            .attr("stroke", colors.strokeBlue)
+            .attr("stroke-width", 1)
+            .attr("fill", "none")
+            .attr("id", "arc-path-for-selected")
+            //the arc needs to be behind the points so that the mouseover event can be handled
+            .lower();
+    }
 }
 
 function generateRandomAngle() {
