@@ -16,6 +16,7 @@ const colors = {
     "targetPurple": "purple",
     "chartMain": "#996FA7",
     "chartLettersGrey": "#5F5661",
+    "chartLightPurple": "#DCCFDD",
 }
 
 export default function CircularChart() {
@@ -34,52 +35,16 @@ export default function CircularChart() {
     var selectedMatch = null;
 
     function chart(container, targetPatient, matchesObj) {
-        // Create the SVG container.
+        // Create the SVG
         const svg = d3.create("svg")
             .attr("width", width)
             .attr("height", height)
             .attr("id", chartId);
 
-        //adjust the x and y axis to allow for the labels
-        svg.attr("viewBox", [0, 0, width, height + 10]);
+        svg.attr("viewBox", [0, 0, width, height + 10]); //ViewBox
 
-        //put the person mdi at the origin of the chart at the bottom
-        svg.append("g")
-            .attr("transform", `translate(${marginLeft - 22},${(height - marginBottom) + 3})`)
-            .append("foreignObject")
-                .attr("width", 28)
-                .attr("height", 28)
-                .html(`
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <path d="M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V22H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z" fill="purple"/>
-                    </svg>
-                `)
-                .on("mouseover", function(event) {
-                    handleMouseOver(event, targetPatient);
-                })
-                .on("mouseout", function(event) {
-                    handleMouseOut(event, targetPatient);
-                });
-
-        //put a grey circle under the person
-        svg.append("g")
-            .attr("transform", `translate(${marginLeft - 8},${(height - marginBottom) + 10})`)
-            .append("circle")
-                .attr("r", 16)
-                .attr("fill", "grey")
-                .attr("stroke", "purple")
-                .attr("opacity", 0.3);
-
-        // put a label that says "Patient" at the origin of the chart at the bottom
-        svg.append("g")
-            .attr("transform", `translate(${marginLeft - 5},${(height - marginBottom) + 34})`)
-            .append("text")
-                .text("Patient")
-                .attr("font-size", "10px")
-                .attr("fill", "purple");
-
-        //create some x axis ticks by evenly dividing the width of the chart into 5 parts
-        // let xTicks = d3.ticks(xMin, xMax, 5);
+        //Create the chart origin and the patient symbol
+        createOriginSymbols(svg, marginLeft, height, marginBottom);
 
         //get the max radius
         let maxRadius = (width - marginRight - marginLeft);
@@ -506,6 +471,33 @@ function createArcSection(innerRadius, outerRadius) {
         .cornerRadius(5);
 
     return arcSection;
+}
+
+function createOriginSymbols(svg, marginLeft, height, marginBottom) {
+        //Add grey circle to the chart at the origin of the chart
+        svg.append("g")
+            .append("circle")
+            .attr("r", 16)
+            .attr("fill", colors.chartLightPurple)
+            .attr("stroke", colors.chartMain)
+            .attr("stroke-width", 1)
+            .attr("transform", `translate(${marginLeft - 8},${(height - marginBottom) + 8})`);
+
+        //Add the person symbol for the patient on the chart
+        svg.append("g")
+            .append("path")
+            .attr("d", "M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V22H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z")
+            .attr("fill", "purple")
+            .attr("transform", `translate(${marginLeft - 23},${(height - marginBottom) - 5}) scale(1.3)`);
+
+        // put a label that says "Patient" under the person symbol
+        svg.append("g")
+            .append("text")
+            .text("Patient")
+            .attr("font-size", "11px")
+            .attr("fill", "purple")
+            .attr("font-weight", "bold")
+            .attr("transform", `translate(${marginLeft - 25},${(height - marginBottom) + 36})`);
 }
 
 function determineFill(dataPoint, selectedMatch=null) {
