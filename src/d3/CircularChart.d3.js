@@ -34,7 +34,7 @@ export default function CircularChart() {
 
     var selectedMatch = null;
 
-    function chart(container, targetPatient, matchesObj) {
+    function chart(container, matchesObj) {
         // Create the SVG
         const svg = d3.create("svg")
             .attr("width", width)

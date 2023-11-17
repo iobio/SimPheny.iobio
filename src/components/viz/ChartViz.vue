@@ -167,7 +167,7 @@
                     .setXMax(this.chartScalesFiltered.xMin)
                     .setXMin(1-((1-this.chartScalesFiltered.xMax)/2));
 
-                    this.chart(container, this.targetPatient, this.filteredPatientMap);
+                    this.chart(container, this.filteredPatientMap);
                 }
             },
             selectMatch() {
