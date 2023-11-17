@@ -46,20 +46,20 @@ export default function CircularChart() {
         //Create the chart origin and the patient symbol
         createOriginSymbols(svg, marginLeft, height, marginBottom);
 
-        //get the max radius
-        let maxRadius = (width - marginRight - marginLeft);
+        //Set max radius
+        let maxRadius = (width - marginRight - marginLeft); 
 
-        // Create the scaling function
+        //Scaling function: scales similarity scores based on the max radius
         var radiusScale = d3.scaleLinear()
             .domain([xMin, xMax]) // Input range
             .range([0, maxRadius]); // Output range
-
-        let xTicks = radiusScale.ticks(6);
-
-        //calcluate the center x and y coordinates
+        
+        //Calcluate the center x and y coordinate
         let centerX = marginLeft;
         let centerY = height - marginBottom;
-        
+
+        let xTicks = radiusScale.ticks(6);
+  
         for (let i = 0; i < xTicks.length; i++) {
             let tic = xTicks[i];
             //increase opacity as i increases
