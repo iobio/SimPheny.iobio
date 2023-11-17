@@ -55,8 +55,8 @@ export default function CircularChart() {
             .range([0, maxRadius]); // Output range
         
         //Calcluate the center x and y coordinate
-        let centerX = marginLeft;
-        let centerY = height - marginBottom;
+        var centerX = marginLeft;
+        var centerY = height - marginBottom;
 
         let xTicks = radiusScale.ticks(6);
   
@@ -79,8 +79,6 @@ export default function CircularChart() {
                 arcSectionGroup.append("path")
                     .attr("d", arcSection)
                     .attr("stroke", 'white')
-                    .attr("stroke-width", 1)
-                    .attr("stroke-linecap", "round")
                     .attr("fill", colors.chartMain)
                     .attr("class", "arc-section")
                     .attr("opacity", opacity)
@@ -90,10 +88,7 @@ export default function CircularChart() {
 
                 //put a rectangle with rounded edges at the end of the arc on the bottom of the arc
                 arcSectionGroup.append("rect")
-                        .attr("width", function() {
-                            //a function of the with of the arc
-                            return radiusScale(xTicks[i + 1]) - radiusScale(tic);
-                        })
+                        .attr("width", radiusScale(xTicks[i + 1]) - radiusScale(tic))
                         .attr("height", 10)
                         .attr("fill", colors.chartMain)
                         .attr("rx", 2)
@@ -140,10 +135,7 @@ export default function CircularChart() {
 
                 //put a rectangle with rounded edges at the end of the arc on the bottom of the chart
                 arcSectionGroup.append("rect")
-                        .attr("width", function() {
-                            //a function of the with of the arc
-                            return maxRadius - radiusScale(tic);
-                        })
+                        .attr("width", () => maxRadius - radiusScale(tic))
                         .attr("height", 10)
                         .attr("fill", colors.chartMain)
                         .attr("rx", 2)
@@ -174,7 +166,7 @@ export default function CircularChart() {
                         });
             }   
         }
-        //for each tic add a label
+        //Tic Labels
         svg.append("g")
             .selectAll("text")
             .data(xTicks)
@@ -183,8 +175,7 @@ export default function CircularChart() {
                     return d;
                 })
                 .attr("x", function(d) {
-                    let radius = radiusScale(d);
-                    let coords = polarToCartesian(radius, 0, centerX, centerY);
+                    let coords = polarToCartesian(radiusScale(d), 0, centerX, centerY);
                     return coords.x;
                 })
                 .attr("y", height - marginBottom + 18)
@@ -192,87 +183,61 @@ export default function CircularChart() {
                 .attr("text-anchor", "middle")
                 .attr("alignment-baseline", "middle")
                 .attr("fill", colors.chartLettersGrey);
+        
+        //In case there are no matches return
+        if (!matchesObj) {
+            return;
+        }
 
-        if (matchesObj) {
-            //make a group for all the matches
-            let matches = svg.append("g")
-            let matchesArray = Object.values(matchesObj);
+        //Matches Group
+        let matches = svg.append("g")
+        //The array of matches objects
+        let matchesArray = Object.values(matchesObj);
+        //Add all the matches to their group and the svg
+        matches.append("g")
+            .selectAll("matches")
+            .data(matchesArray)
+            .enter()
+            .append("path")
+            .attr("d", d => determineShape(d))
+            .attr("transform", d => determineXY(d, centerX, centerY, radiusScale))
+            .classed("selected-match", function(d) {
+                if (selectedMatch && d.id === selectedMatch.id) {
+                    return true;
+                } else {
+                    return false;
+                }
+            })
+            .attr("fill", d => determineFill(d, selectedMatch))
+            .attr("stroke", d => determineStroke(d, selectedMatch))
+            .attr("stroke-width", 1.5)
+            .on("mouseover", function(event, d) {
+                handleMouseOver(event, d);
+            })
+            .on("mouseout", function(event, d) {
+                handleMouseOut(event, d);
+            })
+            .on("click", function(event, d) {
+                handleClick(event, d);
+            }).raise();
 
-            //put all the MATCHES on the chart
-            matches.append("g")
-                .selectAll("matches")
-                .data(matchesArray)
-                .enter()
-                .append("path")
-                .attr("d", function(d) {
-                    // Create an SVG element based on the condition
-                    let symbol = d3.symbol()
-                        .size(15);
-                    if (d.dx === 'undiagnosed') { // Replace 'sharesGenes' with your actual condition
-                        symbol.type(d3.symbolCircle);
-                    } else {
-                        symbol.type(d3.symbolSquare2).size(30);
-                    }
-                    if (d.genesInCommon.length > 0) {
-                        symbol.size(50);
-                    }
-                    return symbol();
-                })
-                .attr("transform", function(d) {
-                    //get the angle
-                    let angle = generateRandomAngle();
-                    //get the radius
-                    let radius = radiusScale(d.similarityScore);
-                    //calcluate the center x and y coordinates
-                    let centerX = marginLeft;
-                    let centerY = height - marginBottom;
-                    //get the x and y coordinates
-                    let coords = polarToCartesian(radius, angle, centerX, centerY);
-                    //return the path
-                    return `translate(${coords.x},${coords.y})`;
-                })
-                .classed("selected-match", function(d) {
-                    if (selectedMatch && d.id === selectedMatch.id) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                })
-                .attr("fill", d => determineFill(d, selectedMatch))
-                .attr("stroke", d => determineStroke(d, selectedMatch))
-                .attr("stroke-width", 1.5)
-                .on("mouseover", function(event, d) {
-                    handleMouseOver(event, d);
-                })
-                .on("mouseout", function(event, d) {
-                    handleMouseOut(event, d);
-                })
-                .on("click", function(event, d) {
-                    handleClick(event, d);
-                }).raise();
+        //if there is a selected match add the arc
+        if (selectedMatch) {
+            //create the arc based on the similarity score
+            let radius = radiusScale(selectedMatch.similarityScore);
+            let arc = createArc(radius, centerX, centerY);
 
-            //if there is a selected match add the arc
-            if (selectedMatch) {
-                //calcluate the center x and y coordinates
-                let centerX = marginLeft;
-                let centerY = height - marginBottom;
-
-                //create the arc based on the similarity score
-                let radius = radiusScale(selectedMatch.similarityScore);
-                let arc = createArc(radius, centerX, centerY);
-
-                let dxValue = selectedMatch.dx;
-                let genesInCommon = selectedMatch.genesInCommon;
-                //add the arc to the svg
-                svg.append("path")
-                    .attr("d", arc)
-                    .attr("stroke", colors.strokeBlue)
-                    .attr("stroke-width", 1)
-                    .attr("fill", "none")
-                    .attr("id", "arc-path-for-selected")
-                    //the arc needs to be behind the points so that the mouseover event can be handled
-                    .lower();
-            }
+            let dxValue = selectedMatch.dx;
+            let genesInCommon = selectedMatch.genesInCommon;
+            //add the arc to the svg
+            svg.append("path")
+                .attr("d", arc)
+                .attr("stroke", colors.strokeBlue)
+                .attr("stroke-width", 1)
+                .attr("fill", "none")
+                .attr("id", "arc-path-for-selected")
+                //the arc needs to be behind the points so that the mouseover event can be handled
+                .lower();
         }
 
         function handleMouseOver(event, d) {
@@ -293,10 +258,6 @@ export default function CircularChart() {
             simScore = Number.parseFloat(simScore).toFixed(3);
             tooltip.append("p")
                 .text("Score: " + simScore);
-
-            //calcluate the center x and y coordinates
-            let centerX = marginLeft;
-            let centerY = height - marginBottom;
 
             //create the arc based on the similarity score
             let radius = radiusScale(d.similarityScore);
@@ -369,10 +330,6 @@ export default function CircularChart() {
                     .raise()
                     .style("stroke", determineStroke(clickedData, clickedData))
                     .attr("fill", determineFill(clickedData, clickedData));
-                
-                //calcluate the center x and y coordinates
-                let centerX = marginLeft;
-                let centerY = height - marginBottom;
 
                 //create the arc based on the similarity score
                 let radius = radiusScale(clickedData.similarityScore);
@@ -546,8 +503,30 @@ function determineStroke(dataPoint, selectedMatch=null) {
     }
 }
 
-function determineShape(dataPoint, selectedMatch=null) {
-    if (selectedMatch != null) {
+function determineShape(dataPoint) {
+    // Create an SVG element based on the condition
+    let symbol = d3.symbol().size(15);
 
+    if (dataPoint.dx === 'undiagnosed') {
+        symbol.type(d3.symbolCircle);
+    } else {
+        symbol.type(d3.symbolSquare2).size(30);
     }
+
+    if (dataPoint.genesInCommon.length > 0) {
+        symbol.size(50);
+    }
+
+    return symbol();
+}
+
+function determineXY(dataPoint, centerX, centerY, radiusScale) {
+    //get the angle
+    let angle = generateRandomAngle();
+    //get the radius
+    let radius = radiusScale(dataPoint.similarityScore);
+    //get the x and y coordinates
+    let coords = polarToCartesian(radius, angle, centerX, centerY);
+    //return the path
+    return `translate(${coords.x},${coords.y})`;
 }
