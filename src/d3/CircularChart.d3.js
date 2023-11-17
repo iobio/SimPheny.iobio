@@ -1,5 +1,23 @@
 import * as d3 from "d3";
 
+//Setting colors for organization
+const colors = {
+    "strokeGreen": "#099509",
+    "fillGreen": "#18F218",
+    "strokePurple": "#8A05B6",
+    "fillPurple": "#D765FC",
+    "strokeBlack": "black",
+    "fillBlack": "black",
+    "strokeTeal": "#007991",
+    "fillTeal": "#33DDFF",
+    "strokeBlue": "#3855A5",
+    "fillBlue": "#3855A5",
+
+    "targetPurple": "purple",
+    "chartMain": "#996FA7",
+    "chartLettersGrey": "#5F5661",
+}
+
 export default function CircularChart() {
 
     var width = 600;
@@ -98,7 +116,7 @@ export default function CircularChart() {
                     .attr("stroke", 'white')
                     .attr("stroke-width", 1)
                     .attr("stroke-linecap", "round")
-                    .attr("fill", "#996FA7")
+                    .attr("fill", colors.chartMain)
                     .attr("class", "arc-section")
                     .attr("opacity", opacity)
                     .attr("transform", `translate(${marginLeft},${height - marginBottom})`)
@@ -112,7 +130,7 @@ export default function CircularChart() {
                             return radiusScale(xTicks[i + 1]) - radiusScale(tic);
                         })
                         .attr("height", 10)
-                        .attr("fill", "#996FA7")
+                        .attr("fill", colors.chartMain)
                         .attr("rx", 2)
                         .attr("ry", 2)
                         .attr("stroke", "white")
@@ -132,12 +150,12 @@ export default function CircularChart() {
                         .on("mouseout", function(event) {
                             //change back to its original color
                             d3.select(this)
-                                .attr("fill", "#996FA7")
+                                .attr("fill", colors.chartMain)
                                 .attr("opacity", opacity);
                             
                             //select the parent then get the first child which is the arc section
                             let arcSection = d3.select(this.parentNode).select(".arc-section");
-                            arcSection.attr("fill", "#996FA7")
+                            arcSection.attr("fill", colors.chartMain)
                         });
             } else if (i === xTicks.length - 1) {
                 //create the last which will have the radius and max radius
@@ -148,7 +166,7 @@ export default function CircularChart() {
                     .attr("stroke", 'white')
                     .attr("stroke-width", 1)
                     .attr("stroke-linecap", "round")
-                    .attr("fill", "#996FA7")
+                    .attr("fill", colors.chartMain)
                     .attr("class", "arc-section")
                     .attr("opacity", opacity)
                     .attr("transform", `translate(${marginLeft},${height - marginBottom})`)
@@ -162,7 +180,7 @@ export default function CircularChart() {
                             return maxRadius - radiusScale(tic);
                         })
                         .attr("height", 10)
-                        .attr("fill", "#996FA7")
+                        .attr("fill", colors.chartMain)
                         .attr("rx", 2)
                         .attr("ry", 2)
                         .attr("stroke", "white")
@@ -182,12 +200,12 @@ export default function CircularChart() {
                         .on("mouseout", function(event) {
                             //change back to its original color
                             d3.select(this)
-                                .attr("fill", "#996FA7")
+                                .attr("fill", colors.chartMain)
                                 .attr("opacity", opacity);
 
                             //select the parent then get the first child which is the arc section
                             let arcSection = d3.select(this.parentNode).select(".arc-section");
-                            arcSection.attr("fill", "#996FA7")
+                            arcSection.attr("fill", colors.chartMain)
                         });
             }   
         }
@@ -208,7 +226,7 @@ export default function CircularChart() {
                 .attr("font-size", "10px")
                 .attr("text-anchor", "middle")
                 .attr("alignment-baseline", "middle")
-                .attr("fill", "#5F5661");
+                .attr("fill", colors.chartLettersGrey);
 
         if (matchesObj) {
             //make a group for all the matches
@@ -255,59 +273,13 @@ export default function CircularChart() {
                         return false;
                     }
                 })
-                .attr("fill", function(d) {
-                    if (d.genesInCommon.length > 0) {
-                        return "#33DDFF";
-                    } else if (d.dx === 'diagnosed') {
-                       return "#18F218"
-                    } else if (d.dx === 'undiagnosed') {
-                        return "#D765FC";
-                    } else {
-                        return "black";
-                    }
-                })
-                .attr("stroke", function(d) {
-                    if (d.genesInCommon.length > 0) {
-                        return "#007991";
-                    }
-
-                    if (selectedMatch && d.id === selectedMatch.id) {
-                        if (d.genesInCommon.length > 0) {
-                            return "#CBD10A";
-                        }
-
-                        if (d.dx === 'undiagnosed') {
-                            return "#8A05B6";
-                        } else if (d.dx === 'diagnosed') {
-                                return "#099509";
-                        }
-                    } else if (d.dx === 'undiagnosed') {
-                        return "#8A05B6";
-                    } else if (d.dx === 'diagnosed') {
-                            return "#099509";
-                    } else {
-                        return "black";
-                    }
-                })
+                .attr("fill", d => determineFill(d, selectedMatch))
+                .attr("stroke", d => determineStroke(d, selectedMatch))
                 .attr("stroke-width", 1.5)
                 .on("mouseover", function(event, d) {
-                    let size = 2 + (d.similarityScore * 7);
-                    d3.select(this)
-                        .attr("stroke-width", 1.5);
                     handleMouseOver(event, d);
                 })
                 .on("mouseout", function(event, d) {
-                    //make the circle smaller
-                    d3.select(this)
-                        .attr("stroke-width", function(d) {
-                            let size = 4 + (d.similarityScore * 7);
-
-                            if (selectedMatch && d.id === selectedMatch.id) {
-                                return 1.5;
-                            } else {
-                                return 1.5;
-                            }
-                        });
                     handleMouseOut(event, d);
                 })
                 .on("click", function(event, d) {
@@ -329,9 +301,7 @@ export default function CircularChart() {
                 //add the arc to the svg
                 svg.append("path")
                     .attr("d", arc)
-                    .attr("stroke", function(d) {
-                        return "#3855A5"
-                    })
+                    .attr("stroke", colors.strokeBlue)
                     .attr("stroke-width", 1)
                     .attr("fill", "none")
                     .attr("id", "arc-path-for-selected")
@@ -367,23 +337,10 @@ export default function CircularChart() {
             let radius = radiusScale(d.similarityScore);
             let arc = createArc(radius, centerX, centerY);
 
-            let dxValue = d.dx;
-            let genesInCommon = d.genesInCommon;
             //add the arc to the svg
             svg.append("path")
                 .attr("d", arc)
-                .attr("stroke", function(d) {
-                    if (genesInCommon.length > 0) {
-                        return "#007991";
-                    }
-                    if (dxValue === 'undiagnosed') {
-                        return "#8A05B6";
-                    } else if (dxValue === 'diagnosed') {
-                            return "#099509";
-                    } else {
-                        return "black";
-                    }
-                })
+                .attr("stroke", determineStroke(d))
                 .attr("stroke-width", 1)
                 .attr("fill", "none")
                 .attr("id", "arc-path-for-hover")
@@ -415,94 +372,51 @@ export default function CircularChart() {
                     .style("visibility", "hidden");
             }, 100);
 
-            let point = d3.select(event.currentTarget);
-            let selected = point.classed("selected-match");
+            let clickedSvg = d3.select(event.currentTarget);
+            let clickedData = d;
+            let isSelected = clickedSvg.classed("selected-match");
 
-            //if classes contains selected, remove it
-            if (selected) {
-                //Get any already selected points and set them back to default style
-                d3.select(".selected-match")
-                    .style("stroke", function(d) {
-                        if (d.dx === 'diagnosed') {
-                            return "#099509";
-                        } else if (d.dx === 'undiagnosed') {
-                            return "#8A05B6";
-                        } else {
-                            return "black";
-                        }
-                    })
-                    .style("stroke-width", function(d) {
-                        let size = 4 + (d.similarityScore * 7);
-                        
-                        if (selectedMatch && d.id === selectedMatch.id) {
-                            return 1.5;
-                        } else {
-                            return 1.5;
-                        }
-                    })
+            if (isSelected) { //if the point clicked is already selected just deselect it
+                clickedSvg
+                    .style("stroke", determineStroke(clickedData))
+                    .attr("fill", determineFill(clickedData))
                     .classed("selected-match", false);
 
-                    svg.select("#arc-path-for-selected").remove();
-
+                    svg.select("#arc-path-for-selected").remove(); //remove the arc
             } else {
                 //Get any already selected points and set them back to default style
-                d3.select(".selected-match")
-                    .style("stroke", function(d) {
-                        if (d.dx === 'diagnosed') {
-                            return "#099509";
-                        } else if (d.dx === 'undiagnosed') {
-                            return "#8A05B6";
-                        } else {
-                            return "black";
-                        }
-                    })
-                    .style("stroke-width", function(d) {
-                        let size = 4 + (d.similarityScore * 7);
-                        
-                        if (selectedMatch && d.id === selectedMatch.id) {
-                            return 1.5;
-                        } else {
-                            return 1.5;
-                        }
-                    })
-                    .classed("selected-match", false);
-                //delete the arc
-                svg.select("#arc-path-for-selected").remove();
+                let previouslySelected = d3.selectAll(".selected-match")
+                if (!previouslySelected.empty()){
+                    previouslySelected.each(function(d) {
+                        d3.select(this)
+                            .style("stroke", determineStroke(d))
+                            .attr("fill", determineFill(d))
+                            .classed("selected-match", false);
+                    });
+                    //delete the arc
+                    svg.select("#arc-path-for-selected").remove();
+                }
 
                 //add the selected class to the point
-                point.classed("selected-match", true);
+                clickedSvg.classed("selected-match", true);
 
                 d3.select(".selected-match")
                     .raise()
-                    .style("stroke", function(d) {
-                        return "#3855A5"
-                    })
-                    .style("stroke-width", function(d) {
-                        let size = 4 + (d.similarityScore * 7);
-                        
-                        if (selectedMatch && d.id === selectedMatch.id) {
-                            return 1.5;
-                        } else {
-                            return 1.5;
-                        }
-                    });
+                    .style("stroke", determineStroke(clickedData, clickedData))
+                    .attr("fill", determineFill(clickedData, clickedData));
                 
                 //calcluate the center x and y coordinates
                 let centerX = marginLeft;
                 let centerY = height - marginBottom;
 
                 //create the arc based on the similarity score
-                let radius = radiusScale(d.similarityScore);
+                let radius = radiusScale(clickedData.similarityScore);
                 let arc = createArc(radius, centerX, centerY);
                 
-                let dxValue = d.dx;
-                let genesInCommon = d.genesInCommon;
                 //add the arc to the svg
                 svg.append("path")
                     .attr("d", arc)
-                    .attr("stroke", function(d) {
-                        return "#3855A5"
-                    })
+                    .attr("stroke", colors.strokeBlue)
                     .attr("stroke-width", 1)
                     .attr("fill", "none")
                     .attr("id", "arc-path-for-selected")
@@ -592,4 +506,56 @@ function createArcSection(innerRadius, outerRadius) {
         .cornerRadius(5);
 
     return arcSection;
+}
+
+function determineFill(dataPoint, selectedMatch=null) {
+    if (selectedMatch != null) { //if there is a selected match
+        //if they are the selected match fill them blue
+        if (dataPoint.id === selectedMatch.id) {
+            return colors.fillBlue;
+        }
+    } 
+
+    //if they have genes in common stop there
+    if (dataPoint.genesInCommon.length > 0) {
+        return colors.fillTeal; //teal-blue color
+    }
+    
+    //if not check if they are diagnosed or undiagnosed
+    if (dataPoint.dx === 'undiagnosed') {
+        return colors.fillPurple;
+    } else if (dataPoint.dx === 'diagnosed') {
+        return colors.fillGreen;
+    } else {
+        return colors.fillBlack; 
+    }
+}
+
+function determineStroke(dataPoint, selectedMatch=null) {
+    if (selectedMatch != null) {
+        //if they are the selected match fill them blue
+        if (dataPoint.id === selectedMatch.id) {
+            return colors.strokeBlue;
+        }
+    }
+
+    //if they have genes in common stop there
+    if (dataPoint.genesInCommon.length > 0) {
+        return colors.strokeTeal; 
+    }
+    
+    //if not check if they are diagnosed or undiagnosed
+    if (dataPoint.dx === 'undiagnosed') {
+        return colors.strokePurple;
+    } else if (dataPoint.dx === 'diagnosed') {
+        return colors.strokeGreen;
+    } else {
+        return colors.strokeBlack; 
+    }
+}
+
+function determineShape(dataPoint, selectedMatch=null) {
+    if (selectedMatch != null) {
+
+    }
 }
