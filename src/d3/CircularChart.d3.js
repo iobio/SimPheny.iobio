@@ -224,25 +224,22 @@ export default function CircularChart() {
 //USER INTERACTION FUNCTIONS ------------------------------------------------------------------------
 
 function mouseOverMatch(event, d, svg, radiusScale, centerX, centerY) {
-    //clear and remove the tooltip
-    d3.select("#lin-chart-tip")
-        .selectAll("p").remove();
-    d3.select("#lin-chart-tip")
-        .style("visibility", "hidden");
+    //get the similarity score
+    let simScore = Number.parseFloat(d.similarityScore).toFixed(3);
 
-    //make a tooltip
+    //clear the tooltip
     let tooltip = d3.select("#lin-chart-tip")
+
+    tooltip.selectAll("p").remove();
+
+    tooltip
         .style("left", (event.pageX + 10) + "px")
         .style("top", (event.pageY - 10) + "px")
         .style("visibility", "visible");
 
-    //add the similarity score
-    let simScore = d.similarityScore;
-
-    //make into a num round and then a string
-    simScore = Number.parseFloat(simScore).toFixed(3);
     tooltip.append("p")
         .text("Score: " + simScore);
+
     //create the arc based on the similarity score
     let radius = radiusScale(d.similarityScore);
     let arc = createArc(radius, centerX, centerY);
@@ -262,12 +259,11 @@ function mouseOverMatch(event, d, svg, radiusScale, centerX, centerY) {
 }
 
 function mouseOutMatch(event, d, svg, radiusScale, centerX, centerY) {
-    //clear and hide the tooltip
-    d3.select("#lin-chart-tip")
-        .selectAll("p").remove();
+    //clear the tooltip
+    let tooltip = d3.select("#lin-chart-tip")
 
-    d3.select("#lin-chart-tip")
-        .style("visibility", "hidden");
+    tooltip.selectAll("p").remove();
+    tooltip.style("visibility", "hidden");
 
     //remove the arc
     svg.select("#arc-path-for-hover").remove();
@@ -276,16 +272,16 @@ function mouseOutMatch(event, d, svg, radiusScale, centerX, centerY) {
 function clickMatch(event, d, svg, radiusScale, centerX, centerY) {
     //Clear and remove the tooltip but delay it so that the click event can be handled
     setTimeout(function() {
-        d3.select("#lin-chart-tip")
-            .selectAll("p").remove();
-
-        d3.select("#lin-chart-tip")
-            .style("visibility", "hidden");
+        //clear the tooltip
+        let tooltip = d3.select("#lin-chart-tip")
+        
+        tooltip.selectAll("p").remove();
+        tooltip.style("visibility", "hidden");
     }, 100);
 
-    let clickedSvg = d3.select(event.currentTarget);
-    let clickedData = d;
-    let isSelected = clickedSvg.classed("selected-match");
+    let clickedSvg = d3.select(event.currentTarget); //the svg that was clicked
+    let clickedData = d; //the data that was clicked
+    let isSelected = clickedSvg.classed("selected-match"); //if the point clicked is already selected (boolean)
 
     if (isSelected) { //if the point clicked is already selected just deselect it
         clickedSvg
