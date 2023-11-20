@@ -168,7 +168,7 @@ export default function CircularChart() {
             .classed("selected-match", d => selectedMatch && (d.id === selectedMatch.id) ? true : false)
             .attr("fill", d => determineFill(d, selectedMatch))
             .attr("stroke", d => determineStroke(d, selectedMatch))
-            .attr("stroke-width", 1.5)
+            .attr("stroke-width", 1)
             .on("mouseover", function(event, d) {
                 mouseOverMatch(event, d, svg, radiusScale, centerX, centerY);
             })
