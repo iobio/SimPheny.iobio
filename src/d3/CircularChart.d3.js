@@ -32,10 +32,14 @@ export default function CircularChart() {
     var marginLeft = 30;
     var chartId = "CircularChartD3";
 
-    var selectedMatch = null;
+    var selectedMatches = [];
     var anglesMap = {};
 
+    var onMatchSelectedCallback = function() {};
+    var onRectangleSelectedCallback = function() {};
+
     function chart(container, matchesObj) {
+
         // Create the SVG
         const svg = d3.create("svg")
             .attr("width", width)
@@ -60,20 +64,23 @@ export default function CircularChart() {
         var centerY = height - marginBottom;
 
         let xTicks = radiusScale.ticks(6);
+        let xHalfTics = radiusScale.ticks(12);
   
-        for (let i = 0; i < xTicks.length; i++) {
-            let tic = xTicks[i];
+        for (let i = 0; i < xHalfTics.length; i++) {
+            let tic = xHalfTics[i];
             //create the arc based on the tic
             var radius = radiusScale(tic);
 
-            if (i < xTicks.length - 1) {
-                var nextRadius = radiusScale(xTicks[i + 1]);
+            if (i < xHalfTics.length - 1) {
+                var nextTic = xHalfTics[i + 1];
+                var nextRadius = radiusScale(xHalfTics[i + 1]);
             } else {
+                var nextTic = xMax;
                 var nextRadius = maxRadius; //the last tic should be the max radius
             }
 
             //increase opacity as i increases
-            let opacity = 1- ((i+2) * 0.11);
+            let opacity = 1 - ((i) * 0.06);
 
             //create a group for the arcSection and the rectangle
             let arcSectionGroup = svg.append("g");
@@ -122,7 +129,8 @@ export default function CircularChart() {
                     //select the parent then get the first child which is the arc section
                     let arcSection = d3.select(this.parentNode).select(".arc-section");
                     arcSection.attr("fill", colors.chartMain)
-                }); 
+                })
+                .on("click", createRectangleClickHandler(tic, nextTic, matchesObj)); 
         }
 
         //Tic Labels
@@ -159,15 +167,24 @@ export default function CircularChart() {
             .enter()
             .append("path")
             .attr("d", d => determineShape(d))
+            .classed("selected-match", function(d) {
+                if (selectedMatches) {
+                    for (let match of selectedMatches) {
+                        if (match.id === d.id) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            })
             .attr("transform", function(d) {
                 let result = determineXY(d, centerX, centerY, radiusScale, anglesMap)
                 let xy = result.xy;
                 anglesMap = result.anglesMap;
                 return xy;
             })
-            .classed("selected-match", d => selectedMatch && (d.id === selectedMatch.id) ? true : false)
-            .attr("fill", d => determineFill(d, selectedMatch))
-            .attr("stroke", d => determineStroke(d, selectedMatch))
+            .attr("fill", d => determineFill(d, selectedMatches))
+            .attr("stroke", d => determineStroke(d, selectedMatches))
             .attr("stroke-width", 1)
             .on("mouseover", function(event, d) {
                 mouseOverMatch(event, d, svg, radiusScale, centerX, centerY);
@@ -177,37 +194,70 @@ export default function CircularChart() {
             })
             .on("click", function(event, d) {
                 clickMatch(event, d, svg, radiusScale, centerX, centerY);
+                onMatchSelectedCallback(d);
             }).raise();
 
         //if there is a selected match add the arc
-        if (selectedMatch) {
-            //create the arc based on the similarity score
-            let radius = radiusScale(selectedMatch.similarityScore);
-            let arc = createArc(radius, centerX, centerY);
+        if (selectedMatches) {
+            for (let match of selectedMatches) {
+                //create the arc based on the similarity score
+                let radius = radiusScale(match.similarityScore);
+                let arc = createArc(radius, centerX, centerY);
 
-            //add the arc to the svg
-            svg.append("path")
-                .attr("d", arc)
-                .attr("stroke", colors.strokeBlue)
-                .attr("stroke-width", 1)
-                .attr("fill", "none")
-                .attr("id", "arc-path-for-selected")
-                //the arc needs to be behind the points so that the mouseover event can be handled
-                .lower();
+                //add the arc to the svg
+                svg.append("path")
+                    .attr("d", arc)
+                    .attr("stroke", colors.strokeBlue)
+                    .attr("stroke-width", 1)
+                    .attr("fill", "none")
+                    .attr("id", match.id + "-arc")
+                    //the arc needs to be behind the points so that the mouseover event can be handled
+                    .lower();
+            }
+        }
+
+        //Handles the rectangle click event
+        function createRectangleClickHandler(tic, nextTic, matchesObj, selectedMatches) {
+            return function(event) {
+                let matches = [];
+                let alreadySelected = d3.selectAll(".selected-match").data();
+
+                for (let match of Object.values(matchesObj)) {
+                    if ((match.similarityScore <= tic) && (match.similarityScore >= nextTic)) {
+                        if (alreadySelected.includes(match)) {
+                            alreadySelected.splice(alreadySelected.indexOf(match), 1);
+                            continue;
+                        } else {
+                            matches.push(match);
+                        }
+                    }
+                }
+                matches = matches.concat(alreadySelected);
+                //call the callback function
+                onRectangleSelectedCallback(matches);
+            };
         }
 
         //Add the svg to the actual container
         container.appendChild(svg.node());
     }
 
+    chart.onMatchSelected = function(callback) {
+        onMatchSelectedCallback = callback;
+        return chart;
+    }
+    chart.onRectangleSelected = function(callback) {
+        onRectangleSelectedCallback = callback;
+        return chart;
+    } 
     chart.setSize = function(newHeight) {
         width = newHeight;
         height = newHeight;
         return chart;
     }
 
-    chart.setSelectedMatch = function(newSelectedMatch) {
-        selectedMatch = newSelectedMatch;
+    chart.setSelectedMatches = function(newSelectedMatches) {
+        selectedMatches = newSelectedMatches;
         return chart;
     }
 
@@ -296,32 +346,18 @@ function clickMatch(event, d, svg, radiusScale, centerX, centerY) {
 
     if (isSelected) { //if the point clicked is already selected just deselect it
         clickedSvg
+            .classed("selected-match", false)
             .style("stroke", determineStroke(clickedData))
-            .attr("fill", determineFill(clickedData))
-            .classed("selected-match", false);
-
-            svg.select("#arc-path-for-selected").remove(); //remove the arc
+            .attr("fill", determineFill(clickedData));
+            
+            svg.select("#" + clickedData.id +"-arc").remove(); //remove the arc
     } else {
-        //Get any already selected points and set them back to default style
-        let previouslySelected = d3.selectAll(".selected-match")
-        if (!previouslySelected.empty()){
-            previouslySelected.each(function(d) {
-                d3.select(this)
-                    .style("stroke", determineStroke(d))
-                    .attr("fill", determineFill(d))
-                    .classed("selected-match", false);
-            });
-            //delete the arc
-            svg.select("#arc-path-for-selected").remove();
-        }
-
         //add the selected class to the point
-        clickedSvg.classed("selected-match", true);
-
-        d3.select(".selected-match")
+        clickedSvg
+            .classed("selected-match", true)
             .raise()
-            .style("stroke", determineStroke(clickedData, clickedData))
-            .attr("fill", determineFill(clickedData, clickedData));
+            .style("stroke", determineStroke(clickedData, [clickedData]))
+            .attr("fill", determineFill(clickedData, [clickedData]));
 
         //create the arc based on the similarity score
         let radius = radiusScale(clickedData.similarityScore);
@@ -333,7 +369,7 @@ function clickMatch(event, d, svg, radiusScale, centerX, centerY) {
             .attr("stroke", colors.strokeBlue)
             .attr("stroke-width", 1)
             .attr("fill", "none")
-            .attr("id", "arc-path-for-selected")
+            .attr("id", clickedData.id + "-arc")
             //the arc needs to be behind the points so that the mouseover event can be handled
             .lower();
     }
@@ -387,7 +423,7 @@ function createArcSection(innerRadius, outerRadius) {
         .outerRadius(outerRadius)
         .startAngle(startAngle)
         .endAngle(endAngle)
-        .cornerRadius(5);
+        .cornerRadius(3);
 
     return arcSection;
 }
@@ -421,11 +457,13 @@ function createOriginSymbols(svg, marginLeft, height, marginBottom) {
             .attr("transform", `translate(${marginLeft - 25},${(height - marginBottom) + 36})`);
 }
 
-function determineFill(dataPoint, selectedMatch=null) {
-    if (selectedMatch != null) { //if there is a selected match
+function determineFill(dataPoint, selectedMatches=[]) {
+    if (selectedMatches && selectedMatches.length) {
         //if they are the selected match fill them blue
-        if (dataPoint.id === selectedMatch.id) {
-            return colors.fillBlue;
+        for (let match of selectedMatches) {
+            if (dataPoint.id === match.id) {
+                return colors.fillBlue;
+            }
         }
     } 
 
@@ -444,13 +482,15 @@ function determineFill(dataPoint, selectedMatch=null) {
     }
 }
 
-function determineStroke(dataPoint, selectedMatch=null) {
-    if (selectedMatch != null) {
+function determineStroke(dataPoint, selectedMatches=[]) {
+    if (selectedMatches && selectedMatches.length) { 
         //if they are the selected match fill them blue
-        if (dataPoint.id === selectedMatch.id) {
-            return colors.strokeBlue;
+        for (let match of selectedMatches) {
+            if (dataPoint.id === match.id) {
+                return colors.strokeBlue;
+            }
         }
-    }
+    } 
 
     //if they have genes in common stop there
     if (dataPoint.genesInCommon.length > 0) {

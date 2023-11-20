@@ -57,7 +57,7 @@
                 <button @click="applyFilters()">Apply</button>
         </div>
 
-        <div ref="lin-chart-container" id="lin-chart-viz" @click="selectMatch" v-if="targetPatient"></div>
+        <div ref="lin-chart-container" id="lin-chart-viz" v-if="targetPatient"></div>
         <div v-else id="lin-chart-alt-text">
             <p>No target patient defined.</p>
             <p>Input target patient to view matches.</p>
@@ -74,12 +74,12 @@
 
     export default {
         emits: ['selectMatch'],
-        name: 'LinearChartViz',
+        name: 'ChartViz',
 
         props: {
             targetPatient: Object,
             patientMap: Object,
-            selectedMatch: Object,
+            selectedMatches: Array,
             chartScales: Object,
         },
         data: function() {
@@ -136,13 +136,10 @@
             validateRank() {
                 let minRank = 1;
                 let maxRank = this.filteredPatientMap.keys().length;
-
-
             },
             validateScore() {
                 let minScore = 0;
                 let maxScore = 1;
-
             },
             drawChart() {
                 let container = this.$refs['lin-chart-container'];
@@ -158,9 +155,11 @@
 
                     this.chart = CircularChart()
                         .setSize(height)
-                        .setSelectedMatch(this.selectedMatch)
+                        .setSelectedMatches(this.selectedMatches)
                         .setXMax(this.chartScalesFiltered.xMin)
-                        .setXMin(1-((1-this.chartScalesFiltered.xMax)/2));
+                        .setXMin(1-((1-this.chartScalesFiltered.xMax)/2))
+                        .onMatchSelected(this.selectMatch)
+                        .onRectangleSelected(this.selectRectangle);
 
                     if (this.anglesMap) {
                         this.chart.setXYCoords(this.anglesMap);
@@ -172,8 +171,15 @@
             },
             selectMatch() {
                 //get the data from the point with the selected-match class
-                let selectedMatch = d3.select('.selected-match').data()[0];
-                this.$emit('selectMatch', selectedMatch);
+                let selectedMatches = d3.selectAll('.selected-match').data();
+                this.$emit('selectMatch', selectedMatches);
+            },
+            selectRectangle(selectedMatches){
+                this.$emit('selectMatch', selectedMatches);
+                //timeout to allow the chart to update
+                setTimeout(() => {
+                    this.drawChart();
+                }, 10);
             },
             applyFilters() {
                 let filteredPatientMap = { ...this.patientMap };

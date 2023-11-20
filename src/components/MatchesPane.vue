@@ -1,44 +1,69 @@
 <template>
     <div id="matches-container">
         <div class="upper matches">
-            <LinearChartViz
+            <ChartViz
                 :targetPatient="targetPatient"
                 :patientMap="patientMap"
-                :selectedMatch="selectedMatch"
+                :selectedMatches="selectedMatches"
                 @selectMatch="populateSelectedMatch"
-                :chartScales="chartScales"></LinearChartViz>
+                :chartScales="chartScales"></ChartViz>
         </div>
 
         <div id="lower-container">
             <div class="lower matches" :class="{ expanded: showDetailsBar, collapsed: !showDetailsBar}">
-                <h1 class="section-head">Selected Match</h1>
-                <div v-if="selectedMatch" class="column-container">
-                    <div class="column">
+                <h1 v-if="selectedMatches && selectedMatches.length <= 1" class="section-head">Selected Match</h1>
+                <h1 v-if="selectedMatches && selectedMatches.length > 1" class="section-head">Selected Matches</h1>
+                <div v-if="selectedMatches" class="column-container">
+                    <div v-if="selectedMatches && selectedMatches.length == 1" class="column">
                         <h4>Summary</h4>
                         <div id="summary-container">
-                            <p><b>ID:</b> {{ selectedMatch.id }}</p>
-                            <p><b>Rank:</b> {{ selectedMatch.rank }}</p>
-                            <p><b>Score:</b> {{ Math.round(selectedMatch.similarityScore * 10000)/10000 }}</p>
-                            <p><b>Dx Status:</b> {{ selectedMatch.dx }}</p>
-                            <p><b>Clinical Dx:</b> {{ selectedMatch.clinicalDiagnosis }}</p>
+                            <p><b>ID:</b> {{ selectedMatches[0].id }}</p>
+                            <p><b>Rank:</b> {{ selectedMatches[0].rank }}</p>
+                            <p><b>Score:</b> {{ Math.round(selectedMatches[0].similarityScore * 10000)/10000 }}</p>
+                            <p><b>Dx Status:</b> {{ selectedMatches[0].dx }}</p>
+                            <p><b>Clinical Dx:</b> {{ selectedMatches[0].clinicalDiagnosis }}</p>
                         </div>
                     </div>
 
-                    <div class="column">
+                    <div v-if="selectedMatches && selectedMatches.length == 1" class="column">
                         <div class="sub">
                             <h4>Phenotypes</h4>
                             <div>
-                                <p class="list-item inTarget" v-for="phenotype in selectedMatch.phenotypesInCommon"> {{ phenotype.hpoId + " " + phenotype.term }}</p>
-                                <p class="list-item" v-for="phenotype in notInTarget"> {{ phenotype.hpoId + " " + phenotype.term }}</p>
+                                <p class="list-item inTarget" v-for="phenotype in phenotypesInCommon"> {{ phenotype.hpoId + " " + phenotype.term }}</p>
+                                <p class="list-item" v-for="phenotype in phenNotInTarget"> {{ phenotype.hpoId + " " + phenotype.term }}</p>
                             </div>
                         </div>
 
                         <div class="sub">
                             <h4>Genes:</h4>
                             <div>
-                                <ul>
-                                    <li v-for="gene in selectedMatch.genesList">{{ gene.gene_symbol }}</li>
-                                </ul>                                 
+                                <p class="list-item inTarget" v-for="gene in genesInCommon">{{ gene.gene_symbol }}</p>
+                                <p class="list-item" v-for="gene in genesNotInTarget">{{ gene.gene_symbol }}</p>                              
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-if="selectedMatches && selectedMatches.length > 1" class="column full-height">
+                        <div class="sub">
+                            <h4>Genes:</h4>
+                            <div>
+                                <p class="list-item inTarget" v-for="gene in genesInCommon">{{ gene.gene_symbol }}</p>
+                                <p class="list-item" v-for="gene in genesNotInTarget">{{ gene.gene_symbol }}</p>                              
+                            </div>
+                        </div>
+                        <div class="sub">
+                            <h4>Diagnoses:</h4>
+                            <div>
+                                <p class="list-item diagnosis" v-for="diagnosis in diagnoses">{{ diagnosis }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-if="selectedMatches && selectedMatches.length > 1" class="column full-height">
+                        <div class="sub">
+                            <h4>Phenotypes</h4>
+                            <div>
+                                <p class="list-item inTarget" v-for="phenotype in phenotypesInCommon"> {{ phenotype.hpoId + " " + phenotype.term }}</p>
+                                <p class="list-item" v-for="phenotype in phenNotInTarget"> {{ phenotype.hpoId + " " + phenotype.term }}</p>
                             </div>
                         </div>
                     </div>
@@ -60,11 +85,11 @@
 </template>
 
 <script> 
-    import LinearChartViz from './viz/ChartViz.vue';
+    import ChartViz from './viz/ChartViz.vue';
   export default {
     name: 'MatchesPane',
     components: {
-        LinearChartViz,
+        ChartViz,
     }, 
     props: {
         targetPatient: Object,
@@ -74,29 +99,116 @@
     data: function() {
       return {
         showDetailsBar: false,
-        selectedMatch: null,
-        notInTarget: [],
+        selectedMatches: null,
+        phenNotInTarget: [],
+        genesNotInTarget: [],
+        phenotypesInCommon: [],
+        genesInCommon: [],
+        diagnoses: [],
       }
     },
     methods: {
-        populateSelectedMatch(match) {
-            this.selectedMatch = match;
-            if (!this.showDetailsBar && this.selectedMatch) {
+        populateSelectedMatch(matches) {
+            let previouslyNull = this.selectedMatches == null;
+            this.selectedMatches = matches;
+            if (!this.showDetailsBar && previouslyNull) {
                 this.showDetailsBar = true;
-            } else if (!this.selectedMatch) {
+            } else if (!this.selectedMatches) {
                 this.showDetailsBar = false;
             }
-            // this.$emit('selectMatch', match);
         },
     },
     watch: {
-        selectedMatch: function() {
-            if (this.selectedMatch && this.targetPatient) {
-                this.notInTarget = this.selectedMatch.phenotypeList.filter(phenotype => {
-                    return !this.targetPatient.phenotypeList.some(targetPhenotype => {
-                        return targetPhenotype.hpoId == phenotype.hpoId;
+        selectedMatches: function() {
+            if (this.selectedMatches && this.targetPatient) {
+                if (this.selectedMatches.length == 0) {
+                    this.phenNotInTarget = [];
+                    this.genesNotInTarget = [];
+                    this.phenotypesInCommon = [];
+                    this.genesInCommon = [];
+                    this.diagnoses = [];
+                    this.showDetailsBar = false;
+                    return;
+                } else if (this.selectedMatches.length == 1) {
+                    let selectedMatch = this.selectedMatches[0];
+
+                    this.phenNotInTarget = selectedMatch.phenotypeList.filter(phenotype => {
+                        return !this.targetPatient.phenotypeList.some(targetPhenotype => {
+                            return targetPhenotype.hpoId == phenotype.hpoId;
+                        })
                     })
-                })
+
+                    this.phenotypesInCommon = selectedMatch.phenotypeList.filter(phenotype => {
+                        return this.targetPatient.phenotypeList.some(targetPhenotype => {
+                            return targetPhenotype.hpoId == phenotype.hpoId;
+                        })
+                    })
+
+                    this.genesNotInTarget = selectedMatch.genesList.filter(gene => {
+                        return !this.targetPatient.genesList.some(targetGene => {
+                            return targetGene.gene_symbol == gene.gene_symbol;
+                        })
+                    })
+
+                    this.genesInCommon = selectedMatch.genesList.filter(gene => {
+                        return this.targetPatient.genesList.some(targetGene => {
+                            return targetGene.gene_symbol == gene.gene_symbol;
+                        })
+                    })
+
+                    this.diagnoses = selectedMatch.diagnoses;
+ 
+                } else if (this.selectedMatches.length > 1) {
+                    //iterate through each match and find the phenotypes that are not in the target
+                    let phenNotInTarget = [];
+                    this.selectedMatches.forEach(match => {
+                        phenNotInTarget = phenNotInTarget.concat(match.phenotypeList.filter(phenotype => {
+                            return !this.targetPatient.phenotypeList.some(targetPhenotype => {
+                                return targetPhenotype.hpoId == phenotype.hpoId;
+                            })
+                        }))
+                    })
+                    this.phenNotInTarget = phenNotInTarget;
+
+                    let genesNotInTarget = [];
+                    this.selectedMatches.forEach(match => {
+                        genesNotInTarget = genesNotInTarget.concat(match.genesList.filter(gene => {
+                            return !this.targetPatient.genesList.some(targetGene => {
+                                return targetGene.gene_symbol == gene.gene_symbol;
+                            })
+                        }))
+                    })
+                    this.genesNotInTarget = genesNotInTarget;
+
+                    let phenotypesInCommon = [];
+                    this.selectedMatches.forEach(match => {
+                        phenotypesInCommon = phenotypesInCommon.concat(match.phenotypeList.filter(phenotype => {
+                            return this.targetPatient.phenotypeList.some(targetPhenotype => {
+                                return targetPhenotype.hpoId == phenotype.hpoId;
+                            })
+                        }))
+                    })
+                    this.phenotypesInCommon = phenotypesInCommon;
+
+                    let genesInCommon = [];
+                    this.selectedMatches.forEach(match => {
+                        genesInCommon = genesInCommon.concat(match.genesList.filter(gene => {
+                            return this.targetPatient.genesList.some(targetGene => {
+                                return targetGene.gene_symbol == gene.gene_symbol;
+                            })
+                        }))
+                    })
+                    this.genesInCommon = genesInCommon;
+
+                    let diagnoses = [];
+                    this.selectedMatches.forEach(match => {
+                        //only add to diagnoses if it is not "Undiagnosed"
+                        if (match.clinicalDiagnosis != "Undiagnosed") {
+                            diagnoses = diagnoses.concat(match.clinicalDiagnosis);
+                        }
+                    })
+                    this.diagnoses = diagnoses;
+                }
             }
         }
     }
@@ -206,12 +318,29 @@
         margin-bottom: 2px;
         padding-left: 10px;
     }
+    .column .sub .list-item.diagnosis {
+        text-transform: uppercase;
+        font-size: small;
+    }
     .column .sub .list-item.inTarget {
         color: #2e482e;
         background-color: #dae4da;
         border-radius: 3px;
         border: 1px solid #b7beb7;
 
+    }
+    .lower.matches .column-container .column.full-height {
+        height: 100%;
+    }
+    .lower.matches .column-container .column.full-height:first-of-type {
+        height: 100%;
+        max-width: 35%;
+    }
+    .lower.matches .column-container .column.full-height .sub {
+        height: 95%;
+    }
+    .lower.matches .column-container .column.full-height:first-of-type .sub {
+        height: 47%;
     }
     .lower.matches .column-container .column li {
         list-style-type: none;
