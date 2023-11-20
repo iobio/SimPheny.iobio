@@ -97,20 +97,18 @@
                     filterByScore: false,
                     rankCutOff: 0,
                     scoreCutOff: 0.0,
-                }
+                },
+                anglesMap: null,
             }
         },
         mounted() {
-        
             if (this.targetPatient) {
                 var linChartContainer = this.$refs['lin-chart-container'];
                 
-
                 //add a listener for when the window is resized or the container is resized
                 this.resizeObserver = new ResizeObserver(() => {
                     this.drawChart();
                 });
-
                 this.resizeObserver.observe(linChartContainer);
 
                 this.drawChart();
@@ -156,18 +154,20 @@
                 }
 
                 if (container != null && this.targetPatient && this.chartScales) {
-                    //width is based on the width of the container
-                    let width = container.clientWidth;
                     let height = container.clientHeight;
 
                     this.chart = CircularChart()
-                    .setWidth(height)
-                    .setHeight(height)
-                    .setSelectedMatch(this.selectedMatch)
-                    .setXMax(this.chartScalesFiltered.xMin)
-                    .setXMin(1-((1-this.chartScalesFiltered.xMax)/2));
+                        .setSize(height)
+                        .setSelectedMatch(this.selectedMatch)
+                        .setXMax(this.chartScalesFiltered.xMin)
+                        .setXMin(1-((1-this.chartScalesFiltered.xMax)/2));
+
+                    if (this.anglesMap) {
+                        this.chart.setXYCoords(this.anglesMap);
+                    }
 
                     this.chart(container, this.filteredPatientMap);
+                    this.anglesMap = this.chart.getXYCoords();
                 }
             },
             selectMatch() {

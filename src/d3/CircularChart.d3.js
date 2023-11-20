@@ -33,6 +33,7 @@ export default function CircularChart() {
     var chartId = "CircularChartD3";
 
     var selectedMatch = null;
+    var anglesMap = {};
 
     function chart(container, matchesObj) {
         // Create the SVG
@@ -158,7 +159,12 @@ export default function CircularChart() {
             .enter()
             .append("path")
             .attr("d", d => determineShape(d))
-            .attr("transform", d => determineXY(d, centerX, centerY, radiusScale))
+            .attr("transform", function(d) {
+                let result = determineXY(d, centerX, centerY, radiusScale, anglesMap)
+                let xy = result.xy;
+                anglesMap = result.anglesMap;
+                return xy;
+            })
             .classed("selected-match", d => selectedMatch && (d.id === selectedMatch.id) ? true : false)
             .attr("fill", d => determineFill(d, selectedMatch))
             .attr("stroke", d => determineStroke(d, selectedMatch))
@@ -194,12 +200,8 @@ export default function CircularChart() {
         container.appendChild(svg.node());
     }
 
-    chart.setWidth = function(newWidth) {
-        width = newWidth;
-        return chart;
-    }
-
-    chart.setHeight = function(newHeight) {
+    chart.setSize = function(newHeight) {
+        width = newHeight;
         height = newHeight;
         return chart;
     }
@@ -215,6 +217,15 @@ export default function CircularChart() {
     }
     chart.setXMax = function(newXMax) {
         xMax = newXMax;
+        return chart;
+    }
+
+    chart.getXYCoords = function() {
+        return anglesMap;
+    }
+
+    chart.setXYCoords = function(newXYCoords) {
+        anglesMap = newXYCoords;
         return chart;
     }
 
@@ -473,13 +484,22 @@ function determineShape(dataPoint) {
     return symbol();
 }
 
-function determineXY(dataPoint, centerX, centerY, radiusScale) {
-    //get the angle
-    let angle = generateRandomAngle();
-    //get the radius
-    let radius = radiusScale(dataPoint.similarityScore);
-    //get the x and y coordinates
-    let coords = polarToCartesian(radius, angle, centerX, centerY);
-    //return the path
-    return `translate(${coords.x},${coords.y})`;
+function determineXY(dataPoint, centerX, centerY, radiusScale, anglesMap) {
+    if (dataPoint.id in anglesMap) {
+        let angle = anglesMap[dataPoint.id];
+        let radius = radiusScale(dataPoint.similarityScore);
+        let coords = polarToCartesian(radius, angle, centerX, centerY);
+        return {xy: `translate(${coords.x},${coords.y})`, anglesMap: anglesMap}
+    } else {
+        let angle = generateRandomAngle();
+        let radius = radiusScale(dataPoint.similarityScore);
+
+        //get the x and y coordinates
+        let coords = polarToCartesian(radius, angle, centerX, centerY);
+        //add to anglesMap
+        anglesMap[dataPoint.id] = angle;
+
+        //return the path
+        return {xy: `translate(${coords.x},${coords.y})`, anglesMap: anglesMap};
+    }
 }
