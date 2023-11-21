@@ -21,12 +21,18 @@
                     <p>Show Undiagnosed</p>
                     <input v-model="filterOptions.showUndiagnosed" type="checkbox" name="" id="">
                 </div>
+                <div class="group">
+                    <p>Genes In Common Only</p>
+                    <input v-model="filterOptions.showGenesInCommonOnly" type="checkbox" name="" id="">
+                </div>
 
                 <div  class="group" id="filter-by-radios">
                     <p>Filter By:</p>
                     <div class="filterby-wrapper">
-                        <input @click="selectFilter('rank')" type="radio" value="rank" name="filterBy">
-                        <label for="rank">Rank</label>
+                        <div>
+                            <input @click="selectFilter('rank')" type="radio" value="rank" name="filterBy">
+                            <label for="rank">Rank</label>
+                        </div>
                         <div class="filter-num-input">
                             <p>Max:</p>
                             <input 
@@ -40,8 +46,10 @@
 
                     </div>
                     <div class="filterby-wrapper">
-                        <input @click="selectFilter('score')" type="radio" value="score" name="filterBy">
-                        <label for="score">Score</label>  
+                        <div>
+                            <input @click="selectFilter('score')" type="radio" value="score" name="filterBy">
+                            <label for="score">Score</label> 
+                        </div>
                         <div class="filter-num-input">
                             <p>Min: </p>
                             <input 
@@ -56,12 +64,14 @@
                 </div>   
             </div>
 
-            <button @click="applyFilters()">Apply</button>
+            <div id="options-buttons">
+                <button @click="applyFilters()">Apply</button>
+                <button @click="resetChart()">Reset <v-icon>mdi-reload-alert</v-icon></button>
+            </div>
     </div>
 </template>
 
 <script>
-    // import LinearChart from '../../d3/linearChart.d3';
     import CircularChart from '../../d3/CircularChart.d3';
     import * as d3 from 'd3';
 
@@ -85,7 +95,7 @@
                 filteredPatientMap: this.patientMap,
                 filterOptions: {
                     showUndiagnosed: true,
-                    useGenesInCommon: true,
+                    showGenesInCommonOnly: false,
                     filterByRank: false,
                     filterByScore: false,
                     rankCutOff: 0,
@@ -103,8 +113,7 @@
                     this.drawChart();
                 });
                 this.resizeObserver.observe(linChartContainer);
-
-                this.drawChart();
+                this.applyFilters();
             }
         },
         updated() {
@@ -163,9 +172,27 @@
                 }
             },
             selectMatch(matches=null) {
-                //get the data from the point with the selected-match class
-                let selectedMatches = d3.selectAll('.selected-match').data();
-                this.$emit('selectMatch', selectedMatches);
+                if (matches == null || typeof matches !== 'array') {
+                    //get the data from the point with the selected-match class
+                    let selectedMatches = d3.selectAll('.selected-match').data();
+                    this.$emit('selectMatch', selectedMatches);
+                } else {
+                    this.$emit('selectMatch', matches);
+                }
+            },
+            resetChart() {
+                this.$emit('selectMatch', []);
+                //reset the filters to default
+                this.filterOptions.showUndiagnosed = true;
+                this.filterOptions.showGenesInCommonOnly = false;
+                this.filterOptions.filterByRank = false;
+                this.filterOptions.filterByScore = false;
+                this.filterOptions.rankCutOff = 0;
+                this.filterOptions.scoreCutOff = 0.0;
+                this.chartScalesFiltered = this.chartScales;
+                this.filteredPatientMap = this.patientMap;
+
+                this.applyFilters();
             },
             clearSelection() {
                 this.$emit('selectMatch', []);
@@ -179,6 +206,8 @@
             },
             applyFilters() {
                 let filteredPatientMap = { ...this.patientMap };
+                let newSelectedMatches = [];
+                let filterNeverFired = true;
                 let newMinSimilartyScore = this.chartScales.xMin
                 let newMaxSimilartyScore = this.chartScales.xMax
                 let minOfPatients = 1;
@@ -186,23 +215,53 @@
 
                 for (let patientId in this.patientMap) {
                     if (!this.filterOptions.showUndiagnosed){
+                        filterNeverFired = false;
                         if (this.patientMap[patientId].dx === 'undiagnosed') {
                             delete filteredPatientMap[patientId];
                             continue;
+                        } else {
+                            //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
+                            if (this.selectedMatches.includes(this.patientMap[patientId])) {
+                                newSelectedMatches.push(this.patientMap[patientId]);
+                            }
+                        }
+                    }
+                    if (this.filterOptions.showGenesInCommonOnly){
+                        filterNeverFired = false;
+                        if (this.patientMap[patientId].genesInCommon.length === 0) {
+                            delete filteredPatientMap[patientId];
+                            continue;
+                        } else {
+                            //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
+                            if (this.selectedMatches.includes(this.patientMap[patientId])) {
+                                newSelectedMatches.push(this.patientMap[patientId]);
+                            }
                         }
                     }
                     if (this.filterOptions.filterByRank){
+                        filterNeverFired = false;
                         let maxRank = this.filterOptions.rankCutOff;
                         if (this.patientMap[patientId].rank && (parseInt(this.patientMap[patientId].rank) > maxRank)) {
                             delete filteredPatientMap[patientId];
                             continue;
+                        } else {
+                            //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
+                            if (this.selectedMatches.includes(this.patientMap[patientId])) {
+                                newSelectedMatches.push(this.patientMap[patientId]);
+                            }
                         }
                     }
                     if (this.filterOptions.filterByScore){
+                        filterNeverFired = false;
                         let minScore = this.filterOptions.scoreCutOff;
                         if (this.patientMap[patientId].similarityScore && (parseFloat(this.patientMap[patientId].similarityScore) < minScore)) {
                             delete filteredPatientMap[patientId];
                             continue;
+                        } else {
+                            //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
+                            if (this.selectedMatches.includes(this.patientMap[patientId])) {
+                                newSelectedMatches.push(this.patientMap[patientId]);
+                            }
                         }
                     }
                     //if we get here then the patient passed all the filters so we need to update the min similarity score
@@ -227,8 +286,13 @@
                     this.chartScalesFiltered.xMax = newMaxSimilartyScore;
                 }
 
-                this.filteredPatientMap = filteredPatientMap;
+                //if the new selected matches is empty then we need to assign it to the previous selected matches
+                if (newSelectedMatches.length == 0 && filterNeverFired == true) {
+                    newSelectedMatches = this.selectedMatches;
+                }
 
+                this.filteredPatientMap = filteredPatientMap;
+                this.selectMatch(newSelectedMatches);
                 this.drawChart();
             },
             selectFilter(filter) {
@@ -289,6 +353,22 @@
         z-index: 2
     #chart-options-btn:hover
         box-shadow: 0px 2px 4px -1px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)), 0px 4px 5px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)), 0px 1px 10px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.12))
+    #options-buttons
+        display: flex
+        flex-direction: row
+        justify-content: center
+        align-items: center
+        width: 100%
+        font-size: 11pt
+        button:nth-of-type(1)
+            background-color: #21351f
+            &:hover
+                background-color: #85C189
+        button:nth-of-type(2)
+            background-color: red
+            margin-left: 5px
+            &:hover
+                background-color: #FF5C5C
     #chart-options-container
         border-radius: 5px
         display: flex
@@ -309,7 +389,7 @@
             justify-content: space-between
             align-items: center
             text-align: center
-            width: 70%
+            width: 85%
             .group
                 width: 100%
                 display: flex
@@ -331,7 +411,9 @@
                     width: 100%
                     display: flex
                     flex-direction: row
-                    justify-content: center
+                    justify-content: space-evenly
+                    label
+                        line-height: 30px
             input
                 margin-right: 5px
                 cursor: pointer
@@ -341,7 +423,7 @@
         *
             overflow: hidden
         #rank-filter, #score-filter
-            width: 40%
+            width: 50%
             border: 1px solid #D4DAD4
             border-radius: 5px
             text-align: center
