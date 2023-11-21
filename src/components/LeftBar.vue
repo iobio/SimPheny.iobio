@@ -776,10 +776,12 @@ import * as hpoDb from '../data/grabData.js'
             button:first-of-type:hover
                 background-color: #FF5C5C
                 cursor: pointer
+                color: black
             button:nth-of-type(2)
                 background-color: #448849
                 color: white
             button:nth-of-type(2):hover
                 background-color: #85C189
                 cursor: pointer
+                color: black
 </style>

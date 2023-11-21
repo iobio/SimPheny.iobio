@@ -43,7 +43,6 @@
                             id="rank-filter" 
                             :disabled="!filterOptions.filterByRank">
                         </div>
-
                     </div>
                     <div class="filterby-wrapper">
                         <div>
@@ -61,7 +60,11 @@
                             :disabled="!filterOptions.filterByScore">
                         </div>
                     </div>                 
-                </div>   
+                </div>  
+                <div class="group zoom-to-select">
+                    <label for="">Zoom on Selection</label>
+                    <button><v-icon>mdi-magnify-plus-outline</v-icon></button>
+                </div> 
             </div>
 
             <div id="options-buttons">
@@ -364,11 +367,13 @@
             background-color: #21351f
             &:hover
                 background-color: #85C189
+                color: black
         button:nth-of-type(2)
             background-color: red
             margin-left: 5px
             &:hover
                 background-color: #FF5C5C
+                color: black
     #chart-options-container
         border-radius: 5px
         display: flex
@@ -400,6 +405,16 @@
                 margin-top: 5px
                 margin-bottom: 5px
                 padding: 5px
+            .zoom-to-select
+                display: flex
+                flex-direction: row
+                justify-content: space-evenly
+                align-items: center
+                button
+                    width: 40px
+                    &:hover
+                        background-color: #85C189
+                        color: black
             .filter-num-input
                 display: flex
                 flex-direction: row
