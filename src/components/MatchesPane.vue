@@ -251,7 +251,7 @@
         background-color: #ffffff;
         padding-top: 48px;
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
         justify-content: center;
     }

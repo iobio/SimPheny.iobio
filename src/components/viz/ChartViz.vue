@@ -1,62 +1,5 @@
 <template>
     <div id="linear-chart-container">
-        <button @click="showChartOptions = !showChartOptions" id="chart-options-btn">
-            <v-icon color="white">mdi-dots-horizontal-circle-outline</v-icon>
-        </button>
-
-        <div id="chart-options-container" :class="{ hidden: showChartOptions === false}">
-                <h3>Chart Options</h3>
-
-                <div id="options-content">
-                    <div class="group">
-                        <p>Show Undiagnosed</p>
-                        <input v-model="filterOptions.showUndiagnosed" type="checkbox" name="" id="">
-                    </div>
-
-                    <div class="group"> 
-                        <p>Use Genes In Common</p>
-                        <input v-model="filterOptions.useGenesInCommon" type="checkbox" name="" id="" disabled="true">
-                    </div>
-
-                    
-                    <div  class="group" id="filter-by-radios">
-                        <p>Filter By:</p>
-                        <div>
-                            <input @click="selectFilter('rank')" type="radio" value="rank" name="filterBy">
-                            <label for="rank">Rank</label>
-                        </div>
-                        <div>
-                            <input @click="selectFilter('score')" type="radio" value="score" name="filterBy">
-                            <label for="score">Score</label>  
-                        </div>                 
-                    </div>   
-
-                    <div class="filter-num-input group">
-                        <p>Max Rank: </p>
-                        <input 
-                        v-model="filterOptions.rankCutOff" 
-                        step="5" 
-                        type="number" 
-                        name="" 
-                        id="rank-filter" 
-                        :disabled="!filterOptions.filterByRank">
-                    </div>
-
-                    <div class="filter-num-input group">
-                        <p>Min Score: </p>
-                        <input 
-                        v-model="filterOptions.scoreCutOff" 
-                        step=".1" 
-                        type="number" 
-                        name="" 
-                        id="score-filter" 
-                        :disabled="!filterOptions.filterByScore">
-                    </div>
-                </div>
-
-                <button @click="applyFilters()">Apply</button>
-        </div>
-
         <div ref="lin-chart-container" id="lin-chart-viz" v-if="targetPatient"></div>
         <div v-else id="lin-chart-alt-text">
             <p>No target patient defined.</p>
@@ -65,6 +8,56 @@
         <!-- <div v-if="targetPatient && showLoading" id="loading-container"><p><v-icon class="loading-icon">mdi-loading</v-icon></p><p>loading matches...</p></div> -->
     </div>
     <div id="lin-chart-tip"></div>
+
+    <button @click="showChartOptions = !showChartOptions" id="chart-options-btn">
+        <v-icon color="white">mdi-dots-horizontal-circle-outline</v-icon>
+    </button>
+
+    <div id="chart-options-container" :class="{ hidden: showChartOptions === false}">
+            <h3>Chart Options</h3>
+
+            <div id="options-content">
+                <div class="group">
+                    <p>Show Undiagnosed</p>
+                    <input v-model="filterOptions.showUndiagnosed" type="checkbox" name="" id="">
+                </div>
+
+                <div  class="group" id="filter-by-radios">
+                    <p>Filter By:</p>
+                    <div class="filterby-wrapper">
+                        <input @click="selectFilter('rank')" type="radio" value="rank" name="filterBy">
+                        <label for="rank">Rank</label>
+                        <div class="filter-num-input">
+                            <p>Max:</p>
+                            <input 
+                            v-model="filterOptions.rankCutOff" 
+                            step="5" 
+                            type="number" 
+                            name="" 
+                            id="rank-filter" 
+                            :disabled="!filterOptions.filterByRank">
+                        </div>
+
+                    </div>
+                    <div class="filterby-wrapper">
+                        <input @click="selectFilter('score')" type="radio" value="score" name="filterBy">
+                        <label for="score">Score</label>  
+                        <div class="filter-num-input">
+                            <p>Min: </p>
+                            <input 
+                            v-model="filterOptions.scoreCutOff" 
+                            step=".1" 
+                            type="number" 
+                            name="" 
+                            id="score-filter" 
+                            :disabled="!filterOptions.filterByScore">
+                        </div>
+                    </div>                 
+                </div>   
+            </div>
+
+            <button @click="applyFilters()">Apply</button>
+    </div>
 </template>
 
 <script>
@@ -87,7 +80,7 @@
                 chart: null,
                 resizeObserver: null,
                 showLoading: true,
-                showChartOptions: false,
+                showChartOptions: true,
                 chartScalesFiltered: this.chartScales,
                 filteredPatientMap: this.patientMap,
                 filterOptions: {
@@ -234,7 +227,6 @@
                 this.filteredPatientMap = filteredPatientMap;
 
                 this.drawChart();
-                this.showChartOptions = false;
             },
             selectFilter(filter) {
                 if (filter == 'rank') {
@@ -273,9 +265,92 @@
 </script>
 
 <style lang="sass">
+    #chart-options-btn
+        background-color: #21351f
+        position: absolute
+        top: 55px
+        right: 20px
+        border-radius: 50%
+        height: 35px
+        width: 35px
+        z-index: 2
+    #chart-options-btn:hover
+        box-shadow: 0px 2px 4px -1px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)), 0px 4px 5px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)), 0px 1px 10px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.12))
+    #chart-options-container
+        border-radius: 5px
+        display: flex
+        flex-direction: column
+        justify-content: space-evenly
+        align-items: center
+        width: 30%
+        max-width: 310px
+        height: 90%
+        max-height: 500px
+        margin-left: 10px
+        background-color: white
+        transition: all .45s ease-in-out
+        box-shadow: 0px 2px 4px -1px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)), 0px 4px 5px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)), 0px 1px 10px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.12))
+        #options-content
+            display: flex
+            flex-direction: column
+            justify-content: space-between
+            align-items: center
+            text-align: center
+            width: 70%
+            .group
+                width: 100%
+                display: flex
+                flex-direction: column
+                justify-content: center
+                border: 1px solid #D4DAD4
+                border-radius: 5px
+                margin-top: 5px
+                margin-bottom: 5px
+                padding: 5px
+            .filter-num-input
+                display: flex
+                flex-direction: row
+                justify-content: space-evenly
+                align-items: center
+                width: 50%
+            #filter-by-radios
+                .filterby-wrapper
+                    width: 100%
+                    display: flex
+                    flex-direction: row
+                    justify-content: center
+            input
+                margin-right: 5px
+                cursor: pointer
+            input:disabled
+                cursor: not-allowed
+                text-decoration: line-through
+        *
+            overflow: hidden
+        #rank-filter, #score-filter
+            width: 40%
+            border: 1px solid #D4DAD4
+            border-radius: 5px
+            text-align: center
+        button
+            background-color: #21351f
+            color: white
+            border: none
+            border-radius: 5px
+            padding: 5px
+            width: 30%
+            &:hover
+                cursor: pointer
+                background-color: #1a2e1a
+    #chart-options-container.hidden
+        height: 0px
+        width: 0px
+        border: 0px solid transparent
+        button
+            display: none
     #linear-chart-container 
         height: 90%
-        max-height: 800px
+        max-height: 700px
         background-color: rgb(255, 255, 255)
         display: flex
         flex-direction: column
@@ -283,91 +358,6 @@
         position: relative
         box-shadow: 0px 2px 4px -1px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)), 0px 4px 5px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)), 0px 1px 10px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.12))
         border-radius: 5px
-        #chart-options-btn
-            background-color: #21351f
-            position: absolute
-            top: 0px
-            right: -45px
-            border-radius: 50%
-            height: 35px
-            width: 35px
-            z-index: 2
-        #chart-options-btn:hover
-            box-shadow: 0px 2px 4px -1px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)), 0px 4px 5px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)), 0px 1px 10px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.12))
-        #chart-options-container
-            position: absolute
-            top: 2px
-            right: -7px
-            border-radius: 5px
-            display: flex
-            flex-direction: column
-            justify-content: space-evenly
-            align-items: center
-            border: 1px solid #D4DAD4
-            width: 55%
-            max-width: 500px
-            height: 98%
-            background-color: white
-            opacity: 0.96
-            transition: all .45s ease-in-out
-            box-shadow: 0px 2px 4px -1px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)), 0px 4px 5px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)), 0px 1px 10px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.12))
-            #options-content
-                display: flex
-                flex-direction: column
-                justify-content: space-between
-                align-items: center
-                text-align: center
-                width: 70%
-                .group
-                    width: 100%
-                    display: flex
-                    flex-direction: column
-                    justify-content: center
-                    border: 1px solid #D4DAD4
-                    border-radius: 5px
-                    margin-top: 5px
-                    margin-bottom: 5px
-                    padding: 5px
-                .filter-num-input
-                    display: flex
-                    flex-direction: column
-                    justify-content: center
-                    align-items: center
-                #filter-by-radios
-                    div
-                        width: 100%
-                        display: flex
-                        flex-direction: row
-                        justify-content: center
-                input
-                    margin-right: 5px
-                    cursor: pointer
-                input:disabled
-                    cursor: not-allowed
-                    text-decoration: line-through
-            *
-                overflow: hidden
-            #rank-filter, #score-filter
-                width: 50%
-                border: 1px solid #D4DAD4
-                border-radius: 5px
-                text-align: center
-            button
-                background-color: #21351f
-                color: white
-                border: none
-                border-radius: 5px
-                padding: 5px
-                width: 30%
-                &:hover
-                    cursor: pointer
-                    background-color: #1a2e1a
-        #chart-options-container.hidden
-            height: 0px
-            width: 0px
-            border: 0px solid transparent
-            button
-                display: none
         #lin-chart-viz 
             height: 100%
             width: fit-content
