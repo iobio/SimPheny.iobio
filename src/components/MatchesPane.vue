@@ -31,7 +31,7 @@
                         <div class="sub">
                             <h4>Phenotypes</h4>
                             <div>
-                                <p class="list-item inTarget" v-for="(value, key) in phenotypesInCommon" :key="key"> {{ value.phenotype.hpoId + " " + value.phenotype.term }}</p>
+                                <p class="list-item inTarget" v-for="(value, key) in phenotypesInCommon" :key="key">{{ value.phenotype.hpoId + " " + value.phenotype.term }}</p>
                                 <p class="list-item" v-for="(value, key) in phenNotInTarget" :key="key"> {{ value.phenotype.hpoId + " " + value.phenotype.term }}</p>
                             </div>
                         </div>
@@ -49,14 +49,23 @@
                         <div class="sub">
                             <h4>Genes:</h4>
                             <div>
-                                <p class="list-item inTarget" v-for="(value, key) in genesInCommon" :key="key">{{ value.gene.gene_symbol + " " + value.count }}</p>
-                                <p class="list-item" v-for="(value, key) in genesNotInTarget" :key="key">{{ value.gene.gene_symbol + " " + value.count }}</p>                              
+                                <p class="list-item inTarget" v-for="(value, key) in genesInCommon" :key="key">
+                                    <span>{{ value.gene.gene_symbol }}</span>
+                                    <span v-if="value.count > 1">{{ value.count }}</span>
+                                </p>
+                                <p class="list-item" v-for="(value, key) in genesNotInTarget" :key="key">
+                                    <span>{{ value.gene.gene_symbol }}</span>
+                                    <span v-if="value.count > 1">{{ value.count }}</span>
+                                </p>                              
                             </div>
                         </div>
                         <div class="sub">
                             <h4>Diagnoses:</h4>
                             <div>
-                                <p class="list-item diagnosis" v-for="(value, key) in diagnoses" :key="key">{{ value.diagnosis }}</p>
+                                <p class="list-item diagnosis" v-for="(value, key) in diagnoses" :key="key">
+                                    <span>{{ value.diagnosis }}</span>
+                                    <span v-if="value.count > 1">{{ value.count }}</span>
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -64,8 +73,14 @@
                         <div class="sub">
                             <h4>Phenotypes</h4>
                             <div>
-                                <p class="list-item inTarget" v-for="(value, key) in phenotypesInCommon" :key="key"> {{ value.phenotype.hpoId + " " + value.phenotype.term + " " + value.count }}</p>
-                                <p class="list-item" v-for="(value, key) in phenNotInTarget" :key="key"> {{ value.phenotype.hpoId + " " + value.phenotype.term + " " + value.count }}</p>
+                                <p class="list-item inTarget" v-for="(value, key) in phenotypesInCommon" :key="key"> 
+                                    <span>{{ value.phenotype.hpoId + " " + value.phenotype.term }}</span>
+                                    <span v-if="value.count > 1">{{ value.count }}</span>
+                                </p>
+                                <p class="list-item" v-for="(value, key) in phenNotInTarget" :key="key">
+                                    <span>{{ value.phenotype.hpoId + " " + value.phenotype.term}}</span>
+                                    <span v-if="value.count > 1">{{ value.count }}</span>
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -329,6 +344,10 @@
         border-bottom: 1px solid #b7beb7;
         margin-bottom: 2px;
         padding-left: 10px;
+        padding-right: 20px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
     }
     .column .sub .list-item.diagnosis {
         text-transform: uppercase;
