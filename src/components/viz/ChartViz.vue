@@ -5,7 +5,7 @@
             <p>No target patient defined.</p>
             <p>Input target patient to view matches.</p>
         </div>
-        <!-- <div v-if="targetPatient && showLoading" id="loading-container"><p><v-icon class="loading-icon">mdi-loading</v-icon></p><p>loading matches...</p></div> -->
+        <div v-if="targetPatient && showLoading" id="loading-container"><p><v-icon class="loading-icon">mdi-loading</v-icon></p><p>loading matches...</p></div>
     </div>
     <div id="lin-chart-tip"></div>
 
@@ -162,10 +162,13 @@
                     this.anglesMap = this.chart.getXYCoords();
                 }
             },
-            selectMatch() {
+            selectMatch(matches=null) {
                 //get the data from the point with the selected-match class
                 let selectedMatches = d3.selectAll('.selected-match').data();
                 this.$emit('selectMatch', selectedMatches);
+            },
+            clearSelection() {
+                this.$emit('selectMatch', []);
             },
             selectRectangle(selectedMatches){
                 this.$emit('selectMatch', selectedMatches);
@@ -241,12 +244,22 @@
         watch: {
             patientMap: {
                 handler: function(newVal) {
-                    if (newVal == null) {
-                        this.showLoading = true;
+                    if (this.patientMap == null) {
+                        //loading
                     } else {
                         this.applyFilters();
                         this.showLoading = false;
                     } 
+                },
+                deep: true
+            },
+            chart: {
+                handler: function() {
+                    if (!this.chart) {
+                        this.showLoading = true;
+                    } else {
+                        this.showLoading = false;
+                    }
                 },
                 deep: true
             },
@@ -375,7 +388,9 @@
                 font-size: large
         #loading-container
             height: 80vh
+            max-height: 700px
             width: 80vh
+            max-width: 700px
             display: flex
             flex-direction: column
             align-items: center
