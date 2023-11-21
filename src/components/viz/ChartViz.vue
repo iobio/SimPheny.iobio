@@ -5,7 +5,12 @@
             <p>No target patient defined.</p>
             <p>Input target patient to view matches.</p>
         </div>
-        <div v-if="targetPatient && showLoading" id="loading-container"><p><v-icon class="loading-icon">mdi-loading</v-icon></p><p>loading matches...</p></div>
+        <div v-if="targetPatient && showLoading" id="loading-container">
+            <v-progress-circular indeterminate color="#21351f" :size="110" :width="10">
+                <template v-slot:default>Loading...</template>
+            </v-progress-circular>
+        </div>
+        
     </div>
     <div id="lin-chart-tip"></div>
 
@@ -491,16 +496,6 @@
             display: flex
             flex-direction: column
             align-items: center
-            p:nth-of-type(2)
-                text-align: center
-                font-size: large
-                transform: translate(0px, -10px)
-            p:nth-of-type(1)
-                transform: translate(15px, 0px)
-            .loading-icon
-                font-size: 50px
-                transform: translate(100px, -10px)
-                animation: spin 1s linear infinite
     #lin-chart-tip 
         position: absolute
         visibility: hidden
@@ -516,9 +511,4 @@
         width: fit-content
 
         font-size: small
-    @keyframes spin 
-        from 
-            transform: translate(-50%, -50%) rotate(0deg)
-        to 
-            transform: translate(-50%, -50%) rotate(360deg) 
 </style>
