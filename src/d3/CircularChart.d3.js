@@ -2,21 +2,31 @@ import * as d3 from "d3";
 
 //Setting colors for organization
 const colors = {
-    "strokeGreen": "#099509",
-    "fillGreen": "#18F218",
+    // "strokeGreen": "#099509",
+    "strokeGreen": "#78049F",
+    // "fillGreen": "#18F218",
+    "fillGreen": "#FAEBFF",
+
     "strokePurple": "#8A05B6",
     "fillPurple": "#D765FC",
-    "strokeBlack": "black",
-    "fillBlack": "black",
-    "strokeTeal": "#007991",
-    "fillTeal": "#33DDFF",
+
+    "strokeBlack": "#0A0A0A",
+    "fillBlack": "#333333",
+
+    // "strokeTeal": "#007991",
+    "strokeTeal": "#78049F",
+    // "fillTeal": "#33DDFF",
+    "fillTeal": "#EFC2FE",
+
     "strokeBlue": "#3855A5",
     "fillBlue": "#3855A5",
 
     "targetPurple": "purple",
-    "chartMain": "#996FA7",
+    // "chartMain": "#376C35",
+    "chartMain": "#3C5D3A",
     "chartLettersGrey": "#5F5661",
-    "chartLightPurple": "#DCCFDD",
+    // "chartLightPurple": "#DCCFDD",
+    "chartLightPurple": "#CEE0CD",
 }
 
 export default function CircularChart() {
