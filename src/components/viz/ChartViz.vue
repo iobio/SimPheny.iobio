@@ -180,7 +180,7 @@
                 }
             },
             selectMatch(matches=null) {
-                if (matches == null || typeof matches !== 'array') {
+                if (matches == null || !Array.isArray(matches)) {
                     //get the data from the point with the selected-match class
                     let selectedMatches = d3.selectAll('.selected-match').data();
                     this.$emit('selectMatch', selectedMatches);
@@ -199,7 +199,7 @@
                 this.filterOptions.scoreCutOff = 0.0;
                 this.chartScalesFiltered = this.chartScales;
                 this.filteredPatientMap = this.patientMap;
-
+                this.clearSelection();
                 this.applyFilters();
             },
             clearSelection() {

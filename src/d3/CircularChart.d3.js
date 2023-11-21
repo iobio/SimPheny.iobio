@@ -18,8 +18,10 @@ const colors = {
     // "fillTeal": "#33DDFF",
     "fillTeal": "#EFC2FE",
 
-    "strokeBlue": "#3855A5",
-    "fillBlue": "#3855A5",
+    // "strokeBlue": "#3855A5",
+    "strokeBlue": "#047600",
+    // "fillBlue": "#3855A5",
+    "fillBlue": "#21E438",
 
     "targetPurple": "purple",
     // "chartMain": "#376C35",
