@@ -308,7 +308,7 @@
     .lower.matches .column-container .column h4 {
         margin-bottom: 5px;
         margin-top: 10px;
-        background-color: #e9ede9;
+        background-color: #d7ded7;
         padding-left: 10px;
         border-radius: 3px;
     }
@@ -337,17 +337,23 @@
     }
     .lower.matches .column-container .column .sub:last-of-type div {
         width: 100%;
-        padding-left: 10px;
         overflow: auto;
     }
     .column .sub .list-item {
-        border-bottom: 1px solid #b7beb7;
+        border-radius: 3px;
+        border: 1px solid #b7beb7;
         margin-bottom: 2px;
+        margin-right: 5px;
+        margin-left: 5px;
         padding-left: 10px;
         padding-right: 20px;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+        cursor: default;
+    }
+    .column .sub .list-item:hover {
+        background-color: #e9ede9;
     }
     .column .sub .list-item.diagnosis {
         text-transform: uppercase;
@@ -359,6 +365,9 @@
         border-radius: 3px;
         border: 1px solid #b7beb7;
 
+    }
+    .column .sub .list-item.inTarget:hover {
+        background-color: #e9ede9;
     }
     .lower.matches .column-container .column.full-height {
         height: 100%;
