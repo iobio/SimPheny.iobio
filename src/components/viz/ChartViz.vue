@@ -32,37 +32,45 @@
                 </div>
 
                 <div  class="group" id="filter-by-radios">
-                    <p>Filter By:</p>
+                    <p>Filter By</p>
                     <div class="filterby-wrapper">
                         <div>
-                            <input @click="selectFilter('rank')" type="radio" value="rank" name="filterBy">
+                            <input @click="selectFilter('rank')" type="checkbox" v-model="filterOptions.filterByRank">
                             <label for="rank">Rank</label>
                         </div>
                         <div class="filter-num-input">
-                            <p>Max:</p>
-                            <input 
-                            v-model="filterOptions.rankCutOff" 
-                            step="5" 
-                            type="number" 
-                            name="" 
-                            id="rank-filter" 
-                            :disabled="!filterOptions.filterByRank">
+                            <v-text-field
+                                ref="rankField"
+                                :rules="[validRank]"
+                                variant="outlined" 
+                                label="Max"
+                                type="number"
+                                density="compact"
+                                step="5"
+                                v-model="filterOptions.rankCutOff"
+                                :disabled="!filterOptions.filterByRank"
+                                :hint="'0 <= N => ' + Object.keys(filteredPatientMap).length">
+                            </v-text-field>
                         </div>
                     </div>
                     <div class="filterby-wrapper">
                         <div>
-                            <input @click="selectFilter('score')" type="radio" value="score" name="filterBy">
+                            <input @click="selectFilter('score')" type="checkbox" v-model="filterOptions.filterByScore">
                             <label for="score">Score</label> 
                         </div>
                         <div class="filter-num-input">
-                            <p>Min: </p>
-                            <input 
-                            v-model="filterOptions.scoreCutOff" 
-                            step=".1" 
-                            type="number" 
-                            name="" 
-                            id="score-filter" 
-                            :disabled="!filterOptions.filterByScore">
+                            <v-text-field
+                                ref="scoreField"
+                                :rules="[validScore]"
+                                variant="outlined" 
+                                label="Min"
+                                type="number"
+                                density="compact"
+                                step=".1"
+                                v-model="filterOptions.scoreCutOff"
+                                :disabled="!filterOptions.filterByScore"
+                                hint="0 <= N => 1">
+                            </v-text-field>
                         </div>
                     </div>                 
                 </div>  
@@ -73,7 +81,7 @@
             </div>
 
             <div id="options-buttons">
-                <button @click="applyFilters()">Apply</button>
+                <button @click="applyFilters()" :disabled="!canApplyFilters()">Apply</button>
                 <button @click="resetChart()">Reset <v-icon>mdi-reload-alert</v-icon></button>
             </div>
     </div>
@@ -143,13 +151,14 @@
             }
         },
         methods: {
-            validateRank() {
-                let minRank = 1;
-                let maxRank = this.filteredPatientMap.keys().length;
+            canApplyFilters() {
+                return this.validRank(this.filterOptions.rankCutOff) && this.validScore(this.filterOptions.scoreCutOff);
             },
-            validateScore() {
-                let minScore = 0;
-                let maxScore = 1;
+            validRank(v) {
+                return !isNaN(v) && Number.isInteger(+v) && v >= 0 && v <= Object.keys(this.filteredPatientMap).length && v !== '';
+            },
+            validScore(v) {
+                return !isNaN(v) && v >= 0.0 && v <= 1.0;
             },
             drawChart() {
                 let container = this.$refs['lin-chart-container'];
@@ -304,12 +313,22 @@
                 this.drawChart();
             },
             selectFilter(filter) {
-                if (filter == 'rank') {
+                if (filter == 'rank' && !this.filterOptions.filterByRank) {
                     this.filterOptions.filterByRank = true;
+
                     this.filterOptions.filterByScore = false;
-                } else if (filter == 'score') {
-                    this.filterOptions.filterByRank = false;
+                    this.filterOptions.scoreCutOff = 0.0;
+                } else if (filter == 'score' && !this.filterOptions.filterByScore) {
                     this.filterOptions.filterByScore = true;
+
+                    this.filterOptions.filterByRank = false;
+                    this.filterOptions.rankCutOff = 0;
+                } else {
+                    this.filterOptions.filterByRank = false;
+                    this.filterOptions.rankCutOff = 0;
+
+                    this.filterOptions.filterByScore = false;
+                    this.filterOptions.scoreCutOff = 0.0;
                 }
             },
         },
@@ -373,6 +392,10 @@
             &:hover
                 background-color: #85C189
                 color: black
+            &:disabled
+                background-color: #D4DAD4
+                font-style: italic
+                color: gray
         button:nth-of-type(2)
             background-color: red
             margin-left: 5px
@@ -421,6 +444,7 @@
                         background-color: #85C189
                         color: black
             .filter-num-input
+                margin-top: 5px
                 display: flex
                 flex-direction: row
                 justify-content: space-evenly
@@ -440,8 +464,6 @@
             input:disabled
                 cursor: not-allowed
                 text-decoration: line-through
-        *
-            overflow: hidden
         #rank-filter, #score-filter
             width: 50%
             border: 1px solid #D4DAD4
@@ -463,6 +485,8 @@
         border: 0px solid transparent
         button
             display: none
+        *
+        overflow: hidden
     #linear-chart-container 
         height: 90%
         max-height: 700px
