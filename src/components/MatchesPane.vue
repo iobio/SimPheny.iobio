@@ -151,6 +151,7 @@
         populateSelectedMatch(matches) {
             let previouslyNull = this.selectedMatches == null;
             this.selectedMatches = matches;
+            
             if (!this.showDetailsBar && previouslyNull) {
                 this.showDetailsBar = true;
             } 

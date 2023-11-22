@@ -194,28 +194,38 @@
                     this.anglesMap = this.chart.getXYCoords();
                 }
             },
-            selectMatch(matches=null) {
+            selectMatches(matches=null) {
+                if (matches && Array.isArray(matches) && matches.length === 0) {
+                    this.$emit('selectMatch', []);
+                    return;
+                }
+
                 if (matches == null || !Array.isArray(matches)) {
                     //get the data from the point with the selected-match class
                     let selectedMatches = d3.selectAll('.selected-match').data();
                     this.$emit('selectMatch', selectedMatches);
-                } else {
-                    this.$emit('selectMatch', matches);
-                }
+                    return;
+                } 
             },
             resetChart() {
-                this.$emit('selectMatch', []);
+                this.clearSelection();
                 //reset the filters to default
-                this.filterOptions.showUndiagnosed = true;
-                this.filterOptions.showGenesInCommonOnly = false;
-                this.filterOptions.filterByRank = false;
-                this.filterOptions.filterByScore = false;
-                this.filterOptions.rankCutOff = 0;
-                this.filterOptions.scoreCutOff = 0.0;
+                this.filterOptions = {
+                    showUndiagnosed: true,
+                    showGenesInCommonOnly: false,
+                    filterByRank: false,
+                    filterByScore: false,
+                    rankCutOff: 0,
+                    scoreCutOff: 0.0,
+                },
                 this.chartScalesFiltered = this.chartScales;
                 this.filteredPatientMap = this.patientMap;
-                this.clearSelection();
+                
                 this.applyFilters();
+                //timeout to allow the chart to update
+                setTimeout(() => {
+                    this.drawChart();
+                }, 10);
             },
             clearSelection() {
                 this.$emit('selectMatch', []);
@@ -349,13 +359,17 @@
                 }
 
                 //if the new selected matches is empty then we need to assign it to the previous selected matches
-                if (newSelectedMatches.length == 0 && filterNeverFired == true) {
+                if (newSelectedMatches.length === 0 && filterNeverFired === true && this.selectedMatches && this.selectedMatches.length > 0) {
                     newSelectedMatches = this.selectedMatches;
                 }
 
+                if (this.selectMatches.length === 0) {
+                    newSelectedMatches = [];
+                } 
+
                 this.zoomed = false;
                 this.filteredPatientMap = filteredPatientMap;
-                this.selectMatch(newSelectedMatches);
+                this.selectMatches(newSelectedMatches);
                 this.drawChart();
             },
             selectFilter(filter) {
@@ -417,7 +431,13 @@
                     }
                 },
                 deep: true
-            }
+            },
+            selectedMatches: {
+                handler: function() {
+                    console.log('selected matches changed');
+                },
+                deep: true
+            },
         }
     }
 
