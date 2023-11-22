@@ -5,6 +5,7 @@
                 :targetPatient="targetPatient"
                 :patientMap="patientMap"
                 :selectedMatches="selectedMatches"
+                :hoveredFromMatches="hoveredFromMatches"
                 @selectMatch="populateSelectedMatch"
                 :chartScales="chartScales"></ChartViz>
         </div>
@@ -49,22 +50,31 @@
                         <div class="sub">
                             <h4>Genes:</h4>
                             <div>
-                                <p class="list-item inTarget" v-for="(value, key) in genesInCommon" :key="key">
-                                    <span>{{ value.gene.gene_symbol }}</span>
-                                    <span v-if="value.count > 1">{{ value.count }}</span>
+                                <p class="list-item inTarget" v-for="(value, key) in genesInCommon" 
+                                    :key="key" 
+                                    @mouseover="showHoveredFromMatches(value.matches)"
+                                    @mouseout="resetHoveredFromMatches()">
+                                        <span>{{ value.gene.gene_symbol }}</span>
+                                        <span v-if="value.count > 1">{{ value.count }}</span>
                                 </p>
-                                <p class="list-item" v-for="(value, key) in genesNotInTarget" :key="key">
-                                    <span>{{ value.gene.gene_symbol }}</span>
-                                    <span v-if="value.count > 1">{{ value.count }}</span>
+                                <p class="list-item" v-for="(value, key) in genesNotInTarget" 
+                                    :key="key" 
+                                    @mouseover="showHoveredFromMatches(value.matches)"
+                                    @mouseout="resetHoveredFromMatches()">
+                                        <span>{{ value.gene.gene_symbol }}</span>
+                                        <span v-if="value.count > 1">{{ value.count }}</span>
                                 </p>                              
                             </div>
                         </div>
                         <div class="sub">
                             <h4>Diagnoses:</h4>
                             <div>
-                                <p class="list-item diagnosis" v-for="(value, key) in diagnoses" :key="key">
-                                    <span>{{ value.diagnosis }}</span>
-                                    <span v-if="value.count > 1">{{ value.count }}</span>
+                                <p class="list-item diagnosis" v-for="(value, key) in diagnoses" 
+                                    :key="key" 
+                                    @mouseover="showHoveredFromMatches(value.matches)"
+                                    @mouseout="resetHoveredFromMatches()">
+                                        <span>{{ value.diagnosis }}</span>
+                                        <span v-if="value.count > 1">{{ value.count }}</span>
                                 </p>
                             </div>
                         </div>
@@ -73,13 +83,19 @@
                         <div class="sub">
                             <h4>Phenotypes</h4>
                             <div>
-                                <p class="list-item inTarget" v-for="(value, key) in phenotypesInCommon" :key="key"> 
-                                    <span>{{ value.phenotype.hpoId + " " + value.phenotype.term }}</span>
-                                    <span v-if="value.count > 1">{{ value.count }}</span>
+                                <p class="list-item inTarget" v-for="(value, key) in phenotypesInCommon" 
+                                    :key="key" 
+                                    @mouseover="showHoveredFromMatches(value.matches)"
+                                    @mouseout="resetHoveredFromMatches()"> 
+                                        <span>{{ value.phenotype.hpoId + " " + value.phenotype.term }}</span>
+                                        <span v-if="value.count > 1">{{ value.count }}</span>
                                 </p>
-                                <p class="list-item" v-for="(value, key) in phenNotInTarget" :key="key">
-                                    <span>{{ value.phenotype.hpoId + " " + value.phenotype.term}}</span>
-                                    <span v-if="value.count > 1">{{ value.count }}</span>
+                                <p class="list-item" v-for="(value, key) in phenNotInTarget" 
+                                    :key="key" 
+                                    @mouseover="showHoveredFromMatches(value.matches)"
+                                    @mouseout="resetHoveredFromMatches()">
+                                        <span>{{ value.phenotype.hpoId + " " + value.phenotype.term}}</span>
+                                        <span v-if="value.count > 1">{{ value.count }}</span>
                                 </p>
                             </div>
                         </div>
@@ -122,9 +138,16 @@
         phenotypesInCommon: {},
         genesInCommon: {},
         diagnoses: {},
+        hoveredFromMatches: [],
       }
     },
     methods: {
+        showHoveredFromMatches(matches) {
+            this.hoveredFromMatches = matches;
+        },
+        resetHoveredFromMatches() {
+            this.hoveredFromMatches = [];
+        },
         populateSelectedMatch(matches) {
             let previouslyNull = this.selectedMatches == null;
             this.selectedMatches = matches;
@@ -132,9 +155,7 @@
                 this.showDetailsBar = true;
             } 
         },
-    },
-    watch: {
-        selectedMatches: function() {
+        setLists() {
             if (this.selectedMatches && this.targetPatient) {
                 if (this.selectedMatches.length == 0) {
                     this.phenNotInTarget = {};
@@ -151,11 +172,13 @@
                     phenNotInTarget = selectedMatch.phenotypeList.reduce((obj, phenotype) => {
                         let isInTarget = this.targetPatient.phenotypeList.some(targetPhenotype => targetPhenotype.hpoId == phenotype.hpoId)
                         if (!isInTarget) {
-                            obj[phenotype.hpoId] = obj[phenotype.hpoId] || {phenotype: phenotype, count: 0};
+                            obj[phenotype.hpoId] = obj[phenotype.hpoId] || {phenotype: phenotype, count: 0, matches: []};
                             obj[phenotype.hpoId].count++;
+                            obj[phenotype.hpoId].matches.push(selectedMatch); //adding the match, one pt should only ever have a phenotype once so this is fine
                         } else {
-                            phenInCommon[phenotype.hpoId] = phenInCommon[phenotype.hpoId] || {phenotype: phenotype, count: 0};
+                            phenInCommon[phenotype.hpoId] = phenInCommon[phenotype.hpoId] || {phenotype: phenotype, count: 0, matches: []};
                             phenInCommon[phenotype.hpoId].count++;
+                            phenInCommon[phenotype.hpoId].matches.push(selectedMatch);
                         }
                         return obj;
                     }, {});
@@ -168,11 +191,13 @@
                     genesNotInTarget = selectedMatch.genesList.reduce((obj, gene) => {
                         let isInTarget = this.targetPatient.genesList.some(targetGene => targetGene.gene_symbol == gene.gene_symbol)
                         if (!isInTarget) {
-                            obj[gene.gene_symbol] = obj[gene.gene_symbol] || {gene: gene, count: 0};
+                            obj[gene.gene_symbol] = obj[gene.gene_symbol] || {gene: gene, count: 0, matches: []};
                             obj[gene.gene_symbol].count++;
+                            obj[gene.gene_symbol].matches.push(selectedMatch);
                         } else {
-                            genesInCommon[gene.gene_symbol] = genesInCommon[gene.gene_symbol] || {gene: gene, count: 0};
+                            genesInCommon[gene.gene_symbol] = genesInCommon[gene.gene_symbol] || {gene: gene, count: 0, matches: []};
                             genesInCommon[gene.gene_symbol].count++;
+                            genesInCommon[gene.gene_symbol].matches.push(selectedMatch);
                         }
                         return obj;
                     }, {})
@@ -189,11 +214,13 @@
                         phenNotInTarget = match.phenotypeList.reduce((obj, phenotype) => {
                             let isInTarget = this.targetPatient.phenotypeList.some(targetPhenotype => targetPhenotype.hpoId == phenotype.hpoId)
                             if (!isInTarget) {
-                                obj[phenotype.hpoId] = obj[phenotype.hpoId] || {phenotype: phenotype, count: 0};
+                                obj[phenotype.hpoId] = obj[phenotype.hpoId] || {phenotype: phenotype, count: 0, matches: []};
                                 obj[phenotype.hpoId].count++;
+                                obj[phenotype.hpoId].matches.push(match);
                             } else {
-                                phenInCommon[phenotype.hpoId] = phenInCommon[phenotype.hpoId] || {phenotype: phenotype, count: 0};
+                                phenInCommon[phenotype.hpoId] = phenInCommon[phenotype.hpoId] || {phenotype: phenotype, count: 0, matches: []};
                                 phenInCommon[phenotype.hpoId].count++;
+                                phenInCommon[phenotype.hpoId].matches.push(match);
                             }
                             return obj;
                         }, phenNotInTarget);
@@ -208,11 +235,13 @@
                         genesNotInTarget = match.genesList.reduce((obj, gene) => {
                             let isInTarget = this.targetPatient.genesList.some(targetGene => targetGene.gene_symbol == gene.gene_symbol)
                             if (!isInTarget) {
-                                obj[gene.gene_symbol] = obj[gene.gene_symbol] || {gene: gene, count: 0};
+                                obj[gene.gene_symbol] = obj[gene.gene_symbol] || {gene: gene, count: 0, matches: []};
                                 obj[gene.gene_symbol].count++;
+                                obj[gene.gene_symbol].matches.push(match);
                             } else {
-                                genesInCommon[gene.gene_symbol] = genesInCommon[gene.gene_symbol] || {gene: gene, count: 0};
+                                genesInCommon[gene.gene_symbol] = genesInCommon[gene.gene_symbol] || {gene: gene, count: 0, matches: []};
                                 genesInCommon[gene.gene_symbol].count++;
+                                genesInCommon[gene.gene_symbol].matches.push(match);
                             }
                             return obj;
                         }, genesNotInTarget);
@@ -225,13 +254,20 @@
                     this.selectedMatches.forEach(match => {
                         //only add to diagnoses if it is not "Undiagnosed"
                         if (match.clinicalDiagnosis != "Undiagnosed") {
-                            diagnoses[match.clinicalDiagnosis] = diagnoses[match.clinicalDiagnosis] || {diagnosis: match.clinicalDiagnosis, count: 0};
+                            diagnoses[match.clinicalDiagnosis] = diagnoses[match.clinicalDiagnosis] || {diagnosis: match.clinicalDiagnosis, count: 0, matches: []};
+                            diagnoses[match.clinicalDiagnosis].count++;
+                            diagnoses[match.clinicalDiagnosis].matches.push(match);
                         }
                     })
                     this.diagnoses = Object.values(diagnoses).sort((a, b) => b.count - a.count);
                 }
             }
-        }
+        },
+    },
+    watch: {
+        selectedMatches: function() {
+            this.setLists();
+        },
     }
   }
 </script>

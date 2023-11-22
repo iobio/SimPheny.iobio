@@ -45,24 +45,13 @@ export default function CircularChart() {
     var chartId = "CircularChartD3";
 
     var selectedMatches = [];
+    var hoveredMatches = [];
     var anglesMap = {};
 
     var onMatchSelectedCallback = function() {};
     var onRectangleSelectedCallback = function() {};
 
     function chart(container, matchesObj) {
-
-        // Create the SVG
-        const svg = d3.create("svg")
-            .attr("width", width)
-            .attr("height", height)
-            .attr("id", chartId);
-
-        svg.attr("viewBox", [0, 0, width, height + 10]); //ViewBox
-
-        //Create the chart origin and the patient symbol
-        createOriginSymbols(svg, marginLeft, height, marginBottom);
-
         //Set max radius
         let maxRadius = (width - marginRight - marginLeft); 
 
@@ -74,6 +63,17 @@ export default function CircularChart() {
         //Calcluate the center x and y coordinate
         var centerX = marginLeft;
         var centerY = height - marginBottom;
+
+        // Create the SVG
+        const svg = d3.create("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("id", chartId);
+
+        svg.attr("viewBox", [0, 0, width, height + 10]); //ViewBox
+
+        //Create the chart origin and the patient symbol
+        createOriginSymbols(svg, marginLeft, height, marginBottom);
 
         let xTicks = radiusScale.ticks(6);
         let xHalfTics = radiusScale.ticks(12);
@@ -251,6 +251,31 @@ export default function CircularChart() {
             };
         }
 
+
+        if (hoveredMatches.length == 0) {
+            //remove the hovered points
+            svg.selectAll(".hovered-from-matches").remove();
+        } else {
+            //add all the matches to the chart their shape should follow the same rules as the other matches color is red
+            matchPoints.append("g")
+                .selectAll("matches")
+                .data(hoveredMatches)
+                .enter()
+                .append("path")
+                .attr("d", d => determineShape(d))
+                .attr("transform", function(d) {
+                    let result = determineXY(d, centerX, centerY, radiusScale, anglesMap)
+                    let xy = result.xy;
+                    anglesMap = result.anglesMap;
+                    return xy + " scale(1.5)";
+                })
+                .attr("fill", '#E5E900')
+                .attr("stroke", 'black')
+                .attr("stroke-width", .5)
+                .attr("class", "hovered-from-matches")
+                .raise();
+        }
+
         //Add the svg to the actual container
         container.appendChild(svg.node());
     }
@@ -271,6 +296,11 @@ export default function CircularChart() {
 
     chart.setSelectedMatches = function(newSelectedMatches) {
         selectedMatches = newSelectedMatches;
+        return chart;
+    }
+    
+    chart.setHoveredFromMatches = function(newHoveredMatches) {
+        hoveredMatches = newHoveredMatches;
         return chart;
     }
 

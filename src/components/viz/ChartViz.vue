@@ -103,6 +103,7 @@
             patientMap: Object,
             selectedMatches: Array,
             chartScales: Object,
+            hoveredFromMatches: Array,
         },
         data: function() {
             return {
@@ -182,7 +183,8 @@
                         .setXMax(this.chartScalesFiltered.xMin)
                         .setXMin(1 - ((1-this.chartScalesFiltered.xMax)*.9))
                         .onMatchSelected(this.selectMatch)
-                        .onRectangleSelected(this.selectRectangle);
+                        .onRectangleSelected(this.selectRectangle)
+                        .setHoveredFromMatches(this.hoveredFromMatches);
 
                     if (this.anglesMap) {
                         this.chart.setXYCoords(this.anglesMap);
@@ -377,6 +379,15 @@
             },
         },
         watch: {
+            hoveredFromMatches: {
+                handler: function(newVal) {
+                    if (this.chart) {
+                        this.chart.setHoveredFromMatches(newVal);
+                        this.drawChart();
+                    }
+                },
+                deep: true
+            },
             patientMap: {
                 handler: function(newVal) {
                     if (this.patientMap == null) {
