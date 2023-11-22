@@ -45,7 +45,9 @@ export default function CircularChart() {
     var chartId = "CircularChartD3";
 
     var selectedMatches = [];
-    var hoveredMatches = [];
+    var selectedMatchesObj = {};
+    var hoveredMatchesList = [];
+    var hoveredMatchesObj = {};
     var anglesMap = {};
 
     var onMatchSelectedCallback = function() {};
@@ -181,11 +183,9 @@ export default function CircularChart() {
             .append("path")
             .attr("d", d => determineShape(d))
             .classed("selected-match", function(d) {
-                if (selectedMatches) {
-                    for (let match of selectedMatches) {
-                        if (match.id === d.id) {
-                            return true;
-                        }
+                if (selectedMatchesObj && Object.keys(selectedMatchesObj).length > 0) {
+                    if (d.id in selectedMatchesObj) {
+                        return true;
                     }
                 }
                 return false;
@@ -194,10 +194,16 @@ export default function CircularChart() {
                 let result = determineXY(d, centerX, centerY, radiusScale, anglesMap)
                 let xy = result.xy;
                 anglesMap = result.anglesMap;
+
+                if (hoveredMatchesObj && hoveredMatchesList.length) {
+                    if (d.id in hoveredMatchesObj) {
+                        return xy + " scale(1.3)";
+                    }
+                }
                 return xy;
             })
-            .attr("fill", d => determineFill(d, selectedMatches))
-            .attr("stroke", d => determineStroke(d, selectedMatches))
+            .attr("fill", d => determineFill(d, selectedMatchesObj, hoveredMatchesObj))
+            .attr("stroke", d => determineStroke(d, selectedMatchesObj, hoveredMatchesObj))
             .attr("stroke-width", 1)
             .on("mouseover", function(event, d) {
                 mouseOverMatch(event, d, svg, radiusScale, centerX, centerY);
@@ -230,7 +236,7 @@ export default function CircularChart() {
         }
 
         //Handles the rectangle click event
-        function createRectangleClickHandler(tic, nextTic, matchesObj, selectedMatches) {
+        function createRectangleClickHandler(tic, nextTic, matchesObj) {
             return function(event) {
                 let matches = [];
                 let alreadySelected = d3.selectAll(".selected-match").data();
@@ -249,31 +255,6 @@ export default function CircularChart() {
                 //call the callback function
                 onRectangleSelectedCallback(matches);
             };
-        }
-
-
-        if (hoveredMatches.length == 0) {
-            //remove the hovered points
-            svg.selectAll(".hovered-from-matches").remove();
-        } else {
-            //add all the matches to the chart their shape should follow the same rules as the other matches color is red
-            matchPoints.append("g")
-                .selectAll("matches")
-                .data(hoveredMatches)
-                .enter()
-                .append("path")
-                .attr("d", d => determineShape(d))
-                .attr("transform", function(d) {
-                    let result = determineXY(d, centerX, centerY, radiusScale, anglesMap)
-                    let xy = result.xy;
-                    anglesMap = result.anglesMap;
-                    return xy + " scale(1.5)";
-                })
-                .attr("fill", '#E5E900')
-                .attr("stroke", 'black')
-                .attr("stroke-width", .5)
-                .attr("class", "hovered-from-matches")
-                .raise();
         }
 
         //Add the svg to the actual container
@@ -298,9 +279,18 @@ export default function CircularChart() {
         selectedMatches = newSelectedMatches;
         return chart;
     }
+    chart.setSelectedMatchesObj = function(newSelectedMatches) {
+        selectedMatchesObj = newSelectedMatches;
+        return chart;
+    }
     
     chart.setHoveredFromMatches = function(newHoveredMatches) {
-        hoveredMatches = newHoveredMatches;
+        hoveredMatchesList = newHoveredMatches;
+        return chart;
+    }
+
+    chart.setHoveredObjFromMatches = function(newHoveredMatches) {
+        hoveredMatchesObj = newHoveredMatches;
         return chart;
     }
 
@@ -500,13 +490,17 @@ function createOriginSymbols(svg, marginLeft, height, marginBottom) {
             .attr("transform", `translate(${marginLeft - 37},${(height - marginBottom) + 44})`);
 }
 
-function determineFill(dataPoint, selectedMatches=[]) {
-    if (selectedMatches && selectedMatches.length) {
-        //if they are the selected match fill them blue
-        for (let match of selectedMatches) {
-            if (dataPoint.id === match.id) {
-                return colors.fillBlue;
-            }
+function determineFill(dataPoint, selectedMatches={}, hoveredMatches={}) {
+    let color = colors.fillBlack;
+    //if they are in hovered maches they will be yellow
+    if (hoveredMatches && Object.keys(hoveredMatches).length > 0) {
+        if (dataPoint.id in hoveredMatches) {
+            return '#E5E900';
+        }
+    }
+    if (selectedMatches && Object.keys(selectedMatches).length > 0) {
+        if (dataPoint.id in selectedMatches) {
+            return colors.fillBlue;
         }
     } 
 
@@ -517,21 +511,20 @@ function determineFill(dataPoint, selectedMatches=[]) {
     
     //if not check if they are diagnosed or undiagnosed
     if (dataPoint.dx === 'undiagnosed') {
-        return colors.fillPurple;
+        color = colors.fillPurple;
     } else if (dataPoint.dx === 'diagnosed') {
-        return colors.fillGreen;
+        color = colors.fillGreen;
     } else {
-        return colors.fillBlack; 
+        color = colors.fillBlack; 
     }
+
+    return color;
 }
 
-function determineStroke(dataPoint, selectedMatches=[]) {
-    if (selectedMatches && selectedMatches.length) { 
-        //if they are the selected match fill them blue
-        for (let match of selectedMatches) {
-            if (dataPoint.id === match.id) {
-                return colors.strokeBlue;
-            }
+function determineStroke(dataPoint, selectedMatches={}, hoveredMatches={}) {
+    if (selectedMatches && Object.keys(selectedMatches).length > 0) { 
+        if (dataPoint.id in selectedMatches) {
+            return colors.strokeBlue;
         }
     } 
 

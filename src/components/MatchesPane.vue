@@ -84,11 +84,14 @@
                             <h4>Phenotypes</h4>
                             <div>
                                 <p class="list-item inTarget" v-for="(value, key) in phenotypesInCommon" 
-                                    :key="key" 
-                                    @mouseover="showHoveredFromMatches(value.matches)"
-                                    @mouseout="resetHoveredFromMatches()"> 
+                                    :key="key"> 
                                         <span>{{ value.phenotype.hpoId + " " + value.phenotype.term }}</span>
-                                        <span v-if="value.count > 1">{{ value.count }}</span>
+                                        <span v-if="value.count > 1">
+                                            <v-icon 
+                                                @mouseover="showHoveredFromMatches(value.matches)"
+                                                @mouseout="resetHoveredFromMatches()">mdi-chart-scatter-plot</v-icon>
+                                            {{ value.count }}
+                                        </span>
                                 </p>
                                 <p class="list-item" v-for="(value, key) in phenNotInTarget" 
                                     :key="key" 
@@ -151,7 +154,7 @@
         populateSelectedMatch(matches) {
             let previouslyNull = this.selectedMatches == null;
             this.selectedMatches = matches;
-            
+
             if (!this.showDetailsBar && previouslyNull) {
                 this.showDetailsBar = true;
             } 

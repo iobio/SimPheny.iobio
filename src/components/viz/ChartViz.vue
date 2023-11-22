@@ -177,6 +177,20 @@
                 if (container != null && this.targetPatient && this.chartScales) {
                     let height = container.clientHeight;
 
+                    //create a map with the hovered maches if they exist where id is the key
+                    let hoveredMatchesMap = {};
+                    if (this.hoveredFromMatches && this.hoveredFromMatches.length > 0) {
+                        for (let match of this.hoveredFromMatches) {
+                            hoveredMatchesMap[match.id] = match;
+                        }
+                    }
+                    let selectedMatchesMap = {};
+                    if (this.selectedMatches && this.selectedMatches.length > 0) {
+                        for (let match of this.selectedMatches) {
+                            selectedMatchesMap[match.id] = match;
+                        }
+                    }
+
                     this.chart = CircularChart()
                         .setSize(height)
                         .setSelectedMatches(this.selectedMatches)
@@ -184,7 +198,9 @@
                         .setXMin(1 - ((1-this.chartScalesFiltered.xMax)*.9))
                         .onMatchSelected(this.selectMatch)
                         .onRectangleSelected(this.selectRectangle)
-                        .setHoveredFromMatches(this.hoveredFromMatches);
+                        .setHoveredFromMatches(this.hoveredFromMatches)
+                        .setHoveredObjFromMatches(hoveredMatchesMap)
+                        .setSelectedMatchesObj(selectedMatchesMap);
 
                     if (this.anglesMap) {
                         this.chart.setXYCoords(this.anglesMap);
@@ -429,12 +445,6 @@
                         this.chartScalesFiltered = this.chartScales;
                         this.drawChart();
                     }
-                },
-                deep: true
-            },
-            selectedMatches: {
-                handler: function() {
-                    console.log('selected matches changed');
                 },
                 deep: true
             },
