@@ -377,9 +377,7 @@
                 //if the new selected matches is empty then we need to assign it to the previous selected matches
                 if (newSelectedMatches.length === 0 && filterNeverFired === true && this.selectedMatches && this.selectedMatches.length > 0) {
                     newSelectedMatches = this.selectedMatches;
-                }
-
-                if (this.selectMatches.length === 0) {
+                } else if (this.selectedMatches && this.selectedMatches.length === 0) {
                     newSelectedMatches = [];
                 } 
 

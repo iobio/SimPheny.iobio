@@ -248,7 +248,6 @@ export default function CircularChart() {
         matchPoints.raise();
 
         if (hoveredMatchesList.length > 0) {
-            console.log("raising");
             //raise the hovered matches to the top
             d3.selectAll(".hovered-from-matches").raise();
         }
