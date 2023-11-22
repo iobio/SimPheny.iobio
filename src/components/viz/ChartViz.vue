@@ -75,13 +75,16 @@
                     </div>                 
                 </div>  
                 <div class="group zoom-to-select">
-                    <label for="">Zoom on Selection</label>
-                    <button><v-icon>mdi-magnify-plus-outline</v-icon></button>
+                    <label v-if="!zoomed" for="zoom-to-select">Zoom on Selection</label>
+                    <button v-if="!zoomed" @click="zoomToSelect()" :disabled="!selectedMatches || selectedMatches.length == 0"><v-icon>mdi-magnify-plus-outline</v-icon></button>
+                    
+                    <label v-if="zoomed" for="zoom-to-select">Return to Origin</label>
+                    <button v-if="zoomed" @click="applyFilters()"><v-icon>mdi-magnify-minus-outline</v-icon></button>
                 </div> 
             </div>
 
             <div id="options-buttons">
-                <button @click="applyFilters()" :disabled="!canApplyFilters()">Apply</button>
+                <button @click="applyFilters()" :disabled="!canApplyFilters()">Apply<v-icon v-if="zoomed">mdi-magnify-minus-outline</v-icon></button>
                 <button @click="resetChart()">Reset <v-icon>mdi-reload-alert</v-icon></button>
             </div>
     </div>
@@ -118,6 +121,7 @@
                     scoreCutOff: 0.0,
                 },
                 anglesMap: null,
+                zoomed: false,
             }
         },
         mounted() {
@@ -176,7 +180,7 @@
                         .setSize(height)
                         .setSelectedMatches(this.selectedMatches)
                         .setXMax(this.chartScalesFiltered.xMin)
-                        .setXMin(1-((1-this.chartScalesFiltered.xMax)/2))
+                        .setXMin(1-((1-this.chartScalesFiltered.xMax)*.80))
                         .onMatchSelected(this.selectMatch)
                         .onRectangleSelected(this.selectRectangle);
 
@@ -220,6 +224,44 @@
                 setTimeout(() => {
                     this.drawChart();
                 }, 10);
+            },
+            zoomToSelect() {
+                //get the selected matches and make them the only "filtered" matches
+                let selectedMatches = d3.selectAll('.selected-match').data();
+                let filteredPatientMap = {};
+                let minOfPatients = 1;
+                let maxOfPatients = 0;
+                let newMinSimilartyScore = this.chartScales.xMin
+                let newMaxSimilartyScore = this.chartScales.xMax
+
+                for (let match of selectedMatches) {
+                    filteredPatientMap[match.id] = match;
+
+                    //if we get here then the patient passed all the filters so we need to update the min similarity score
+                    if (match.similarityScore && (parseFloat(match.similarityScore) < minOfPatients)) {
+                        minOfPatients = parseFloat(match.similarityScore);
+                    }
+                    //update max
+                    if (match.similarityScore && (parseFloat(match.similarityScore) > maxOfPatients)) {
+                        maxOfPatients = parseFloat(match.similarityScore);
+                    }
+                }
+
+                if (minOfPatients < 1) {
+                    this.chartScalesFiltered.xMin = minOfPatients;
+                } else {
+                    this.chartScalesFiltered.xMin = newMinSimilartyScore;
+                }
+
+                if (maxOfPatients > 0) {
+                    this.chartScalesFiltered.xMax = maxOfPatients;
+                } else {
+                    this.chartScalesFiltered.xMax = newMaxSimilartyScore;
+                }
+
+                this.filteredPatientMap = filteredPatientMap;
+                this.zoomed = true;
+                this.drawChart();
             },
             applyFilters() {
                 let filteredPatientMap = { ...this.patientMap };
@@ -308,6 +350,7 @@
                     newSelectedMatches = this.selectedMatches;
                 }
 
+                this.zoomed = false;
                 this.filteredPatientMap = filteredPatientMap;
                 this.selectMatch(newSelectedMatches);
                 this.drawChart();
@@ -396,6 +439,7 @@
                 background-color: #D4DAD4
                 font-style: italic
                 color: gray
+                cursor: not-allowed
         button:nth-of-type(2)
             background-color: red
             margin-left: 5px
@@ -443,6 +487,11 @@
                     &:hover
                         background-color: #85C189
                         color: black
+                    &:disabled
+                        background-color: #D4DAD4
+                        font-style: italic
+                        color: gray
+                        cursor: not-allowed
             .filter-num-input
                 margin-top: 5px
                 display: flex
