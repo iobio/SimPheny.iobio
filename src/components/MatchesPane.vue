@@ -51,17 +51,29 @@
                             <h4>Genes:</h4>
                             <div>
                                 <p class="list-item inTarget" v-for="(value, key) in genesInCommon" 
-                                    :key="key" 
-                                    @mouseover="showHoveredFromMatches(value.matches)"
-                                    @mouseout="resetHoveredFromMatches()">
+                                    :key="key">
+                                    <div>
+                                        <span class="icon-span">
+                                            <v-icon 
+                                            size="small"
+                                            @mouseover="showHoveredFromMatches(value.matches)"
+                                            @mouseout="resetHoveredFromMatches()">mdi-chart-scatter-plot</v-icon>
+                                        </span>
                                         <span>{{ value.gene.gene_symbol }}</span>
+                                    </div>
                                         <span v-if="value.count > 1">{{ value.count }}</span>
                                 </p>
                                 <p class="list-item" v-for="(value, key) in genesNotInTarget" 
-                                    :key="key" 
-                                    @mouseover="showHoveredFromMatches(value.matches)"
-                                    @mouseout="resetHoveredFromMatches()">
+                                    :key="key">
+                                    <div>
+                                        <span class="icon-span">
+                                            <v-icon 
+                                            size="small"
+                                            @mouseover="showHoveredFromMatches(value.matches)"
+                                            @mouseout="resetHoveredFromMatches()">mdi-chart-scatter-plot</v-icon>
+                                        </span>
                                         <span>{{ value.gene.gene_symbol }}</span>
+                                    </div>
                                         <span v-if="value.count > 1">{{ value.count }}</span>
                                 </p>                              
                             </div>
@@ -70,11 +82,17 @@
                             <h4>Diagnoses:</h4>
                             <div>
                                 <p class="list-item diagnosis" v-for="(value, key) in diagnoses" 
-                                    :key="key" 
-                                    @mouseover="showHoveredFromMatches(value.matches)"
-                                    @mouseout="resetHoveredFromMatches()">
+                                    :key="key">
+                                    <div>
+                                        <span class="icon-span">
+                                            <v-icon 
+                                            size="small"
+                                            @mouseover="showHoveredFromMatches(value.matches)"
+                                            @mouseout="resetHoveredFromMatches()">mdi-chart-scatter-plot</v-icon>
+                                        </span>
                                         <span>{{ value.diagnosis }}</span>
-                                        <span v-if="value.count > 1">{{ value.count }}</span>
+                                    </div>
+                                    <span v-if="value.count > 1">{{ value.count }}</span>
                                 </p>
                             </div>
                         </div>
@@ -83,21 +101,28 @@
                         <div class="sub">
                             <h4>Phenotypes</h4>
                             <div>
-                                <p class="list-item inTarget" v-for="(value, key) in phenotypesInCommon" 
-                                    :key="key"> 
-                                        <span>{{ value.phenotype.hpoId + " " + value.phenotype.term }}</span>
-                                        <span v-if="value.count > 1">
+                                <p class="list-item inTarget" v-for="(value, key) in phenotypesInCommon" :key="key"> 
+                                    <div>
+                                        <span class="icon-span">
                                             <v-icon 
+                                            size="small"
+                                            @mouseover="showHoveredFromMatches(value.matches)"
+                                            @mouseout="resetHoveredFromMatches()">mdi-chart-scatter-plot</v-icon>
+                                        </span>
+                                        <span>{{ value.phenotype.hpoId + " " + value.phenotype.term }}</span>
+                                    </div>
+                                        <span v-if="value.count > 1">{{ value.count }}</span>
+                                </p>
+                                <p class="list-item" v-for="(value, key) in phenNotInTarget" :key="key">
+                                    <div>
+                                        <span class="icon-span">
+                                            <v-icon
+                                                size="small" 
                                                 @mouseover="showHoveredFromMatches(value.matches)"
                                                 @mouseout="resetHoveredFromMatches()">mdi-chart-scatter-plot</v-icon>
-                                            {{ value.count }}
                                         </span>
-                                </p>
-                                <p class="list-item" v-for="(value, key) in phenNotInTarget" 
-                                    :key="key" 
-                                    @mouseover="showHoveredFromMatches(value.matches)"
-                                    @mouseout="resetHoveredFromMatches()">
                                         <span>{{ value.phenotype.hpoId + " " + value.phenotype.term}}</span>
+                                    </div>
                                         <span v-if="value.count > 1">{{ value.count }}</span>
                                 </p>
                             </div>
@@ -408,6 +433,30 @@
     }
     .column .sub .list-item.inTarget:hover {
         background-color: #e9ede9;
+    }
+    .column .sub .list-item .v-icon {
+        stroke: none;
+        fill: none;
+        font-size: 12pt; 
+    }
+    .column .sub .list-item div {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+    .column .sub .list-item div .icon-span {
+        margin-right: 5px;
+        height: 25;
+        width: 25;
+        padding: 2px;
+        border-radius: 5px;
+        border: 1px solid #b7beb7;
+        background-color: #3d4a3c;
+        color: #E9EDE8;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center; 
     }
     .lower.matches .column-container .column.full-height {
         height: 100%;

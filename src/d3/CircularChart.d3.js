@@ -170,9 +170,30 @@ export default function CircularChart() {
         if (!matchesObj) {
             return;
         }
+        //group for the selected matches arcs
+        var selectedMatchesGroup = svg.append("g")
+        .attr("id", "selected-matches-group");
 
+        //if there is a selected match add the arc
+        if (selectedMatches) {
+            for (let match of selectedMatches) {
+                //create the arc based on the similarity score
+                let radius = radiusScale(match.similarityScore);
+                let arc = createArc(radius, centerX, centerY);
+
+                //add the arc to the svg
+                selectedMatchesGroup.append("path")
+                    .attr("d", arc)
+                    .attr("stroke", colors.strokeBlue)
+                    .attr("stroke-width", 1)
+                    .attr("fill", "none")
+                    .attr("id", match.id + "-arc");
+            }
+        }
+        selectedMatchesGroup.raise();
         //Matches Group
         let matchPoints = svg.append("g")
+
         //The array of matches objects
         let matchesArray = Object.values(matchesObj);
         //Add all the matches to their group and the svg
@@ -183,12 +204,20 @@ export default function CircularChart() {
             .append("path")
             .attr("d", d => determineShape(d))
             .classed("selected-match", function(d) {
-                if (selectedMatchesObj && Object.keys(selectedMatchesObj).length > 0) {
-                    if (d.id in selectedMatchesObj) {
-                        return true;
+                    if (selectedMatchesObj && Object.keys(selectedMatchesObj).length > 0) {
+                        if (d.id in selectedMatchesObj) {
+                            return true;
+                        }
                     }
-                }
-                return false;
+                    return false;
+            })
+            .classed("hovered-from-matches", function(d) {
+                    if (hoveredMatchesObj && Object.keys(hoveredMatchesObj).length > 0) {
+                        if (d.id in hoveredMatchesObj) {
+                            return true;
+                        }
+                    }
+                    return false;
             })
             .attr("transform", function(d) {
                 let result = determineXY(d, centerX, centerY, radiusScale, anglesMap)
@@ -197,7 +226,7 @@ export default function CircularChart() {
 
                 if (hoveredMatchesObj && hoveredMatchesList.length) {
                     if (d.id in hoveredMatchesObj) {
-                        return xy + " scale(1.3)";
+                        xy = xy + " scale(1.5)";
                     }
                 }
                 return xy;
@@ -214,25 +243,14 @@ export default function CircularChart() {
             .on("click", function(event, d) {
                 clickMatch(event, d, svg, radiusScale, centerX, centerY);
                 onMatchSelectedCallback(d);
-            }).raise();
+            });
+        
+        matchPoints.raise();
 
-        //if there is a selected match add the arc
-        if (selectedMatches) {
-            for (let match of selectedMatches) {
-                //create the arc based on the similarity score
-                let radius = radiusScale(match.similarityScore);
-                let arc = createArc(radius, centerX, centerY);
-
-                //add the arc to the svg
-                svg.append("path")
-                    .attr("d", arc)
-                    .attr("stroke", colors.strokeBlue)
-                    .attr("stroke-width", 1)
-                    .attr("fill", "none")
-                    .attr("id", match.id + "-arc")
-                    //the arc needs to be behind the points so that the mouseover event can be handled
-                    .lower();
-            }
+        if (hoveredMatchesList.length > 0) {
+            console.log("raising");
+            //raise the hovered matches to the top
+            d3.selectAll(".hovered-from-matches").raise();
         }
 
         //Handles the rectangle click event
