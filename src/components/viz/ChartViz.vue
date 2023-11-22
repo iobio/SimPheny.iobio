@@ -180,7 +180,7 @@
                         .setSize(height)
                         .setSelectedMatches(this.selectedMatches)
                         .setXMax(this.chartScalesFiltered.xMin)
-                        .setXMin(1-((1-this.chartScalesFiltered.xMax)*.80))
+                        .setXMin(1 - ((1-this.chartScalesFiltered.xMax)*.9))
                         .onMatchSelected(this.selectMatch)
                         .onRectangleSelected(this.selectRectangle);
 
@@ -245,6 +245,7 @@
                     if (match.similarityScore && (parseFloat(match.similarityScore) > maxOfPatients)) {
                         maxOfPatients = parseFloat(match.similarityScore);
                     }
+
                 }
 
                 if (minOfPatients < 1) {

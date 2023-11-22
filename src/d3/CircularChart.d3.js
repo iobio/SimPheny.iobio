@@ -40,8 +40,8 @@ export default function CircularChart() {
     var xMax = 0;
 
     var marginRight = 30;
-    var marginBottom = 30;
-    var marginLeft = 30;
+    var marginBottom = 40;
+    var marginLeft = 40;
     var chartId = "CircularChartD3";
 
     var selectedMatches = [];
@@ -450,14 +450,14 @@ function createOriginSymbols(svg, marginLeft, height, marginBottom) {
             .attr("fill", colors.chartLightPurple)
             .attr("stroke", colors.chartMain)
             .attr("stroke-width", 1)
-            .attr("transform", `translate(${marginLeft - 8},${(height - marginBottom) + 8})`);
+            .attr("transform", `translate(${marginLeft - 15},${(height - marginBottom) + 15})`);
 
         //Add the person symbol for the patient on the chart
         svg.append("g")
             .append("path")
             .attr("d", "M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V22H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z")
             .attr("fill", "purple")
-            .attr("transform", `translate(${marginLeft - 23},${(height - marginBottom) - 5}) scale(1.3)`);
+            .attr("transform", `translate(${marginLeft - 30},${(height - marginBottom) + 3}) scale(1.3)`);
 
         // put a label that says "Patient" under the person symbol
         svg.append("g")
@@ -466,7 +466,7 @@ function createOriginSymbols(svg, marginLeft, height, marginBottom) {
             .attr("font-size", "11px")
             .attr("fill", "purple")
             .attr("font-weight", "bold")
-            .attr("transform", `translate(${marginLeft - 25},${(height - marginBottom) + 36})`);
+            .attr("transform", `translate(${marginLeft - 30},${(height - marginBottom) + 42})`);
 }
 
 function determineFill(dataPoint, selectedMatches=[]) {
