@@ -241,8 +241,8 @@ export default function CircularChart() {
                 mouseOutMatch(event, d, svg, radiusScale, centerX, centerY);
             })
             .on("click", function(event, d) {
-                clickMatch(event, d, svg, radiusScale, centerX, centerY);
-                onMatchSelectedCallback(d);
+                // clickMatch(event, d, svg, radiusScale, centerX, centerY);
+                createMatchClickHandler(d);
             });
         
         matchPoints.raise();
@@ -272,6 +272,27 @@ export default function CircularChart() {
                 //call the callback function
                 onRectangleSelectedCallback(matches);
             };
+        }
+
+        //Handles the single match click event
+        function createMatchClickHandler(match) {
+            //if match is already selected then deselect it
+            let matchId = match.id;
+            if (matchId in selectedMatchesObj) {
+                delete selectedMatchesObj[matchId];
+            } else {
+                selectedMatchesObj[matchId] = match;
+            }
+
+            //if selected matches is empty then clear the selected matches
+            if (Object.keys(selectedMatchesObj).length === 0) {
+                selectedMatchesObj = {};
+                //call the callback function
+                onMatchSelectedCallback([]);
+            } else {
+                //call the callback function
+                onMatchSelectedCallback(Object.values(selectedMatchesObj));
+            }
         }
 
         //Add the svg to the actual container

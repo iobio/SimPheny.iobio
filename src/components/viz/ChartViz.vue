@@ -196,7 +196,7 @@
                         .setSelectedMatches(this.selectedMatches)
                         .setXMax(this.chartScalesFiltered.xMin)
                         .setXMin(1 - ((1-this.chartScalesFiltered.xMax)*.9))
-                        .onMatchSelected(this.selectMatch)
+                        .onMatchSelected(this.selectMatches)
                         .onRectangleSelected(this.selectRectangle)
                         .setHoveredFromMatches(this.hoveredFromMatches)
                         .setHoveredObjFromMatches(hoveredMatchesMap)
@@ -213,6 +213,10 @@
             selectMatches(matches=null) {
                 if (matches && Array.isArray(matches) && matches.length === 0) {
                     this.$emit('selectMatch', []);
+                    //timeout to allow the chart to update
+                    setTimeout(() => {
+                        this.drawChart();
+                    }, 10);
                     return;
                 }
 
@@ -220,8 +224,18 @@
                     //get the data from the point with the selected-match class
                     let selectedMatches = d3.selectAll('.selected-match').data();
                     this.$emit('selectMatch', selectedMatches);
+                    //timeout to allow the chart to update
+                    setTimeout(() => {
+                        this.drawChart();
+                    }, 10);
                     return;
-                } 
+                }
+                //otherwise we have an array of matches so we need to emit them
+                this.$emit('selectMatch', matches);
+                //timeout to allow the chart to update
+                setTimeout(() => {
+                    this.drawChart();
+                }, 10);
             },
             resetChart() {
                 this.clearSelection();
