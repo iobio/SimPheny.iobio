@@ -212,6 +212,8 @@
             },
             selectMatches(matches=null) {
                 if (matches && Array.isArray(matches) && matches.length === 0) {
+                    //select all the matches
+                    d3.selectAll('.selected-match').classed('selected-match', false);
                     this.$emit('selectMatch', []);
                     //timeout to allow the chart to update
                     setTimeout(() => {
@@ -258,6 +260,9 @@
                 }, 10);
             },
             clearSelection() {
+                //select all the matches
+                d3.selectAll('.selected-match').classed('selected-match', false);
+                //emit the empty array
                 this.$emit('selectMatch', []);
             },
             selectRectangle(selectedMatches){
@@ -421,6 +426,32 @@
             },
         },
         watch: {
+            targetPatient: {
+                handler: function(newVal) {
+                    if (newVal && newVal !== this.targetPatient) {
+                        this.clearSelection();
+                        //clear the filters
+                        this.filterOptions = {
+                            showUndiagnosed: true,
+                            showGenesInCommonOnly: false,
+                            filterByRank: false,
+                            filterByScore: false,
+                            rankCutOff: 0,
+                            scoreCutOff: 0.0,
+                        },
+                        this.chartScalesFiltered = this.chartScales;
+                        this.filteredPatientMap = this.patientMap;
+                        this.showLoading = true;
+                        this.applyFilters();
+                
+                        //wait and then draw the chart
+                        setTimeout(() => {
+                            this.drawChart();
+                        }, 10);
+                    }
+                },
+                deep: true
+            },
             hoveredFromMatches: {
                 handler: function(newVal) {
                     if (this.chart) {

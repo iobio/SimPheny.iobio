@@ -43,7 +43,7 @@
                                     class="num-in-target"
                                     @mouseenter="showAssociationsPeek($event, geneAssociationsMap[gene.gene_symbol].uniquePhenotypes, 'phenotypes')"
                                     @mouseleave="showAssociationsPeek($event, [], 'none')" 
-                                    v-if="geneAssociationsMap && geneAssociationsMap[gene.gene_symbol].numInTarget > 0">
+                                    v-if="geneAssociationsMap && geneAssociationsMap[gene.gene_symbol] && geneAssociationsMap[gene.gene_symbol].numInTarget > 0">
                                     {{ geneAssociationsMap[gene.gene_symbol].numInTarget }}
                                 </span>
                             </div>
