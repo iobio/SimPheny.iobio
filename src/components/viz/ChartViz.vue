@@ -1,5 +1,37 @@
 <template>
     <div id="linear-chart-container">
+        <div id="chart-key-container">
+            <p id="chart-key-hoverable" @mouseenter="showChartKey = true" @mouseleave="showChartKey = false"><v-icon>mdi-key-variant</v-icon></p>
+            <p id="chart-key-popout" :class="{show: showChartKey}">
+                <span>
+                    <svg height="8" width="8">
+                        <rect x="1" y="1" width="6" height="6" style="fill:rgb(218, 180, 237); stroke: rgb(116, 4, 172);"></rect>
+                    </svg>
+                    = Diagnosed
+                </span>
+                <span>
+                    <svg height="8" width="8">
+                        <rect x="1" y="1" width="6" height="6" style="fill:rgb(9, 9, 9); stroke: rgb(14, 14, 14);"></rect>
+                    </svg>
+                    = Clinical Dx Only
+                </span>
+                <span>
+                    <svg height="8" width="8">
+                        <circle cx="4" cy="4" r="3" style="fill:rgb(189, 74, 247); stroke: rgb(116, 4, 172);"></circle>
+                    </svg>
+                    = Undiagnosed
+                </span>
+                <span>
+                    <svg height="10" width="10">
+                        <circle cx="5" cy="5" r="4" style="fill:rgb(201, 153, 225); stroke: rgb(116, 4, 172);"></circle>
+                    </svg> /
+                    <svg height="10" width="10">
+                        <rect x="1" y="1" width="8" height="8" style="fill:rgb(201, 153, 225); stroke: rgb(116, 4, 172);"></rect>
+                    </svg>
+                    = Genes in Common
+                </span>
+            </p>
+        </div>
         <div ref="lin-chart-container" id="lin-chart-viz" v-if="targetPatient"></div>
         <div v-else id="lin-chart-alt-text">
             <p>No target patient defined.</p>
@@ -95,408 +127,440 @@
     import * as d3 from 'd3';
 
     export default {
-        emits: ['selectMatch'],
-        name: 'ChartViz',
-
-        props: {
-            targetPatient: Object,
-            patientMap: Object,
-            selectedMatches: Array,
-            chartScales: Object,
-            hoveredFromMatches: Array,
-        },
-        data: function() {
-            return {
-                chart: null,
-                resizeObserver: null,
-                showLoading: true,
-                showChartOptions: true,
-                chartScalesFiltered: this.chartScales,
-                filteredPatientMap: this.patientMap,
-                filterOptions: {
-                    showUndiagnosed: true,
-                    showGenesInCommonOnly: false,
-                    filterByRank: false,
-                    filterByScore: false,
-                    rankCutOff: 0,
-                    scoreCutOff: 0.0,
-                },
-                anglesMap: null,
-                zoomed: false,
-            }
-        },
-        mounted() {
-            if (this.targetPatient) {
+    emits: ['selectMatch'],
+    name: 'ChartViz',
+    props: {
+        targetPatient: Object,
+        patientMap: Object,
+        selectedMatches: Array,
+        chartScales: Object,
+        hoveredFromMatches: Array,
+    },
+    data: function () {
+        return {
+            chart: null,
+            resizeObserver: null,
+            showLoading: true,
+            showChartOptions: true,
+            showChartKey: false,
+            chartScalesFiltered: this.chartScales,
+            filteredPatientMap: this.patientMap,
+            filterOptions: {
+                showUndiagnosed: true,
+                showGenesInCommonOnly: false,
+                filterByRank: false,
+                filterByScore: false,
+                rankCutOff: 0,
+                scoreCutOff: 0.0,
+            },
+            anglesMap: null,
+            zoomed: false,
+        };
+    },
+    mounted() {
+        if (this.targetPatient) {
+            var linChartContainer = this.$refs['lin-chart-container'];
+            //add a listener for when the window is resized or the container is resized
+            this.resizeObserver = new ResizeObserver(() => {
+                this.drawChart();
+            });
+            this.resizeObserver.observe(linChartContainer);
+            this.applyFilters();
+        }
+    },
+    updated() {
+        if (this.targetPatient) {
+            if (this.resizeObserver == null) {
                 var linChartContainer = this.$refs['lin-chart-container'];
-                
                 //add a listener for when the window is resized or the container is resized
                 this.resizeObserver = new ResizeObserver(() => {
                     this.drawChart();
                 });
                 this.resizeObserver.observe(linChartContainer);
-                this.applyFilters();
+            }
+        }
+    },
+    beforeDestroy() {
+        //remove the resize observer if it exists
+        if (this.resizeObserver != null) {
+            this.resizeObserver.unobserve(linChartContainer);
+        }
+    },
+    methods: {
+        canApplyFilters() {
+            return this.validRank(this.filterOptions.rankCutOff) && this.validScore(this.filterOptions.scoreCutOff);
+        },
+        validRank(v) {
+            return !isNaN(v) && Number.isInteger(+v) && v >= 0 && v <= Object.keys(this.filteredPatientMap).length && v !== '';
+        },
+        validScore(v) {
+            return !isNaN(v) && v >= 0.0 && v <= 1.0;
+        },
+        drawChart() {
+            let container = this.$refs['lin-chart-container'];
+            //clear the chart if it already exists
+            if (this.chart) {
+                //clear container
+                d3.select(container).selectAll("*").remove();
+            }
+            if (container != null && this.targetPatient && this.chartScales) {
+                let height = container.clientHeight;
+                //create a map with the hovered maches if they exist where id is the key
+                let hoveredMatchesMap = {};
+                if (this.hoveredFromMatches && this.hoveredFromMatches.length > 0) {
+                    for (let match of this.hoveredFromMatches) {
+                        hoveredMatchesMap[match.id] = match;
+                    }
+                }
+                let selectedMatchesMap = {};
+                if (this.selectedMatches && this.selectedMatches.length > 0) {
+                    for (let match of this.selectedMatches) {
+                        selectedMatchesMap[match.id] = match;
+                    }
+                }
+                this.chart = CircularChart()
+                    .setSize(height)
+                    .setSelectedMatches(this.selectedMatches)
+                    .setXMax(this.chartScalesFiltered.xMin)
+                    .setXMin(1 - ((1 - this.chartScalesFiltered.xMax) * .9))
+                    .onMatchSelected(this.selectMatches)
+                    .onRectangleSelected(this.selectRectangle)
+                    .setHoveredFromMatches(this.hoveredFromMatches)
+                    .setHoveredObjFromMatches(hoveredMatchesMap)
+                    .setSelectedMatchesObj(selectedMatchesMap);
+                if (this.anglesMap) {
+                    this.chart.setXYCoords(this.anglesMap);
+                }
+                this.chart(container, this.filteredPatientMap);
+                this.anglesMap = this.chart.getXYCoords();
             }
         },
-        updated() {
-            if (this.targetPatient) {
-                if (this.resizeObserver == null) {
-                    var linChartContainer = this.$refs['lin-chart-container'];
-                    //add a listener for when the window is resized or the container is resized
-                    this.resizeObserver = new ResizeObserver(() => {
-                        this.drawChart();
-                    });
-                    this.resizeObserver.observe(linChartContainer);
-                }
-            }
-        },
-        beforeDestroy() {
-            //remove the resize observer if it exists
-            if (this.resizeObserver != null) {
-                this.resizeObserver.unobserve(linChartContainer);
-            }
-        },
-        methods: {
-            canApplyFilters() {
-                return this.validRank(this.filterOptions.rankCutOff) && this.validScore(this.filterOptions.scoreCutOff);
-            },
-            validRank(v) {
-                return !isNaN(v) && Number.isInteger(+v) && v >= 0 && v <= Object.keys(this.filteredPatientMap).length && v !== '';
-            },
-            validScore(v) {
-                return !isNaN(v) && v >= 0.0 && v <= 1.0;
-            },
-            drawChart() {
-                let container = this.$refs['lin-chart-container'];
-
-                //clear the chart if it already exists
-                if (this.chart) {
-                    //clear container
-                    d3.select(container).selectAll("*").remove();
-                }
-
-                if (container != null && this.targetPatient && this.chartScales) {
-                    let height = container.clientHeight;
-
-                    //create a map with the hovered maches if they exist where id is the key
-                    let hoveredMatchesMap = {};
-                    if (this.hoveredFromMatches && this.hoveredFromMatches.length > 0) {
-                        for (let match of this.hoveredFromMatches) {
-                            hoveredMatchesMap[match.id] = match;
-                        }
-                    }
-                    let selectedMatchesMap = {};
-                    if (this.selectedMatches && this.selectedMatches.length > 0) {
-                        for (let match of this.selectedMatches) {
-                            selectedMatchesMap[match.id] = match;
-                        }
-                    }
-
-                    this.chart = CircularChart()
-                        .setSize(height)
-                        .setSelectedMatches(this.selectedMatches)
-                        .setXMax(this.chartScalesFiltered.xMin)
-                        .setXMin(1 - ((1-this.chartScalesFiltered.xMax)*.9))
-                        .onMatchSelected(this.selectMatches)
-                        .onRectangleSelected(this.selectRectangle)
-                        .setHoveredFromMatches(this.hoveredFromMatches)
-                        .setHoveredObjFromMatches(hoveredMatchesMap)
-                        .setSelectedMatchesObj(selectedMatchesMap);
-
-                    if (this.anglesMap) {
-                        this.chart.setXYCoords(this.anglesMap);
-                    }
-
-                    this.chart(container, this.filteredPatientMap);
-                    this.anglesMap = this.chart.getXYCoords();
-                }
-            },
-            selectMatches(matches=null) {
-                if (matches && Array.isArray(matches) && matches.length === 0) {
-                    //select all the matches
-                    d3.selectAll('.selected-match').classed('selected-match', false);
-                    this.$emit('selectMatch', []);
-                    //timeout to allow the chart to update
-                    setTimeout(() => {
-                        this.drawChart();
-                    }, 10);
-                    return;
-                }
-
-                if (matches == null || !Array.isArray(matches)) {
-                    //get the data from the point with the selected-match class
-                    let selectedMatches = d3.selectAll('.selected-match').data();
-                    this.$emit('selectMatch', selectedMatches);
-                    //timeout to allow the chart to update
-                    setTimeout(() => {
-                        this.drawChart();
-                    }, 10);
-                    return;
-                }
-                //otherwise we have an array of matches so we need to emit them
-                this.$emit('selectMatch', matches);
-                //timeout to allow the chart to update
-                setTimeout(() => {
-                    this.drawChart();
-                }, 10);
-            },
-            resetChart() {
-                this.clearSelection();
-                //reset the filters to default
-                this.filterOptions = {
-                    showUndiagnosed: true,
-                    showGenesInCommonOnly: false,
-                    filterByRank: false,
-                    filterByScore: false,
-                    rankCutOff: 0,
-                    scoreCutOff: 0.0,
-                },
-                this.chartScalesFiltered = this.chartScales;
-                this.filteredPatientMap = this.patientMap;
-                
-                this.applyFilters();
-                //timeout to allow the chart to update
-                setTimeout(() => {
-                    this.drawChart();
-                }, 10);
-            },
-            clearSelection() {
+        selectMatches(matches = null) {
+            if (matches && Array.isArray(matches) && matches.length === 0) {
                 //select all the matches
                 d3.selectAll('.selected-match').classed('selected-match', false);
-                //emit the empty array
                 this.$emit('selectMatch', []);
-            },
-            selectRectangle(selectedMatches){
+                //timeout to allow the chart to update
+                setTimeout(() => {
+                    this.drawChart();
+                }, 10);
+                return;
+            }
+            if (matches == null || !Array.isArray(matches)) {
+                //get the data from the point with the selected-match class
+                let selectedMatches = d3.selectAll('.selected-match').data();
                 this.$emit('selectMatch', selectedMatches);
                 //timeout to allow the chart to update
                 setTimeout(() => {
                     this.drawChart();
                 }, 10);
-            },
-            zoomToSelect() {
-                //get the selected matches and make them the only "filtered" matches
-                let selectedMatches = d3.selectAll('.selected-match').data();
-                let filteredPatientMap = {};
-                let minOfPatients = 1;
-                let maxOfPatients = 0;
-                let newMinSimilartyScore = this.chartScales.xMin
-                let newMaxSimilartyScore = this.chartScales.xMax
-
-                for (let match of selectedMatches) {
-                    filteredPatientMap[match.id] = match;
-
-                    //if we get here then the patient passed all the filters so we need to update the min similarity score
-                    if (match.similarityScore && (parseFloat(match.similarityScore) < minOfPatients)) {
-                        minOfPatients = parseFloat(match.similarityScore);
-                    }
-                    //update max
-                    if (match.similarityScore && (parseFloat(match.similarityScore) > maxOfPatients)) {
-                        maxOfPatients = parseFloat(match.similarityScore);
-                    }
-
-                }
-
-                if (minOfPatients < 1) {
-                    this.chartScalesFiltered.xMin = minOfPatients;
-                } else {
-                    this.chartScalesFiltered.xMin = newMinSimilartyScore;
-                }
-
-                if (maxOfPatients > 0) {
-                    this.chartScalesFiltered.xMax = maxOfPatients;
-                } else {
-                    this.chartScalesFiltered.xMax = newMaxSimilartyScore;
-                }
-
-                this.filteredPatientMap = filteredPatientMap;
-                this.zoomed = true;
+                return;
+            }
+            //otherwise we have an array of matches so we need to emit them
+            this.$emit('selectMatch', matches);
+            //timeout to allow the chart to update
+            setTimeout(() => {
                 this.drawChart();
-            },
-            applyFilters() {
-                let filteredPatientMap = { ...this.patientMap };
-                let newSelectedMatches = [];
-                let filterNeverFired = true;
-                let newMinSimilartyScore = this.chartScales.xMin
-                let newMaxSimilartyScore = this.chartScales.xMax
-                let minOfPatients = 1;
-                let maxOfPatients = 0;
-
-                for (let patientId in this.patientMap) {
-                    if (!this.filterOptions.showUndiagnosed){
-                        filterNeverFired = false;
-                        if (this.patientMap[patientId].dx === 'undiagnosed') {
-                            delete filteredPatientMap[patientId];
-                            continue;
-                        } else {
-                            //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
-                            if (this.selectedMatches.includes(this.patientMap[patientId])) {
-                                newSelectedMatches.push(this.patientMap[patientId]);
-                            }
-                        }
-                    }
-                    if (this.filterOptions.showGenesInCommonOnly){
-                        filterNeverFired = false;
-                        if (this.patientMap[patientId].genesInCommon.length === 0) {
-                            delete filteredPatientMap[patientId];
-                            continue;
-                        } else {
-                            //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
-                            if (this.selectedMatches.includes(this.patientMap[patientId])) {
-                                newSelectedMatches.push(this.patientMap[patientId]);
-                            }
-                        }
-                    }
-                    if (this.filterOptions.filterByRank){
-                        filterNeverFired = false;
-                        let maxRank = this.filterOptions.rankCutOff;
-                        if (this.patientMap[patientId].rank && (parseInt(this.patientMap[patientId].rank) > maxRank)) {
-                            delete filteredPatientMap[patientId];
-                            continue;
-                        } else {
-                            //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
-                            if (this.selectedMatches.includes(this.patientMap[patientId])) {
-                                newSelectedMatches.push(this.patientMap[patientId]);
-                            }
-                        }
-                    }
-                    if (this.filterOptions.filterByScore){
-                        filterNeverFired = false;
-                        let minScore = this.filterOptions.scoreCutOff;
-                        if (this.patientMap[patientId].similarityScore && (parseFloat(this.patientMap[patientId].similarityScore) < minScore)) {
-                            delete filteredPatientMap[patientId];
-                            continue;
-                        } else {
-                            //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
-                            if (this.selectedMatches.includes(this.patientMap[patientId])) {
-                                newSelectedMatches.push(this.patientMap[patientId]);
-                            }
-                        }
-                    }
-                    //if we get here then the patient passed all the filters so we need to update the min similarity score
-                    if (this.patientMap[patientId].similarityScore && (parseFloat(this.patientMap[patientId].similarityScore) < minOfPatients)) {
-                        minOfPatients = parseFloat(this.patientMap[patientId].similarityScore);
-                    }
-                    //update max
-                    if (this.patientMap[patientId].similarityScore && (parseFloat(this.patientMap[patientId].similarityScore) > maxOfPatients)) {
-                        maxOfPatients = parseFloat(this.patientMap[patientId].similarityScore);
-                    }
-                }
-
-                if (minOfPatients < 1) {
-                    this.chartScalesFiltered.xMin = minOfPatients;
-                } else {
-                    this.chartScalesFiltered.xMin = newMinSimilartyScore;
-                }
-
-                if (maxOfPatients > 0) {
-                    this.chartScalesFiltered.xMax = maxOfPatients;
-                } else {
-                    this.chartScalesFiltered.xMax = newMaxSimilartyScore;
-                }
-
-                //if the new selected matches is empty then we need to assign it to the previous selected matches
-                if (newSelectedMatches.length === 0 && filterNeverFired === true && this.selectedMatches && this.selectedMatches.length > 0) {
-                    newSelectedMatches = this.selectedMatches;
-                } else if (this.selectedMatches && this.selectedMatches.length === 0) {
-                    newSelectedMatches = [];
-                } 
-
-                this.zoomed = false;
-                this.filteredPatientMap = filteredPatientMap;
-                this.selectMatches(newSelectedMatches);
-                this.drawChart();
-            },
-            selectFilter(filter) {
-                if (filter == 'rank' && !this.filterOptions.filterByRank) {
-                    this.filterOptions.filterByRank = true;
-
-                    this.filterOptions.filterByScore = false;
-                    this.filterOptions.scoreCutOff = 0.0;
-                } else if (filter == 'score' && !this.filterOptions.filterByScore) {
-                    this.filterOptions.filterByScore = true;
-
-                    this.filterOptions.filterByRank = false;
-                    this.filterOptions.rankCutOff = 0;
-                } else {
-                    this.filterOptions.filterByRank = false;
-                    this.filterOptions.rankCutOff = 0;
-
-                    this.filterOptions.filterByScore = false;
-                    this.filterOptions.scoreCutOff = 0.0;
-                }
-            },
+            }, 10);
         },
-        watch: {
-            targetPatient: {
-                handler: function(newVal) {
-                    if (newVal && newVal !== this.targetPatient) {
-                        this.clearSelection();
-                        //clear the filters
-                        this.filterOptions = {
-                            showUndiagnosed: true,
-                            showGenesInCommonOnly: false,
-                            filterByRank: false,
-                            filterByScore: false,
-                            rankCutOff: 0,
-                            scoreCutOff: 0.0,
-                        },
+        resetChart() {
+            this.clearSelection();
+            //reset the filters to default
+            this.filterOptions = {
+                showUndiagnosed: true,
+                showGenesInCommonOnly: false,
+                filterByRank: false,
+                filterByScore: false,
+                rankCutOff: 0,
+                scoreCutOff: 0.0,
+            },
+                this.chartScalesFiltered = this.chartScales;
+            this.filteredPatientMap = this.patientMap;
+            this.applyFilters();
+            //timeout to allow the chart to update
+            setTimeout(() => {
+                this.drawChart();
+            }, 10);
+        },
+        clearSelection() {
+            //select all the matches
+            d3.selectAll('.selected-match').classed('selected-match', false);
+            //emit the empty array
+            this.$emit('selectMatch', []);
+        },
+        selectRectangle(selectedMatches) {
+            this.$emit('selectMatch', selectedMatches);
+            //timeout to allow the chart to update
+            setTimeout(() => {
+                this.drawChart();
+            }, 10);
+        },
+        zoomToSelect() {
+            //get the selected matches and make them the only "filtered" matches
+            let selectedMatches = d3.selectAll('.selected-match').data();
+            let filteredPatientMap = {};
+            let minOfPatients = 1;
+            let maxOfPatients = 0;
+            let newMinSimilartyScore = this.chartScales.xMin;
+            let newMaxSimilartyScore = this.chartScales.xMax;
+            for (let match of selectedMatches) {
+                filteredPatientMap[match.id] = match;
+                //if we get here then the patient passed all the filters so we need to update the min similarity score
+                if (match.similarityScore && (parseFloat(match.similarityScore) < minOfPatients)) {
+                    minOfPatients = parseFloat(match.similarityScore);
+                }
+                //update max
+                if (match.similarityScore && (parseFloat(match.similarityScore) > maxOfPatients)) {
+                    maxOfPatients = parseFloat(match.similarityScore);
+                }
+            }
+            if (minOfPatients < 1) {
+                this.chartScalesFiltered.xMin = minOfPatients;
+            }
+            else {
+                this.chartScalesFiltered.xMin = newMinSimilartyScore;
+            }
+            if (maxOfPatients > 0) {
+                this.chartScalesFiltered.xMax = maxOfPatients;
+            }
+            else {
+                this.chartScalesFiltered.xMax = newMaxSimilartyScore;
+            }
+            this.filteredPatientMap = filteredPatientMap;
+            this.zoomed = true;
+            this.drawChart();
+        },
+        applyFilters() {
+            let filteredPatientMap = { ...this.patientMap };
+            let newSelectedMatches = [];
+            let filterNeverFired = true;
+            let newMinSimilartyScore = this.chartScales.xMin;
+            let newMaxSimilartyScore = this.chartScales.xMax;
+            let minOfPatients = 1;
+            let maxOfPatients = 0;
+            for (let patientId in this.patientMap) {
+                if (!this.filterOptions.showUndiagnosed) {
+                    filterNeverFired = false;
+                    if (this.patientMap[patientId].dx === 'undiagnosed') {
+                        delete filteredPatientMap[patientId];
+                        continue;
+                    }
+                    else {
+                        //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
+                        if (this.selectedMatches.includes(this.patientMap[patientId])) {
+                            newSelectedMatches.push(this.patientMap[patientId]);
+                        }
+                    }
+                }
+                if (this.filterOptions.showGenesInCommonOnly) {
+                    filterNeverFired = false;
+                    if (this.patientMap[patientId].genesInCommon.length === 0) {
+                        delete filteredPatientMap[patientId];
+                        continue;
+                    }
+                    else {
+                        //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
+                        if (this.selectedMatches.includes(this.patientMap[patientId])) {
+                            newSelectedMatches.push(this.patientMap[patientId]);
+                        }
+                    }
+                }
+                if (this.filterOptions.filterByRank) {
+                    filterNeverFired = false;
+                    let maxRank = this.filterOptions.rankCutOff;
+                    if (this.patientMap[patientId].rank && (parseInt(this.patientMap[patientId].rank) > maxRank)) {
+                        delete filteredPatientMap[patientId];
+                        continue;
+                    }
+                    else {
+                        //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
+                        if (this.selectedMatches.includes(this.patientMap[patientId])) {
+                            newSelectedMatches.push(this.patientMap[patientId]);
+                        }
+                    }
+                }
+                if (this.filterOptions.filterByScore) {
+                    filterNeverFired = false;
+                    let minScore = this.filterOptions.scoreCutOff;
+                    if (this.patientMap[patientId].similarityScore && (parseFloat(this.patientMap[patientId].similarityScore) < minScore)) {
+                        delete filteredPatientMap[patientId];
+                        continue;
+                    }
+                    else {
+                        //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
+                        if (this.selectedMatches.includes(this.patientMap[patientId])) {
+                            newSelectedMatches.push(this.patientMap[patientId]);
+                        }
+                    }
+                }
+                //if we get here then the patient passed all the filters so we need to update the min similarity score
+                if (this.patientMap[patientId].similarityScore && (parseFloat(this.patientMap[patientId].similarityScore) < minOfPatients)) {
+                    minOfPatients = parseFloat(this.patientMap[patientId].similarityScore);
+                }
+                //update max
+                if (this.patientMap[patientId].similarityScore && (parseFloat(this.patientMap[patientId].similarityScore) > maxOfPatients)) {
+                    maxOfPatients = parseFloat(this.patientMap[patientId].similarityScore);
+                }
+            }
+            if (minOfPatients < 1) {
+                this.chartScalesFiltered.xMin = minOfPatients;
+            }
+            else {
+                this.chartScalesFiltered.xMin = newMinSimilartyScore;
+            }
+            if (maxOfPatients > 0) {
+                this.chartScalesFiltered.xMax = maxOfPatients;
+            }
+            else {
+                this.chartScalesFiltered.xMax = newMaxSimilartyScore;
+            }
+            //if the new selected matches is empty then we need to assign it to the previous selected matches
+            if (newSelectedMatches.length === 0 && filterNeverFired === true && this.selectedMatches && this.selectedMatches.length > 0) {
+                newSelectedMatches = this.selectedMatches;
+            }
+            else if (this.selectedMatches && this.selectedMatches.length === 0) {
+                newSelectedMatches = [];
+            }
+            this.zoomed = false;
+            this.filteredPatientMap = filteredPatientMap;
+            this.selectMatches(newSelectedMatches);
+            this.drawChart();
+        },
+        selectFilter(filter) {
+            if (filter == 'rank' && !this.filterOptions.filterByRank) {
+                this.filterOptions.filterByRank = true;
+                this.filterOptions.filterByScore = false;
+                this.filterOptions.scoreCutOff = 0.0;
+            }
+            else if (filter == 'score' && !this.filterOptions.filterByScore) {
+                this.filterOptions.filterByScore = true;
+                this.filterOptions.filterByRank = false;
+                this.filterOptions.rankCutOff = 0;
+            }
+            else {
+                this.filterOptions.filterByRank = false;
+                this.filterOptions.rankCutOff = 0;
+                this.filterOptions.filterByScore = false;
+                this.filterOptions.scoreCutOff = 0.0;
+            }
+        },
+    },
+    watch: {
+        targetPatient: {
+            handler: function (newVal) {
+                if (newVal && newVal !== this.targetPatient) {
+                    this.clearSelection();
+                    //clear the filters
+                    this.filterOptions = {
+                        showUndiagnosed: true,
+                        showGenesInCommonOnly: false,
+                        filterByRank: false,
+                        filterByScore: false,
+                        rankCutOff: 0,
+                        scoreCutOff: 0.0,
+                    },
                         this.chartScalesFiltered = this.chartScales;
-                        this.filteredPatientMap = this.patientMap;
-                        this.showLoading = true;
-                        this.applyFilters();
-                
-                        //wait and then draw the chart
-                        setTimeout(() => {
-                            this.drawChart();
-                        }, 10);
-                    }
-                },
-                deep: true
-            },
-            hoveredFromMatches: {
-                handler: function(newVal) {
-                    if (this.chart) {
-                        this.chart.setHoveredFromMatches(newVal);
+                    this.filteredPatientMap = this.patientMap;
+                    this.showLoading = true;
+                    this.applyFilters();
+                    //wait and then draw the chart
+                    setTimeout(() => {
                         this.drawChart();
-                    }
-                },
-                deep: true
+                    }, 10);
+                }
             },
-            patientMap: {
-                handler: function(newVal) {
-                    if (this.patientMap == null) {
-                        //loading
-                    } else {
-                        this.applyFilters();
-                        this.showLoading = false;
-                    } 
-                },
-                deep: true
+            deep: true
+        },
+        hoveredFromMatches: {
+            handler: function (newVal) {
+                if (this.chart) {
+                    this.chart.setHoveredFromMatches(newVal);
+                    this.drawChart();
+                }
             },
-            chart: {
-                handler: function() {
-                    if (!this.chart) {
-                        this.showLoading = true;
-                    } else {
-                        this.showLoading = false;
-                    }
-                },
-                deep: true
+            deep: true
+        },
+        patientMap: {
+            handler: function (newVal) {
+                if (this.patientMap == null) {
+                    //loading
+                }
+                else {
+                    this.applyFilters();
+                    this.showLoading = false;
+                }
             },
-            chartScales: {
-                handler: function() {
-                    if (this.chartScales) {
-                        this.chartScalesFiltered = this.chartScales;
-                        this.drawChart();
-                    }
-                },
-                deep: true
+            deep: true
+        },
+        chart: {
+            handler: function () {
+                if (!this.chart) {
+                    this.showLoading = true;
+                }
+                else {
+                    this.showLoading = false;
+                }
             },
-        }
-    }
+            deep: true
+        },
+        chartScales: {
+            handler: function () {
+                if (this.chartScales) {
+                    this.chartScalesFiltered = this.chartScales;
+                    this.drawChart();
+                }
+            },
+            deep: true
+        },
+    },
+}
 
 </script>
 
 <style lang="sass">
+    #chart-key-hoverable
+        position: absolute
+        top: 5px
+        right: 5px
+        background-color: #21351f
+        color: #E9EDEA
+        border: 1px solid #E9EDEA
+        border-radius: 50%
+        width: 25px
+        height: 25px
+        display: flex
+        flex-direction: column
+        justify-content: center
+        align-items: center
+        cursor: pointer
+        z-index: 2
+        &:hover
+            color: #21351F
+            background-color: #E9EDE8
+            border: 1px solid #21351F
+        .v-icon
+            font-size: 14pt
+    #chart-key-popout
+        display: flex
+        flex-direction: column
+        justify-content: center
+        align-items: start
+        font-size: 9pt
+        border-radius: 5px
+        width: 0px
+        height: 0px
+        padding: 0px
+        overflow: hidden
+        position: absolute
+        top: 18px
+        right: 18px
+        transition: all .45s ease-in-out
+    #chart-key-popout.show
+        height: 100px
+        width: 160px
+        padding: 5px
+        border: 1px solid #E9EDEA
+        color: #21351F
     #chart-options-btn
         background-color: #21351f
         position: absolute
