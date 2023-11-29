@@ -3,6 +3,9 @@ import TargetPatient from "../models/TargetPatient";
 import Phenotype from "../models/Phenotype";
 import Gene from "../models/Gene";
 
+var baseURL = "http://localhost:8911/"
+// var baseURL = "https://mosaic-staging.chpc.utah.edu/ike8-xjfl/phenomatcher-backend/"
+
 export default async function grabData(patientsCsvUrl, similarityCsvUrl, patientID) {
   
   // Parse the CSV files
@@ -238,7 +241,7 @@ export async function getUdnIds(similarityCsvUrl) {
 //One off functions to get things from the hpo database
 
 export async function getPhenotypeWithId(id) {
-  let url = "http://localhost:8911/id/"
+  let url = baseURL + "id/"
   const response = await fetch(url + encodeURI(id));
   //if the response is not ok then return null
   if (!response.ok) {
@@ -248,7 +251,7 @@ export async function getPhenotypeWithId(id) {
 }
 
 export async function getPhenotypeWithName(name) {
-  let url = "http://localhost:8911/name/"
+  let url = baseURL + "name/"
   const response = await fetch(url + encodeURI(name));
   //if the response is not ok then return null
   if (!response.ok) {
@@ -258,7 +261,7 @@ export async function getPhenotypeWithName(name) {
 }
 
 export async function getAllPhenotypes() {
-  let url = "http://localhost:8911/all/hpoTerms/"
+  let url = baseURL + "all/hpoTerms/"
   const response = await fetch(url);
   return response.json();
 }
@@ -267,7 +270,7 @@ export async function getGenesWithPhenotype(id) {
   /*
   Takes a phenotype id and returns the genes associated with that phenotype
   */
-  let url = "http://localhost:8911/id/getGenes/"
+  let url = baseURL + "id/getGenes/"
   const response = await fetch(url + encodeURI(id));
   //if the response is not ok then return null
   if (!response.ok) {
@@ -280,7 +283,7 @@ export async function getPhenotypesWithGene(id){
   /*
   Takes a gene id and returns the phenotypes associated with that gene
   */
-  let url = "http://localhost:8911/gene/getPhenotypes/"
+  let url = baseURL + "gene/getPhenotypes/"
   const response = await fetch(url + encodeURI(id));
   //if the response is not ok then return null
   if (!response.ok) {
@@ -290,7 +293,7 @@ export async function getPhenotypesWithGene(id){
 }
 
 export async function getGeneById(id) {
-  let url = "http://localhost:8911/gene/id/"
+  let url = baseURL + "gene/id/"
   const response = await fetch(url + encodeURI(id));
   //if the response is not ok then return null
   if (!response.ok) {
@@ -300,7 +303,7 @@ export async function getGeneById(id) {
 }
 
 export async function getGeneByName(name) {
-  let url = "http://localhost:8911/gene/name/"
+  let url = baseURL + "gene/name/"
   const response = await fetch(url + encodeURI(name));
   //if the response is not ok then return null
   if (!response.ok) {
@@ -310,7 +313,7 @@ export async function getGeneByName(name) {
 }
 
 export async function getGeneList(geneNameList) {
-  let url = "http://localhost:8911/gene/names/"
+  let url = baseURL + "gene/names/"
   //turn the list into a concatenated string
   geneNameList = geneNameList.join(",")
   //take out spaces
