@@ -26,10 +26,11 @@ def setHeaders(self):
 
 class reqHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
-        #if we are at the root just show that the server is running
+        #if we are at the root just show basic message
         if self.path == '/':
             setHeaders(self)
-            self.wfile.write("Server is running".encode())
+            self.wfile.write(b'Hello, world!')
+            return
         # 
         #           Get items using the id routes
         #
@@ -162,3 +163,5 @@ class reqHandler(SimpleHTTPRequestHandler):
 if __name__ == '__main__':
     server = HTTPServer(('localhost', 8911), reqHandler)
     server.serve_forever()
+
+print('Server running on port 8911')
