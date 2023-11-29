@@ -26,6 +26,10 @@ def setHeaders(self):
 
 class reqHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
+        #if we are at the root just show that the server is running
+        if self.path == '/':
+            setHeaders(self)
+            self.wfile.write("Server is running".encode())
         # 
         #           Get items using the id routes
         #
