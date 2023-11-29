@@ -29,7 +29,7 @@ class reqHandler(SimpleHTTPRequestHandler):
         #if we are at the root just show basic message
         if self.path == '/':
             setHeaders(self)
-            self.wfile.write(b'Hello, world!')
+            self.wfile.write(b'Pheno-Matcher-Stage Running!')
             return
         # 
         #           Get items using the id routes
@@ -163,5 +163,3 @@ class reqHandler(SimpleHTTPRequestHandler):
 if __name__ == '__main__':
     server = HTTPServer(('localhost', 8911), reqHandler)
     server.serve_forever()
-
-print('Server running on port 8911')
