@@ -14,7 +14,6 @@ dist-ssr
 
 public/SimilarityMatrix.csv
 public/UdnPatients.csv
-testingBackend
 
 # Editor directories and files
 .vscode/*
