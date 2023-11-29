@@ -1,14 +1,23 @@
 <template>
     <div id="linear-chart-container">
         <div id="chart-key-container">
-            <p id="chart-key-hoverable" @mouseenter="showChartKey = true" @mouseleave="showChartKey = false"><v-icon>mdi-key-variant</v-icon></p>
-            <ChartKeyPopout :showChartKey="showChartKey"></ChartKeyPopout>
+            <p id="chart-key-hoverable" 
+                @mouseenter="showChartKey = true" 
+                @mouseleave="showChartKey = false">
+                    <v-icon>mdi-key-variant</v-icon>
+            </p>
+            <ChartKeyPopout 
+                :showChartKey="showChartKey">
+            </ChartKeyPopout>
         </div>
+        
         <div ref="lin-chart-container" id="lin-chart-viz" v-if="targetPatient"></div>
         <div v-else id="lin-chart-alt-text">
             <p>No target patient defined.</p>
             <p>Input target patient to view matches.</p>
         </div>
+
+        <!-- Loading indicator -->
         <div v-if="targetPatient && showLoading" id="loading-container">
             <v-progress-circular indeterminate color="#21351f" :size="110" :width="10">
                 <template v-slot:default>Loading...</template>
@@ -16,6 +25,7 @@
         </div>
         
     </div>
+    
     <div id="lin-chart-tip"></div>
 
     <button @click="showChartOptions = !showChartOptions" id="chart-options-btn">
@@ -639,7 +649,7 @@
         button
             display: none
         *
-        overflow: hidden
+            overflow: hidden
     #linear-chart-container 
         height: 90%
         max-height: 700px
