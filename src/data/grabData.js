@@ -4,7 +4,7 @@ import Phenotype from "../models/Phenotype";
 import Gene from "../models/Gene";
 
 // var baseURL = "http://localhost:8911/"
-var baseURL = "https://mosaic-staging.chpc.utah.edu/ike8-xjfl/phenomatcher-backend/"
+var baseURL = "https://mosaic-staging.chpc.utah.edu/phenomatcher-backend/"
 
 export default async function grabData(patientsCsvUrl, similarityCsvUrl, patientID) {
   
