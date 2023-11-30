@@ -4,7 +4,7 @@
             <ChartViz
                 :targetPatient="targetPatient"
                 :patientMap="patientMap"
-                :selectedMatches="selectedMatches"
+                :selectedMatchesProp="selectedMatches"
                 :hoveredFromMatches="hoveredFromMatches"
                 @selectMatch="populateSelectedMatch"
                 :chartScales="chartScales"></ChartViz>

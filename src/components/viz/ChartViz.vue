@@ -118,7 +118,7 @@
     props: {
         targetPatient: Object,
         patientMap: Object,
-        selectedMatches: Array,
+        selectedMatchesProp: Array,
         chartScales: Object,
         hoveredFromMatches: Array,
     },
@@ -129,6 +129,7 @@
             showLoading: true,
             showChartOptions: true,
             showChartKey: false,
+            selectedMatches: this.selectedMatchesProp,
             chartScalesFiltered: this.chartScales,
             filteredPatientMap: this.patientMap,
             filterOptions: {
@@ -225,6 +226,7 @@
             if (matches && Array.isArray(matches) && matches.length === 0) {
                 //select all the matches
                 d3.selectAll('.selected-match').classed('selected-match', false);
+                this.selectedMatches = [];
                 this.$emit('selectMatch', []);
                 //timeout to allow the chart to update
                 setTimeout(() => {
@@ -235,6 +237,7 @@
             if (matches == null || !Array.isArray(matches)) {
                 //get the data from the point with the selected-match class
                 let selectedMatches = d3.selectAll('.selected-match').data();
+                this.selectedMatches = selectedMatches;
                 this.$emit('selectMatch', selectedMatches);
                 //timeout to allow the chart to update
                 setTimeout(() => {
@@ -243,6 +246,7 @@
                 return;
             }
             //otherwise we have an array of matches so we need to emit them
+            this.selectedMatches = matches;
             this.$emit('selectMatch', matches);
             //timeout to allow the chart to update
             setTimeout(() => {
@@ -260,7 +264,7 @@
                 rankCutOff: 0,
                 scoreCutOff: 0.0,
             },
-                this.chartScalesFiltered = this.chartScales;
+            this.chartScalesFiltered = this.chartScales;
             this.filteredPatientMap = this.patientMap;
             this.applyFilters();
             //timeout to allow the chart to update
@@ -272,7 +276,7 @@
             //select all the matches
             d3.selectAll('.selected-match').classed('selected-match', false);
             //emit the empty array
-            this.$emit('selectMatch', []);
+            this.selectMatches([]);
         },
         selectRectangle(selectedMatches) {
             this.$emit('selectMatch', selectedMatches);
@@ -453,6 +457,15 @@
                     setTimeout(() => {
                         this.drawChart();
                     }, 10);
+                }
+            },
+            deep: true
+        },
+        selectedMatchesProp: {
+            handler: function (newVal) {
+                if (newVal && newVal !== this.selectedMatches) {
+                    this.selectedMatches = newVal;
+                    this.drawChart();
                 }
             },
             deep: true
