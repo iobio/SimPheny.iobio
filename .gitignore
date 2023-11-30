@@ -13,7 +13,6 @@ dist-ssr
 *.local
 
 public/SimilarityMatrix.csv
-public/UdnPatients.csv
 
 # Editor directories and files
 .vscode/*
@@ -25,3 +24,9 @@ public/UdnPatients.csv
 *.njsproj
 *.sln
 *.sw?
+
+#python
+__pycache__/
+
+#any folder named UdnPatients
+UdnPatients.csv
