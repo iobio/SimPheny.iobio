@@ -39,7 +39,7 @@
                         no-resize 
                         hint="insert comma or semi-colon separated list of genes"></v-textarea>
                 </div>
-                <v-btn @click="processPatient" :disabled="!phenotypesText || !(phenotypesText.length > 0)">Compare Patient</v-btn>
+                <v-btn @click="processPatient">Compare Patient</v-btn>
             </div>
         </v-overlay>
     </div>

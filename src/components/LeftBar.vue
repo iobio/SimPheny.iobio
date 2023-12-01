@@ -23,7 +23,7 @@
                                     class="num-in-target"
                                     @mouseenter="showAssociationsPeek($event, phenotypeAssociationsMap[phenotype.hpoId].uniqueGenes, 'genes')"
                                     @mouseleave="showAssociationsPeek($event, [], 'none')" 
-                                    v-if="phenotypeAssociationsMap && phenotypeAssociationsMap[phenotype.hpoId].numInTarget > 0">
+                                    v-if="phenotypeAssociationsMap && phenotypeAssociationsMap[phenotype.hpoId] && phenotypeAssociationsMap[phenotype.hpoId].numInTarget > 0">
                                         {{ phenotypeAssociationsMap[phenotype.hpoId].numInTarget }}
                                 </span>
                             </div>

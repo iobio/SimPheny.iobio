@@ -69,8 +69,10 @@
 
             },
             async setPatientAndGetMatches(patient) {
+                //inside of this function we need a signal to the application that the 
+                //target patient has changed and we are reloading the matches when we get the matches then we can set up everything again
                 this.targetPatient = new TargetPatient(patient.id);
-                this.targetPatient.setFromPatientObject(patient);
+                this.targetPatient.setFromPatientObject(patient); //at this point the target patient wont have genes/phenotypes if empty but will be set when get matches returns
                 this.showPtSelectOverlay = false;
                 await this.getMatches();
             },
