@@ -12,6 +12,7 @@
                 <h3>Input Target Patient Details</h3>
                 <div v-if="udnPatientIdsList" id="udn-id-input" class="input-container">
                     <v-autocomplete
+                    @update:modelValue="patientChanged"
                     v-model="udnId"
                     :items="udnPatientIdsList"
                     variant="solo-filled"
@@ -72,6 +73,10 @@
 
         },
         methods: {
+            patientChanged() {
+                this.phenotypesText = '';
+                this.genesText = '';
+            },
             async processPatient() {
                 //create a new patient object
                 let patient = new TargetPatient(this.udnId);
@@ -135,15 +140,13 @@
                 this.showOverlay = newVal;
             },
             targetPatient: {
-                deep: true,
-                immediate: true,
                 handler: function(newVal, oldVal) {
                     if (newVal) {
                         this.udnId = newVal.id;
                         this.phenotypesText = newVal.phenotypeList.map((phenotype) => {return phenotype.hpoId; }).join('; ');
                         this.genesText = newVal.genesList.map((gene) => { return gene.gene_symbol; }).join('; ');
                     }
-                }
+                }, deep: true
             }
         }
     }
