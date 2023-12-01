@@ -19,11 +19,19 @@
 
                 <div v-if="selectedMatches" class="column-container" :class="{ single: selectedMatches.length == 1 }">
                     <div v-if="selectedMatches && selectedMatches.length == 1" class="column full-height">
+                        <div class="sub">
                             <h4>Genes:</h4>
-                            <div class="list-box">
+                            <div>
                                 <p class="list-item inTarget" v-for="(value, key) in genesInCommon" :key="key">{{ value.gene.gene_symbol }}</p>
                                 <p class="list-item" v-for="(value, key) in genesNotInTarget" :key="key">{{ value.gene.gene_symbol }}</p>                              
                             </div>
+                        </div>
+                        <div class="sub">
+                            <h4>Diagnoses:</h4>
+                            <div>
+                                <p class="list-item diagnosis">{{ selectedMatches[0].clinicalDiagnosis }}</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div v-if="selectedMatches && selectedMatches.length == 1" class="column full-height">
@@ -41,7 +49,6 @@
                             <p><b>Rank:</b> {{ selectedMatches[0].rank }}</p>
                             <p><b>Score:</b> {{ Math.round(selectedMatches[0].similarityScore * 10000)/10000 }}</p>
                             <p><b>Dx Status:</b> {{ selectedMatches[0].dx }}</p>
-                            <p><b>Clinical Dx:</b> {{ selectedMatches[0].clinicalDiagnosis }}</p>
                         </div>
                     </div>
 
@@ -80,6 +87,7 @@
                         <div class="sub">
                             <h4>Diagnoses:</h4>
                             <div>
+                                <p v-if="Object.keys(diagnoses).length == 0" class="list-item diagnosis">No Diagnoses</p>
                                 <p class="list-item diagnosis" v-for="(value, key) in diagnoses" 
                                     :key="key">
                                     <div>
@@ -477,11 +485,13 @@
     .lower.matches .column-container.single .column.full-height {
         align-items: start;
         justify-content: start;
+        width: 30%;
+        height: 100%;
     }
     .lower.matches .column-container.single .column.full-height:last-of-type {
-        width: 25%;
+        max-width: 25%;
         min-width: 20%;
-        max-width: 30%;
+        width: 20%;
     }
     .lower.matches .column-container.single .list-box {
         height: 85%;
