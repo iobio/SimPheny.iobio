@@ -55,6 +55,7 @@ export default {
         padding: 0px
         overflow: hidden
         position: absolute
+        background-color: white
         top: 18px
         right: 18px
         transition: all .45s ease-in-out
