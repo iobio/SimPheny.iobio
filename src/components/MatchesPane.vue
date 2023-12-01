@@ -16,33 +16,39 @@
                 <h1 v-if="selectedMatches && selectedMatches.length > 1" class="section-head">Selected Matches ({{ selectedMatches.length }})</h1>
                 <h1 v-if="!selectedMatches" class="section-head">Selected Match</h1>
                 <h4 v-if="selectedMatches && selectedMatches.length == 0" id="no-match-alt-text">No matches selected. Select matches from the chart to display details.</h4>
-                <div v-if="selectedMatches" class="column-container">
-                    <div v-if="selectedMatches && selectedMatches.length == 1" class="column">
-                        <h4>Summary</h4>
-                        <div id="summary-container">
-                            <p><b>ID:</b> {{ selectedMatches[0].id }}</p>
-                            <p><b>Rank:</b> {{ selectedMatches[0].rank }}</p>
-                            <p><b>Score:</b> {{ Math.round(selectedMatches[0].similarityScore * 10000)/10000 }}</p>
-                            <p><b>Dx Status:</b> {{ selectedMatches[0].dx }}</p>
-                            <p><b>Clinical Dx:</b> {{ selectedMatches[0].clinicalDiagnosis }}</p>
-                        </div>
-                    </div>
 
-                    <div v-if="selectedMatches && selectedMatches.length == 1" class="column">
-                        <div class="sub">
-                            <h4>Phenotypes</h4>
-                            <div>
-                                <p class="list-item inTarget" v-for="(value, key) in phenotypesInCommon" :key="key">{{ value.phenotype.hpoId + " " + value.phenotype.term }}</p>
-                                <p class="list-item" v-for="(value, key) in phenNotInTarget" :key="key"> {{ value.phenotype.hpoId + " " + value.phenotype.term }}</p>
-                            </div>
-                        </div>
-
+                <div v-if="selectedMatches" class="column-container" :class="{ single: selectedMatches.length == 1 }">
+                    <div v-if="selectedMatches && selectedMatches.length == 1" class="column full-height">
                         <div class="sub">
                             <h4>Genes:</h4>
                             <div>
                                 <p class="list-item inTarget" v-for="(value, key) in genesInCommon" :key="key">{{ value.gene.gene_symbol }}</p>
                                 <p class="list-item" v-for="(value, key) in genesNotInTarget" :key="key">{{ value.gene.gene_symbol }}</p>                              
                             </div>
+                        </div>
+                        <div class="sub">
+                            <h4>Diagnoses:</h4>
+                            <div>
+                                <p class="list-item diagnosis">{{ selectedMatches[0].clinicalDiagnosis }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-if="selectedMatches && selectedMatches.length == 1" class="column full-height">
+                            <h4>Phenotypes</h4>
+                            <div class="list-box">
+                                <p class="list-item inTarget" v-for="(value, key) in phenotypesInCommon" :key="key">{{ value.phenotype.hpoId + " " + value.phenotype.term }}</p>
+                                <p class="list-item" v-for="(value, key) in phenNotInTarget" :key="key"> {{ value.phenotype.hpoId + " " + value.phenotype.term }}</p>
+                            </div>
+                    </div>
+
+                    <div v-if="selectedMatches && selectedMatches.length == 1" class="column full-height">
+                        <h4>Summary</h4>
+                        <div id="summary-container" class="list-box">
+                            <p><b>ID:</b> {{ selectedMatches[0].id }}</p>
+                            <p><b>Rank:</b> {{ selectedMatches[0].rank }}</p>
+                            <p><b>Score:</b> {{ Math.round(selectedMatches[0].similarityScore * 10000)/10000 }}</p>
+                            <p><b>Dx Status:</b> {{ selectedMatches[0].dx }}</p>
                         </div>
                     </div>
 
@@ -81,6 +87,7 @@
                         <div class="sub">
                             <h4>Diagnoses:</h4>
                             <div>
+                                <p v-if="Object.keys(diagnoses).length == 0" class="list-item diagnosis">No Diagnoses</p>
                                 <p class="list-item diagnosis" v-for="(value, key) in diagnoses" 
                                     :key="key">
                                     <div>
@@ -370,6 +377,10 @@
         max-width: 26%;
         min-width: 20%;
     }
+    .lower.matches .column-container.single .column:first-of-type {
+        max-width: 26%;
+        min-width: 20%;
+    }
     .lower.matches .column-container .column h4 {
         margin-bottom: 5px;
         margin-top: 10px;
@@ -404,7 +415,7 @@
         width: 100%;
         overflow: auto;
     }
-    .column .sub .list-item {
+    .column .list-item {
         border-radius: 3px;
         border: 1px solid #b7beb7;
         margin-bottom: 2px;
@@ -417,34 +428,34 @@
         justify-content: space-between;
         cursor: default;
     }
-    .column .sub .list-item:hover {
+    .column .list-item:hover {
         background-color: #e9ede9;
     }
-    .column .sub .list-item.diagnosis {
+    .column .list-item.diagnosis {
         text-transform: uppercase;
         font-size: small;
     }
-    .column .sub .list-item.inTarget {
+    .column .list-item.inTarget {
         color: #2e482e;
         background-color: #dae4da;
         border-radius: 3px;
         border: 1px solid #b7beb7;
 
     }
-    .column .sub .list-item.inTarget:hover {
+    .column .list-item.inTarget:hover {
         background-color: #e9ede9;
     }
-    .column .sub .list-item .v-icon {
+    .column .list-item .v-icon {
         stroke: none;
         fill: none;
         font-size: 12pt; 
     }
-    .column .sub .list-item div {
+    .column .list-item div {
         display: flex;
         flex-direction: row;
         align-items: center;
     }
-    .column .sub .list-item div .icon-span {
+    .column .list-item div .icon-span {
         margin-right: 5px;
         height: 25;
         width: 25;
@@ -470,6 +481,21 @@
     }
     .lower.matches .column-container .column.full-height:first-of-type .sub {
         height: 47%;
+    }
+    .lower.matches .column-container.single .column.full-height {
+        align-items: start;
+        justify-content: start;
+        width: 30%;
+        height: 100%;
+    }
+    .lower.matches .column-container.single .column.full-height:last-of-type {
+        max-width: 25%;
+        min-width: 20%;
+        width: 20%;
+    }
+    .lower.matches .column-container.single .list-box {
+        height: 85%;
+        overflow: auto;
     }
     .lower.matches .column-container .column li {
         list-style-type: none;
