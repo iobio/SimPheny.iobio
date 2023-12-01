@@ -133,6 +133,17 @@
         watch: {
             showPtSelectOverlay: function(newVal, oldVal) {
                 this.showOverlay = newVal;
+            },
+            targetPatient: {
+                deep: true,
+                immediate: true,
+                handler: function(newVal, oldVal) {
+                    if (newVal) {
+                        this.udnId = newVal.id;
+                        this.phenotypesText = newVal.phenotypeList.map((phenotype) => {return phenotype.hpoId; }).join('; ');
+                        this.genesText = newVal.genesList.map((gene) => { return gene.gene_symbol; }).join('; ');
+                    }
+                }
             }
         }
     }
