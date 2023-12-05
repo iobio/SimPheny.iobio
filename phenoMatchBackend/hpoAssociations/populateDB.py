@@ -1,8 +1,8 @@
 import sqlite3
 import json
 
-genes_to_diseases_url = 'hpoAssociationsData/genes_to_disease.txt'
-genes_to_phenotypes_url = 'hpoAssociationsData/genes_to_phenotype.txt'
+genes_to_diseases_url = 'genes_to_disease.txt'
+genes_to_phenotypes_url = 'genes_to_phenotype.txt'
 
 genes_to_diseases = []
 genes_to_phenotypes = []
@@ -57,11 +57,11 @@ diseases = url_to_list_diseases(genes_to_diseases_url)
 diseases = list(set(diseases))
 
 # Deserialize JSON
-with open('hpoAssociationsData/hpoTerms.json') as f:
+with open('hpoTerms.json') as f:
     data = json.load(f)
 
 # Connect to SQLite
-conn = sqlite3.connect('hpoAssociationsData/hpo.db')
+conn = sqlite3.connect('hpo.db')
 c = conn.cursor()
 
 #drop tables if any exist
