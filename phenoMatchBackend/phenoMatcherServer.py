@@ -33,7 +33,7 @@ def getDbPath():
 class reqHandler(SimpleHTTPRequestHandler):
     # we will need to have the ontology loaded first
     # then we will want to use isabelles variaous fuctions to get the data depending on what request we get
-
+    
     def do_GET(self):
         #if we are at the root just show basic message
         if self.path == '/':
