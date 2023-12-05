@@ -30,3 +30,6 @@ __pycache__/
 
 #any folder named UdnPatients
 UdnPatients.csv
+
+#the environment folder
+.env
