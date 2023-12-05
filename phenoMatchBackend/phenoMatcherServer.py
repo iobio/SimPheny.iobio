@@ -42,7 +42,7 @@ class reqHandler(SimpleHTTPRequestHandler):
         #
         if self.path.startswith('/id/getGenes/'):
             term_id = unquote(self.path.split('/')[-1])
-            conn = sqlite3.connect('hpo.db')
+            conn = sqlite3.connect('hpoAssociationsData/hpo.db')
             c = conn.cursor()
             c.execute("""SELECT term_to_gene.*, genes.gene_symbol 
                 FROM term_to_gene 
@@ -58,7 +58,7 @@ class reqHandler(SimpleHTTPRequestHandler):
         elif self.path.startswith('/id/'):
             term_id = unquote(self.path.split('/')[-1])
             term_id = str(term_id.replace(' ', ''))
-            conn = sqlite3.connect('hpo.db')
+            conn = sqlite3.connect('hpoAssociationsData/hpo.db')
             c = conn.cursor()
             c.execute("SELECT * FROM Terms WHERE term_id=?", (term_id,))
             res = fetch_to_dict(c)
@@ -72,7 +72,7 @@ class reqHandler(SimpleHTTPRequestHandler):
         #
         if self.path.startswith('/name/'):
             term_name = unquote(self.path.split('/')[-1])
-            conn = sqlite3.connect('hpo.db')
+            conn = sqlite3.connect('hpoAssociationsData/hpo.db')
             c = conn.cursor()
             c.execute("SELECT * FROM Terms WHERE name COLLATE NOCASE LIKE ?", (term_name,))
             res = fetch_to_dict(c)
@@ -86,7 +86,7 @@ class reqHandler(SimpleHTTPRequestHandler):
         #
         if self.path.startswith('/gene/getPhenotypes/'):
             gene_id = unquote(self.path.split('/')[-1])
-            conn = sqlite3.connect('hpo.db')
+            conn = sqlite3.connect('hpoAssociationsData/hpo.db')
             c = conn.cursor()
             c.execute("""SELECT term_to_gene.*, terms.name
                 FROM term_to_gene
@@ -100,7 +100,7 @@ class reqHandler(SimpleHTTPRequestHandler):
 
         elif self.path.startswith('/gene/getDiseases/'):
             gene_id = unquote(self.path.split('/')[-1])
-            conn = sqlite3.connect('hpo.db')
+            conn = sqlite3.connect('hpoAssociationsData/hpo.db')
             c = conn.cursor()
             c.execute("SELECT * FROM disease_to_gene WHERE gene_id=?", (gene_id,))
             res = fetch_to_dict_list(c)
@@ -111,7 +111,7 @@ class reqHandler(SimpleHTTPRequestHandler):
 
         elif self.path.startswith('/gene/id/'):
             gene_id = unquote(self.path.split('/')[-1])
-            conn = sqlite3.connect('hpo.db')
+            conn = sqlite3.connect('hpoAssociationsData/hpo.db')
             c = conn.cursor()
             c.execute("SELECT * FROM Genes WHERE gene_id=?", (gene_id,))
             res = fetch_to_dict(c)
@@ -122,7 +122,7 @@ class reqHandler(SimpleHTTPRequestHandler):
 
         elif self.path.startswith('/gene/name/'):
             gene_symbol = unquote(self.path.split('/')[-1])
-            conn = sqlite3.connect('hpo.db')
+            conn = sqlite3.connect('hpoAssociationsData/hpo.db')
             c = conn.cursor()
             c.execute("SELECT * FROM Genes WHERE gene_symbol=?", (gene_symbol,))
             res = fetch_to_dict(c)
@@ -140,7 +140,7 @@ class reqHandler(SimpleHTTPRequestHandler):
             # Create placeholders for each gene name for use in the IN clause
             placeholders = ','.join('?' for _ in gene_names_list)
 
-            conn = sqlite3.connect('hpo.db')
+            conn = sqlite3.connect('hpoAssociationsData/hpo.db')
             c = conn.cursor()
             # Construct the query string with the correct number of placeholders
             query = "SELECT * FROM Genes WHERE gene_symbol IN ({})".format(placeholders)
@@ -156,7 +156,7 @@ class reqHandler(SimpleHTTPRequestHandler):
         # Pull all hpoTerms to populate the hpo to phenotype name mapping
         #
         if self.path.startswith('/all/hpoTerms/'):
-            conn = sqlite3.connect('hpo.db')
+            conn = sqlite3.connect('hpoAssociationsData/hpo.db')
             c = conn.cursor()
             c.execute("SELECT * FROM Terms")
             rows = c.fetchall()
