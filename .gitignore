@@ -32,4 +32,4 @@ __pycache__/
 UdnPatients.csv
 
 #the environment folder
-.env
+.env/
