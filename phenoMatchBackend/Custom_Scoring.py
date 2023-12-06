@@ -14,25 +14,21 @@ class CustomJaccardIC(SimilarityBase):
         if term1 == term2:
             return 1.0
 
-        common = sum(x.information_content[kind] for x in (term1.all_parents & term2.all_parents))
-        union = sum(x.information_content[kind] for x in (term1.all_parents | term2.all_parents))
+        intersection_sum = sum(x.information_content[kind] for x in (term1.all_parents & term2.all_parents))
+        union_sum = sum(x.information_content[kind] for x in (term1.all_parents | term2.all_parents))
 
+        # since being a parent is mutually exclusive only one of these will be true
         if term1 in term2.all_parents:
-            if term2 in term1.all_parents:
-                union_add = 0
-            else:
-                union_add = term2.information_content[kind]
+            union_add = term2.information_content[kind]
         elif term2 in term1.all_parents:
-            if term1 in term2.all_parents:
-                union_add = 0
-            else:
-                union_add = term1.information_content[kind]
+            union_add = term1.information_content[kind]
         else:
             union_add = (term1.information_content[kind] + term2.information_content[kind])
 
-        union += union_add
+        union_sum += union_add
+
         try:
-            return common/union
+            return intersection_sum/union_sum
         except ZeroDivisionError:
             return 0.0
 SimScore.register('custom_jaccardIC', CustomJaccardIC)
