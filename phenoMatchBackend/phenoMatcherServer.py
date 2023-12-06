@@ -35,10 +35,14 @@ def getDbPath():
     return dbPath
 
 class reqHandler(SimpleHTTPRequestHandler):
+    ontTimeStart = time.time()
     # we will need to have the ontology loaded first
     ontology = loadOntology()
     # print out that the ontology has been loaded
     print('Ontology Loaded!')
+    # print out how long it took to load the ontology
+    ontTimeEnd = time.time()
+    print('Time to load ontology:', ontTimeEnd-ontTimeStart)
 
     def do_GET(self):
         #if we are at the root just show basic message
