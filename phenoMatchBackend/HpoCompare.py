@@ -61,7 +61,7 @@ class HpoCompare:
                     term_ont = self.ontology.get_hpo_object(term)
                 except RuntimeError:
                     print(term, 'is not a valid HPO term')
-                    pass
+                    break
         ##compare input patient to list of background patients
         for patient in patient_list:
             try:
@@ -72,7 +72,7 @@ class HpoCompare:
                         ont=self.ontology.get_hpo_object(term)
                     except RuntimeError:
                         print(term, 'is not a valid HPO term')
-                        pass
+                        break
 
             simScore = input_HPOSet.similarity(patient_HPOSet, method=self.method, kind=self.kind, combine=self.combine)
             scores_list.append([patient, simScore])
