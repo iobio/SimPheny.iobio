@@ -36,6 +36,8 @@ def getDbPath():
 class reqHandler(SimpleHTTPRequestHandler):
     # we will need to have the ontology loaded first
     ontology = loadOntology()
+    # print out that the ontology has been loaded
+    print('Ontology Loaded!')
 
     def do_GET(self):
         #if we are at the root just show basic message
