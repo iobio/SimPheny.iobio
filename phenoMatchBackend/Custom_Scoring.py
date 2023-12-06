@@ -14,8 +14,7 @@ class CustomJaccardIC(SimilarityBase):
         if term1 == term2:
             return 1.0
 
-        common = sum(x.information_content[kind] for x in (term1.all_parents & term2.all_parents))
-        # common = sum([ x.information_content[kind] for x in term1.common_ancestors(term2) ])
+        common = sum([x.information_content[kind] for x in (term1.all_parents & term2.all_parents)])
         union = sum(x.information_content[kind] for x in (term1.all_parents | term2.all_parents))
 
 
