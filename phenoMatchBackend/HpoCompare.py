@@ -76,5 +76,5 @@ class HpoCompare:
             print('Comparing', patient, 'to input patient')
             simScore = input_HPOSet.similarity(patient_HPOSet, method=self.method, kind=self.kind, combine=self.combine)
             scores_list.append([patient, simScore])
-            scores_dict = rankedDict(scores_list) #create dictionary of scores and ranks
+        scores_dict = rankedDict(scores_list) #create dictionary of scores and ranks
         return scores_dict
