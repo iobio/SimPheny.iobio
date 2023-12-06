@@ -14,22 +14,23 @@ class CustomJaccardIC(SimilarityBase):
         if term1 == term2:
             return 1.0
 
-        # common = sum(x.information_content[kind] for x in (term1.all_parents & term2.all_parents))
         common = sum(x.information_content[kind] for x in (term1.all_parents & term2.all_parents))
         union = sum(x.information_content[kind] for x in (term1.all_parents | term2.all_parents))
 
-        if term1 in term2.all_parents:
+        if term1 not in term2.all_parents and term2 not in term1.all_parents:
+            union_add = (term1.information_content[kind] + term2.information_content[kind])
+        elif term1 in term2.all_parents:
             if term2 in term1.all_parents:
                 union_add = 0
             else:
                 union_add = term2.information_content[kind]
-        elif term2 in term1.all_parents:
+        else:
             if term1 in term2.all_parents:
                 union_add = 0
             else:
                 union_add = term1.information_content[kind]
-        else:
-            union_add = (term1.information_content[kind] + term2.information_content[kind])
+        # else:
+        #     union_add = (term1.information_content[kind] + term2.information_content[kind])
 
         union += union_add
         try:
