@@ -180,7 +180,7 @@ class reqHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(res).encode())
 
         # if we are looking to compare a set of patient terms to all the other patients
-        if self.path.startswith('/compare/'):
+        if self.path.startswith('/compare'):
             #start timer
             start = time.time()
             #just test with a set of terms for now
