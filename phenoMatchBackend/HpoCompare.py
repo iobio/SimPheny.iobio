@@ -20,19 +20,19 @@ def createPatientDict(new_rows):
     return patient_dict
 
 def rankedDict(scores_list):
-    ''' Create dictionary where keys=background patients; 
+    """
+    Create dictionary where keys=background patients; 
     score_dict[patient]['Score']=simScore to query
-    score_dict[patient]['Rank'] = rank to query (between 1 and # patients)'''
-    df = pd.DataFrame(scores_list, columns=['ID', 'Score'])
-    df_sorted = df.sort_values(by='Score', ascending=False).reset_index(drop=True)
-    df_sorted['Rank'] = np.array(df_sorted.index) + 1
+    score_dict[patient]['Rank'] = rank to query (between 1 and # patients)
+    """
+    # Sort the scores list in descending order based on scores
+    sorted_scores = sorted(scores_list, key=lambda x: x[1], reverse=True)
+
+    # Create a dictionary and assign rank while iterating
     score_dict = {}
-    for patient in list(df_sorted['ID']):
-        score = df_sorted.loc[df_sorted['ID']==patient]['Score'].item()
-        rank = df_sorted.loc[df_sorted['ID']==patient]['Rank'].item()
-        score_dict[patient] = {}
-        score_dict[patient]['Score'] = score
-        score_dict[patient]['Rank'] = rank
+    for rank, (patient, score) in enumerate(sorted_scores, start=1):
+        score_dict[patient] = {'Score': score, 'Rank': rank}
+
     return score_dict
 
 #HpoCompare class------------------------------------------------------------------------------------------------
@@ -75,6 +75,6 @@ class HpoCompare:
                         break
             simScore = input_HPOSet.similarity(patient_HPOSet, method=self.method, kind=self.kind, combine=self.combine)
             scores_list.append([patient, simScore])
-            
+
         scores_dict = rankedDict(scores_list) #create dictionary of scores and ranks
         return scores_dict
