@@ -1,7 +1,7 @@
 from typing import List
-import pyhpo
+from pyhpo import SimilarityBase, SimScore
 
-class CustomJaccardIC(pyhpo.SimilarityBase):
+class CustomJaccardIC(SimilarityBase):
     def __call__(
         self,
         term1: 'pyhpo.HPOTerm',
@@ -28,4 +28,4 @@ class CustomJaccardIC(pyhpo.SimilarityBase):
             return intersection_sum/union_sum
         except ZeroDivisionError:
             return 0.0
-pyhpo.SimScore.register('custom_jaccardIC', CustomJaccardIC)
+SimScore.register('custom_jaccardIC', CustomJaccardIC)
