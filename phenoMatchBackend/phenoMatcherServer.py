@@ -1,6 +1,6 @@
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 from urllib.parse import unquote
-from pypho import Ontology
+from pyhpo import Ontology
 from HpoCompare import HpoCompare
 import sqlite3
 import json
