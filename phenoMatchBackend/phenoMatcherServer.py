@@ -183,9 +183,21 @@ class reqHandler(SimpleHTTPRequestHandler):
         if self.path.startswith('/compare'):
             #start timer
             start = time.time()
-            #just test with a set of terms for now
-            test_terms = 'HP:0000011; HP:0000189; HP:0000256; HP:0000470; HP:0000545; HP:0000768; HP:0000914; HP:0001284; HP:0001324; HP:0001385; HP:0001510; HP:0001776; HP:0001852; HP:0002019; HP:0002091; HP:0002194; HP:0002650; HP:0002827; HP:0002870; HP:0002987; HP:0003199; HP:0003391; HP:0003458; HP:0003701; HP:0006335; HP:0006380; HP:0008947; HP:0010562; HP:0031162'
-            test_terms = test_terms.split('; ')
+            #if there is no query string then return an empty dictionary
+            if '?' not in self.path:
+                setHeaders(self)
+                self.wfile.write(json.dumps({}).encode())
+                return
+            
+            #Otherwise get the query string and work with it
+            query = self.path.split('?')[1]
+            #get the terms from the query string
+            test_terms = query.split('=')[1]
+            #split the terms into a list
+            test_terms = test_terms.split(', ')
+            #remove any empty strings
+            test_terms = [x for x in test_terms if x != '']
+
             #create a HpoCompare object
             hpoCompare = HpoCompare(self.ontology, './data/UdnPatients.csv')
             #calculate similarity scores
