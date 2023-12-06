@@ -194,7 +194,7 @@ class reqHandler(SimpleHTTPRequestHandler):
             #get the terms from the query string
             test_terms = query.split('=')[1]
             #split the terms into a list
-            test_terms = test_terms.split(', ')
+            test_terms = test_terms.split(',')
             #remove any empty strings
             test_terms = [x for x in test_terms if x != '']
 
