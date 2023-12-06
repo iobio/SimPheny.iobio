@@ -2,12 +2,12 @@ annotated-types==0.6.0
 backports.cached-property==1.0.1
 certifi==2023.11.17
 charset-normalizer==3.3.2
+hpo3==1.0.2
 idna==3.6
 numpy==1.26.2
 pandas==2.1.3
 pydantic==2.5.2
 pydantic_core==2.14.5
-pyhpo==3.2.5
 python-dateutil==2.8.2
 pytz==2023.3.post1
 requests==2.31.0
