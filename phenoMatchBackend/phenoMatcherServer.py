@@ -1,5 +1,7 @@
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 from urllib.parse import unquote
+from pypho import Ontology
+from HpoCompare import HpoCompare
 import sqlite3
 import json
 
@@ -24,7 +26,8 @@ def setHeaders(self):
     self.end_headers()
 
 def loadOntology():
-    pass
+    ontology = Ontology()
+    return ontology
 
 def getDbPath():
     dbPath = './hpoAssociations/hpo.db'
@@ -32,8 +35,8 @@ def getDbPath():
 
 class reqHandler(SimpleHTTPRequestHandler):
     # we will need to have the ontology loaded first
-    # then we will want to use isabelles variaous fuctions to get the data depending on what request we get
-    
+    ontology = loadOntology()
+
     def do_GET(self):
         #if we are at the root just show basic message
         if self.path == '/':
@@ -42,7 +45,7 @@ class reqHandler(SimpleHTTPRequestHandler):
             return
         # 
         #           Get items using the id routes
-        #
+        #        
         if self.path.startswith('/id/getGenes/'):
             term_id = unquote(self.path.split('/')[-1])
             conn = sqlite3.connect(getDbPath())
@@ -168,6 +171,19 @@ class reqHandler(SimpleHTTPRequestHandler):
 
             setHeaders(self)
             self.wfile.write(json.dumps(res).encode())
+
+        # if we are looking to compare a set of patient terms to all the other patients
+        if self.path.startswith('/id/compare/'):
+            #just test with a set of terms for now
+            test_terms = 'HP:0000011; HP:0000189; HP:0000256; HP:0000470; HP:0000545; HP:0000768; HP:0000914; HP:0001284; HP:0001324; HP:0001385; HP:0001510; HP:0001776; HP:0001852; HP:0002019; HP:0002091; HP:0002194; HP:0002650; HP:0002827; HP:0002870; HP:0002987; HP:0003199; HP:0003391; HP:0003458; HP:0003701; HP:0006335; HP:0006380; HP:0008947; HP:0010562; HP:0031162'
+            test_terms = test_terms.split('; ')
+            #create a HpoCompare object
+            hpoCompare = HpoCompare(self.ontology, './data/UdnPatients.csv')
+            #calculate similarity scores
+            scores_dict = hpoCompare.calculateSimilarity(test_terms)
+
+            setHeaders(self)
+            self.wfile.write(json.dumps(scores_dict).encode())
 
 if __name__ == '__main__':
     server = HTTPServer(('localhost', 8911), reqHandler)

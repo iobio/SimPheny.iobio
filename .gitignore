@@ -30,6 +30,7 @@ __pycache__/
 
 #any folder named UdnPatients
 UdnPatients.csv
+SimilarityMatrix.csv
 
 #the environment folder
 .venv/
