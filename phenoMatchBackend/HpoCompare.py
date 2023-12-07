@@ -3,39 +3,6 @@ from pyhpo import HPOSet
 from Custom_Scoring import *
 import numpy as np
 
-#Utility Functions ----------------------------------------------------------------------------------------------
-
-def openFile(infilename):
-    rows = pd.read_csv(infilename)
-    return rows
-
-def createPatientDict(new_rows):
-    ID_list = list(new_rows['ID'])
-    patient_dict = {}
-    for id in ID_list:
-        terms = list(new_rows.loc[new_rows['ID'] == id]['Terms'])
-        #terms = list(new_rows[new_rows['ID'].str.contains(id)]['Terms'])
-        termsList = terms[0].split('; ')
-        patient_dict[id] = termsList
-    return patient_dict
-
-def rankedDict(scores_list):
-    """
-    Create dictionary where keys=background patients; 
-    score_dict[patient]['Score']=simScore to query
-    score_dict[patient]['Rank'] = rank to query (between 1 and # patients)
-    """
-    # Sort the scores list in descending order based on scores
-    sorted_scores = sorted(scores_list, key=lambda x: x[1], reverse=True)
-
-    # Create a dictionary and assign rank while iterating
-    score_dict = {}
-    for rank, (patient, score) in enumerate(sorted_scores, start=1):
-        score_dict[patient] = {'Score': score, 'Rank': rank}
-
-    return score_dict
-
-#HpoCompare class------------------------------------------------------------------------------------------------
 
 class HpoCompare:
     def __init__(self, ontology, background_data_url, method='custom_jaccardIC', kind='omim', combine='funSimAvg'):
@@ -44,8 +11,8 @@ class HpoCompare:
         self.method = method
         self.kind = kind
         self.combine = combine
-        self.fileRows = openFile(self.background_data)
-        self.patient_dict = createPatientDict(self.fileRows)
+        self.fileRows = self.__openFile(self.background_data)
+        self.patient_dict = self.__createPatientDict(self.fileRows)
 
     def calculateSimilarity(self, input_terms):
         ''''Calculate similarity scores between input patient and every patient in background data.
@@ -76,5 +43,36 @@ class HpoCompare:
             simScore = input_HPOSet.similarity(patient_HPOSet, method=self.method, kind=self.kind, combine=self.combine)
             scores_list.append([patient, simScore])
 
-        scores_dict = rankedDict(scores_list) #create dictionary of scores and ranks
+        scores_dict = self.__rankedDict(scores_list) #create dictionary of scores and ranks
         return scores_dict
+
+    #Utility Internal Methods ----------------------------------------------------------------------------------------------
+
+    def __openFile(infilename):
+        rows = pd.read_csv(infilename)
+        return rows
+
+    def __createPatientDict(new_rows):
+        ID_list = list(new_rows['ID'])
+        patient_dict = {}
+        for id in ID_list:
+            terms = list(new_rows.loc[new_rows['ID'] == id]['Terms'])
+            #terms = list(new_rows[new_rows['ID'].str.contains(id)]['Terms'])
+            termsList = terms[0].split('; ')
+            patient_dict[id] = termsList
+        return patient_dict
+
+    def __rankedDict(scores_list):
+        """
+        Create dictionary where keys=background patients; 
+        score_dict[patient]['Score']=simScore to query
+        score_dict[patient]['Rank'] = rank to query (between 1 and # patients)
+        """
+        # Sort the scores list in descending order based on scores
+        sorted_scores = sorted(scores_list, key=lambda x: x[1], reverse=True)
+
+        # Create a dictionary and assign rank while iterating
+        score_dict = {}
+        for rank, (patient, score) in enumerate(sorted_scores, start=1):
+            score_dict[patient] = {'Score': score, 'Rank': rank}
+        return score_dict

@@ -14,10 +14,9 @@ class CustomJaccardIC(SimilarityBase):
         if term1 == term2:
             return 1.0
 
-        intersection_sum = sum(x.information_content[kind] for x in (term1.all_parents & term2.all_parents))
+        intersection_sum = sum(x.information_content[kind] for x in (term1.all_parents & term2.all_parents)) #test that the results of this = results of (term1.common_ancestors(term2)) and speed is equivalent
         union_sum = sum(x.information_content[kind] for x in (term1.all_parents | term2.all_parents))
 
-        # since being a parent is mutually exclusive only one of these will be true if either
         if term1 in term2.all_parents:
             union_sum += term2.information_content[kind]
         elif term2 in term1.all_parents:
