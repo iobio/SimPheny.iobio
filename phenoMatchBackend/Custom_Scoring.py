@@ -1,5 +1,6 @@
 from typing import List
-from pyhpo import SimilarityBase, SimScore
+from pyhpo import HPOTerm
+from pyhpo.similarity import SimScore, SimilarityBase
 
 class CustomJaccardIC(SimilarityBase):
     def __call__(
