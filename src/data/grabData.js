@@ -104,6 +104,8 @@ async function createPatientMap(matrix) {
         let gene = new Gene(g["gene_id"], g["gene_symbol"])
         newGeneList.push(gene)
       }
+    } else {
+      var newGeneList = []
     }
     patient.setGenesList(newGeneList)
 
