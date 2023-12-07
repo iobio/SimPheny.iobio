@@ -48,11 +48,11 @@ class HpoCompare:
 
     #Utility Internal Methods ----------------------------------------------------------------------------------------------
 
-    def __openFile(infilename):
+    def __openFile(self, infilename):
         rows = pd.read_csv(infilename)
         return rows
 
-    def __createPatientDict(new_rows):
+    def __createPatientDict(self, new_rows):
         ID_list = list(new_rows['ID'])
         patient_dict = {}
         for id in ID_list:
@@ -62,7 +62,7 @@ class HpoCompare:
             patient_dict[id] = termsList
         return patient_dict
 
-    def __rankedDict(scores_list):
+    def __rankedDict(self, scores_list):
         """
         Create dictionary where keys=background patients; 
         score_dict[patient]['Score']=simScore to query
