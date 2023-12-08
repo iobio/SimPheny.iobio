@@ -9,8 +9,6 @@ export default class TargetPatient extends Patient {
 
         this.userInputGenesList = [];
         this.userInputHpoIdList = [];
-
-        this.genGenesList();
     }
 
     getUserInputGenesList() {
@@ -35,6 +33,12 @@ export default class TargetPatient extends Patient {
         } else {
             genesNames = this.geneNamesList;
         }
+        
+        if (genesNames.length == 0) {
+            this.genesList = [];
+            return;
+        }
+
         let genesRes = await Be.getGeneList(genesNames);
         for (let gene of genesRes) {
             this.genesList.push(new Gene(gene["gene_id"], gene["gene_symbol"]));

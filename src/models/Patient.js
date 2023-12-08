@@ -8,7 +8,19 @@ export default class Patient {
         this.similarityScore = simObject["Score"]
         this.rank = simObject["Rank"]
         this.dx = patientObject["Dx/Udx"]
-        this.geneNamesList = patientObject["Genes"]
+
+        let geneNames = patientObject["Genes"]
+        //turn geneNames into a string
+        let geneNamesString = JSON.stringify(geneNames)
+        if (geneNamesString.includes(",")) {
+            geneNamesString = geneNamesString.replace("[", "").replace("]", "")
+            this.geneNamesList = geneNamesString.split(",")
+        } else {
+            //remove [] from the string by replacing them with nothing
+            geneNamesString = geneNamesString.replace("[", "").replace("]", "")
+            this.geneNamesList = [geneNamesString]
+        }
+
         this.clinicalDiagnosis = patientObject["Clin diagnosis"]
         this.hpoIdList = patientObject["Terms"]
         this.genesList = [] //generate this from the geneNamesList
@@ -56,6 +68,11 @@ export default class Patient {
         this.genesList = genesList;
     }
     async genGenesList() {
+        if (this.geneNamesList.length == 0) {
+            this.genesList = [];
+            return;
+        }
+        
         //generates the genesList from the geneNamesList
         let genesRes = await Be.getGeneList(this.geneNamesList);
         for (let gene of genesRes) {

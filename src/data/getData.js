@@ -7,22 +7,33 @@ export async function transformPatientMap(targetPatientId, targetTerms, targetGe
 
   let patientMap = {};
 
+  //first just generate and add the target patient
+  let patientObject = patientMapRes[targetPatientId];
+  let simObject = simScoresObj[targetPatientId];
+
+  let targetPatient = new TargetPatient(targetPatientId, patientObject, simObject);
+  targetPatient.setUserInputGenesList(targetGenes);
+  targetPatient.setUserInputHpoIdList(targetTerms);
+  targetPatient.genPhenotypeList(phenotypesMap);
+  await targetPatient.genGenesList();
+
+  patientMap[targetPatientId] = targetPatient;
+
   for(let patientId in patientMapRes){
     if (patientMapRes.hasOwnProperty(patientId)){
       if (patientId != targetPatientId){
         let patientObject = patientMapRes[patientId];
         let simObject = simScoresObj[patientId];
+
         let matchPatient = new MatchPatient(patientId, patientObject, simObject);
         matchPatient.genPhenotypeList(phenotypesMap);
+        matchPatient.genPhenotypesInCommon(targetPatient.getPhenotypeList());
+        await matchPatient.genGenesList();
+        matchPatient.genGenesInCommon(targetPatient.getGenesList());
+
         patientMap[patientId] = matchPatient;
       } else {
-        let patientObject = patientMapRes[patientId];
-        let simObject = simScoresObj[patientId];
-        let targetPatient = new TargetPatient(patientId, patientObject, simObject);
-        targetPatient.setUserInputGenesList(targetGenes);
-        targetPatient.setUserInputHpoIdList(targetTerms);
-        targetPatient.genPhenotypeList(phenotypesMap);
-        patientMap[patientId] = targetPatient;
+        //skip the target patient
       }
     } else {
       console.log("Error: patientMapRes does not have property " + patientId);
