@@ -2,7 +2,7 @@ import MatchPatient from "../models/MatchPatient";
 import TargetPatient from "../models/TargetPatient";
 import * as Be from "./fetchFromBackend.js";
 
-export async function transformPatientMap(targetPatientId, simScoresObj, phenotypesMap){
+export async function transformPatientMap(targetPatientId, targetTerms, targetGenes, simScoresObj, phenotypesMap){
   let patientMapRes = await Be.getPatientMap();
 
   let patientMap = {};
@@ -12,13 +12,15 @@ export async function transformPatientMap(targetPatientId, simScoresObj, phenoty
       if (patientId != targetPatientId){
         let patientObject = patientMapRes[patientId];
         let simObject = simScoresObj[patientId];
-        let matchPatient = new MatchPatient(patientObject, simObject);
+        let matchPatient = new MatchPatient(patientId, patientObject, simObject);
         matchPatient.genPhenotypeList(phenotypesMap);
         patientMap[patientId] = matchPatient;
       } else {
         let patientObject = patientMapRes[patientId];
         let simObject = simScoresObj[patientId];
-        let targetPatient = new TargetPatient(patientObject, simObject);
+        let targetPatient = new TargetPatient(patientId, patientObject, simObject);
+        targetPatient.setUserInputGenesList(targetGenes);
+        targetPatient.setUserInputHpoIdList(targetTerms);
         targetPatient.genPhenotypeList(phenotypesMap);
         patientMap[patientId] = targetPatient;
       }

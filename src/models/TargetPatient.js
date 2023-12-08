@@ -4,8 +4,8 @@ import Phenotype from './Phenotype.js';
 import Gene from './Gene.js';
 
 export default class TargetPatient extends Patient {
-    constructor(patientObject, simObject) {
-        super(patientObject, simObject);
+    constructor(patientId, patientObject, simObject) {
+        super(patientId, patientObject, simObject);
 
         this.userInputGenesList = [];
         this.userInputHpoIdList = [];

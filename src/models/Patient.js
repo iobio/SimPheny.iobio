@@ -3,13 +3,13 @@ import Phenotype from './Phenotype.js';
 import Gene from './Gene.js';
 
 export default class Patient {
-    constructor(patientObject, simObject) {
-        this.id = patientObject["ID"];
+    constructor(patientId, patientObject, simObject) {
+        this.id = patientId
         this.similarityScore = simObject["Score"]
         this.rank = simObject["Rank"]
         this.dx = patientObject["Dx/Udx"]
         this.geneNamesList = patientObject["Genes"]
-        this.clinicalDiagnosis = patientObject["Clinical diagnosis"]
+        this.clinicalDiagnosis = patientObject["Clin diagnosis"]
         this.hpoIdList = patientObject["Terms"]
         this.genesList = [] //generate this from the geneNamesList
         this.phenotypeList = [] //generate this from the hpoIdList

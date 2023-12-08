@@ -1,8 +1,8 @@
 import Patient from "./Patient.js";
 
 export default class MatchPatient extends Patient {
-    constructor(patientObject, simObject) {
-        super(patientObject, simObject);
+    constructor(patientId, patientObject, simObject) {
+        super(patientId, patientObject, simObject);
 
         this.genesInCommon = []
         this.phenotypesInCommon = []
