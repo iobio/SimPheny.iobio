@@ -1,114 +1,25 @@
-import * as hpoDb from '../data/grabData.js'
+import Patient from "./Patient.js";
+import * as Be from "../data/fetchFromBackend.js";
+import Phenotype from './Phenotype.js';
 import Gene from './Gene.js';
 
-class TargetPatient {
-    constructor(id, userInputHpoIdList=[], userInputGenesList=[]) {
-        this.id = id;
-        this.userInputGenesList = userInputGenesList;
-        this.userInputHpoIdList = userInputHpoIdList;
+export default class TargetPatient extends Patient {
+    constructor(patientObject, simObject) {
+        super(patientObject, simObject);
 
-        this.similarityScore = null;
-        this.rank = null;
-        this.dx = null;
-        this.genesList = [];
-        this.clinicalDiagnosis = null;
-        this.hpoIdList = [];
-        this.hpoTermList = [];
+        this.userInputGenesList = [];
+        this.userInputHpoIdList = [];
 
-        this.phenotypeList = [];
+        this.genGenesList();
     }
 
-    getId() {
-        return this.id;
-    }
-    setId(id) {
-        this.id = id;
-    }
-    getSimilarityScore() {
-        return this.similarityScore;
-    }
-    setSimilarityScore(similarityScore) {
-        this.similarityScore = similarityScore;
-    }
-    getRank() {
-        return this.rank;
-    }
-    setRank(rank) {
-        this.rank = rank;
-    }
-    getDx() {
-        return this.dx;
-    }
-    setDx(dx) {
-        this.dx = dx.toLowerCase();
-    }
-    getGenesList() {
-        return this.genesList;
-    }
-    async setGenesList(genesList) {
-        if (typeof genesList === "string" || (Array.isArray(genesList) && genesList.every(item => typeof item === 'string'))) {
-            //if it is a list of strings then we need to convert it to a string
-            if (Array.isArray(genesList) && genesList.every(item => typeof item === 'string')) {
-                genesList = genesList.join(",");
-            }
-            //make sure there are no spaces
-            genesList = genesList.replace(/\s|;/g, ',');
-            //use database to get bulk gene list
-            try {
-                genesList = await hpoDb.getGeneList(genesList);
-
-                var newGeneList = [];
-                for (let g of genesList) {
-                    let gene = new Gene(g.gene_id, g.gene_symbol);
-                    newGeneList.push(gene);
-                }
-                genesList = newGeneList;
-            } catch (error) {
-                //set to empty list if there is an error
-                genesList = [];
-            }
-        } else if (genesList == null || genesList.length == 0 || genesList == undefined) {
-            genesList = [];
-        } else if (typeof genesList == "object") {
-            var newGeneList = [];
-            for (let g of genesList) {
-                let gene = new Gene(g.gene_id, g.gene_symbol);
-                newGeneList.push(gene);
-            }
-            genesList = newGeneList;
-        }
-        this.genesList = genesList;
-    }
-    getClinicalDiagnosis() {
-        return this.clinicalDiagnosis;
-    }
-    setClinicalDiagnosis(clinicalDiagnosis) {
-        this.clinicalDiagnosis = clinicalDiagnosis;
-    }
-    getHpoIdList() {
-        return this.hpoIdList;
-    }
-    setHpoIdList(hpoIdList) {
-        if (typeof hpoIdList === "string") {
-            hpoIdList = hpoIdList.split(",");
-        }
-        this.hpoIdList = hpoIdList;
-    }
-    getHpoTermList() {
-        return this.hpoTermList;
-    }
-    setHpoTermList(hpoTermList) { 
-        if (typeof hpoIdList === "string") {
-            hpoIdList = hpoIdList.split(",");
-        }
-        this.hpoTermList = hpoTermList;
-    }
     getUserInputGenesList() {
         return this.userInputGenesList;
     }
     setUserInputGenesList(userInputGenesList) {
         this.userInputGenesList = userInputGenesList;
     }
+
     getUserInputHpoIdList() {
         return this.userInputHpoIdList;
     }
@@ -116,38 +27,38 @@ class TargetPatient {
         this.userInputHpoIdList = userInputHpoIdList;
     }
 
-    getPhenotypeList() {
-        return this.phenotypeList;
+    async genGenesList() {
+        let genesNames = []
+        //generates the genesList from the geneNamesList
+        if (this.userInputGenesList.length > 0) {
+            genesNames = this.userInputGenesList;
+        } else {
+            genesNames = this.geneNamesList;
+        }
+        let genesRes = await Be.getGeneList(genesNames);
+        for (let gene of genesRes) {
+            this.genesList.push(new Gene(gene["gene_id"], gene["gene_symbol"]));
+        }
     }
-    setPhenotypeList(phenotypeList) {
-        this.phenotypeList = phenotypeList;
-    }
 
-    setFromPatientObject(patient) {
-        this.rank = patient.getRank();
-        this.dx = patient.getDx();
-        
-        if (patient.getSimilarityScore()) {
-            this.similarityScore = patient.getSimilarityScore();
-        } 
-
-        if (this.genesList.length == 0 || this.genesList == null) {
-            this.genesList = patient.getGenesList();
+    genPhenotypeList(phenotypesMap) {
+        let hpoIdList = []
+        if (this.userInputHpoIdList.length > 0) {
+            hpoIdList = this.userInputHpoIdList;
+        } else {
+            hpoIdList = this.hpoIdList;
         }
-
-        this.clinicalDiagnosis = patient.getClinicalDiagnosis();
-
-        if (this.hpoIdList.length == 0 || this.hpoIdList == null) {
-            this.hpoIdList = patient.getHpoIdList();
-        }
-
-        if (this.hpoTermList.length == 0 || this.hpoTermList == null) {
-            this.hpoTermList = patient.getHpoTermList();
-        }
-
-        if (this.phenotypeList.length == 0 || this.phenotypeList == null) {
-            this.phenotypeList = patient.getPhenotypeList();
+        //generates the phenotypeList from the hpoIdList
+        for (let term of hpoIdList) {
+            //if the hpoId is not in the allPhenotypes object then just add it with no other info
+            if (!(term in phenotypesMap.byHpoId || term in phenotypesMap.byTerm)) {
+                this.phenotypeList.push(new Phenotype(term, "No Term Found", "", "", []));
+                continue;
+            } else if (term in phenotypesMap.byTerm) {
+                term = phenotypesMap.byTerm[term];
+            }
+            let phen = phenotypesMap.byHpoId[term];
+            this.phenotypeList.push(new Phenotype(term, phen["name"], phen["definition"], phen["comment"], phen["synonyms"]));
         }
     }
 }
-export default TargetPatient;

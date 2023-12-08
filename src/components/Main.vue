@@ -22,8 +22,9 @@
     import NavBar from './NavBar.vue'
     import LeftBar from './LeftBar.vue'
     import MatchesPane from './MatchesPane.vue'
-    import grabData, { getUdnIds } from '../data/grabData.js'
     import TargetPatient from '../models/TargetPatient.js'
+    import * as Be from '../data/fetchFromBackend.js'
+    import { transformPatientMap } from '../data/getData'
 
     export default {
         name: 'Main',
@@ -35,46 +36,40 @@
         data() {
             return {
                 patientMap: {},
+                ptMapObj: {},
                 similarityMap: {},
                 rankedList: [],
                 targetPatient: null,
-                similarityMatrixUrl: null,
-                udnPatientsUrl: null,
+                targetId: null,
+                targetTerms: [],
+                targetGenes: [],
                 udnPatientIds: [],
                 showPtSelectOverlay: false,
                 chartScales: null,
             }
         },
         async mounted() {
-            this.udnPatientsUrl = "./UdnPatients.csv";
-            this.similarityMatrixUrl = "./SimilarityMatrix.csv";
-            this.udnPatientIds = await getUdnIds(this.similarityMatrixUrl);
-
-            if (this.targetPatient != null) {
-                this.getMatches();
-            } else {
-                this.showPtSelectOverlay = true;
-            }
+            this.ptMapObj = await Be.getPatientMap();
+            this.udnPatientIds = Object.keys(this.ptMapObj);
+            this.showPtSelectOverlay = true;
         },
         methods: {
-            async getMatches(){
-                let { targetPatient, patientMap, similarityMap, rankedList, chartScales } = await grabData(this.udnPatientsUrl, this.similarityMatrixUrl, this.targetPatient.id);
-
-                this.patientMap = patientMap;
-                this.similarityMap = similarityMap;
-                this.rankedList = rankedList;
-                this.chartScales = chartScales;
-
-                this.targetPatient.setFromPatientObject(targetPatient);
-
+            async calcScores(targetTerms){
+                let similarityRes = await Be.getSimScores(targetTerms);
+                this.similarityMap = similarityRes.scores_dict;
+                this.rankedList = similarityRes.scores_list;
             },
-            async setPatientAndGetMatches(patient) {
+            async setPatientAndGetMatches(targetId, targetTerms, targetGenes) {
                 //inside of this function we need a signal to the application that the 
                 //target patient has changed and we are reloading the matches when we get the matches then we can set up everything again
-                this.targetPatient = new TargetPatient(patient.id);
-                this.targetPatient.setFromPatientObject(patient); //at this point the target patient wont have genes/phenotypes if empty but will be set when get matches returns
+                this.targetId = targetId;
+                this.targetTerms = targetTerms;
+                this.targetGenes = targetGenes;
+
                 this.showPtSelectOverlay = false;
-                await this.getMatches();
+                await this.calcScores(this.targetTerms);
+                this.patientMap = await transformPatientMap(this.targetId, this.similarityMap, this.$hpoTermsMap);
+                this.targetPatient = this.patientMap[this.targetId];
             },
             async reloadMatches(updatedPatient) {
                 this.targetPatient = updatedPatient;

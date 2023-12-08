@@ -123,8 +123,6 @@
 </template>
 
 <script>
-    import { VueElement } from 'vue';
-import * as hpoDb from '../data/grabData.js'
     import * as d3 from 'd3';
 
     export default {
