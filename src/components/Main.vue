@@ -73,7 +73,10 @@
                 await this.calcScores(this.targetTerms);
                 this.patientMap = await transformPatientMap(this.targetId, targetTerms, targetGenes, this.similarityMap, this.$hpoTermsMap);
                 this.targetPatient = this.patientMap[this.targetId];
+                //delete the target patient from the patient map
+                delete this.patientMap[this.targetId];
                 console.log(this.targetPatient);
+                console.log(this.patientMap['UDN902772']);
 
                 this.chartScales.xMin = this.rankedList[this.rankedList.length - 1].score;
                 this.chartScales.xMax = this.rankedList[1].score; //for now we do this because targets are in the data set
