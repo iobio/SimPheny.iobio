@@ -13,11 +13,11 @@ export default class Patient {
         //turn geneNames into a string
         let geneNamesString = JSON.stringify(geneNames)
         if (geneNamesString.includes(",")) {
-            geneNamesString = geneNamesString.replace("[", "").replace("]", "")
+            geneNamesString = geneNamesString.replace(/[\[\]"']/g, "")
             this.geneNamesList = geneNamesString.split(",")
         } else {
             //remove [] from the string by replacing them with nothing
-            geneNamesString = geneNamesString.replace("[", "").replace("]", "")
+            geneNamesString = geneNamesString.replace(/[\[\]"']/g, "")
             this.geneNamesList = [geneNamesString]
         }
 
