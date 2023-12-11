@@ -15,10 +15,13 @@ export default class Patient {
         if (geneNamesString.includes(",")) {
             geneNamesString = geneNamesString.replace(/[\[\]"']/g, "")
             this.geneNamesList = geneNamesString.split(",")
+            //if any are empty strings or a space remove them
+            this.geneNamesList = this.geneNamesList.filter(geneName => geneName != "" && geneName != " ")
         } else {
             //remove [] from the string by replacing them with nothing
             geneNamesString = geneNamesString.replace(/[\[\]"']/g, "")
             this.geneNamesList = [geneNamesString]
+            this.geneNamesList = this.geneNamesList.filter(geneName => geneName != "" && geneName != " ")
         }
 
         this.clinicalDiagnosis = patientObject["Clin diagnosis"]

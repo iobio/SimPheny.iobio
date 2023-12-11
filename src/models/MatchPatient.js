@@ -13,11 +13,11 @@ export default class MatchPatient extends Patient {
     }
     genGenesInCommon(targetGenes) {
         if (targetGenes.length == 0 || this.genesList.length == 0) {
-            console.log("Error: targetGenes or this.genesList is empty");
+            this.genesInCommon = [];
             return;
         }
         for (let gene of this.genesList) {
-            if (targetGenes.includes(gene)) {
+            if (targetGenes.some(targetGene => targetGene.gene_symbol == gene.gene_symbol)) {
                 this.genesInCommon.push(gene);
             }
         }
@@ -27,11 +27,11 @@ export default class MatchPatient extends Patient {
     }
     genPhenotypesInCommon(targetPhenotypes) {
         if (targetPhenotypes.length == 0 || this.phenotypeList.length == 0) {
-            console.log("Error: targetPhenotypes or this.phenotypeList is empty");
+            this.phenotypesInCommon = [];
             return;
         }
         for (let phenotype of this.phenotypeList) {
-            if (targetPhenotypes.includes(phenotype)) {
+            if (targetPhenotypes.some(targetPhenotype => targetPhenotype.id == phenotype.id)) {
                 this.phenotypesInCommon.push(phenotype);
             }
         }
