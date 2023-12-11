@@ -124,6 +124,7 @@
 
 <script>
     import * as d3 from 'd3';
+    import * as Be from '../data/fetchFromBackend.js';
 
     export default {
         name: 'LeftBar',
@@ -300,7 +301,7 @@
                 let phenotypeIdList = targetPatient.phenotypeList.map(phenotype => phenotype.hpoId);
 
                 let phenotypePromises = targetPatient.phenotypeList.map(phenotype => 
-                    hpoDb.getGenesWithPhenotype(phenotype.hpoId).then(res => {
+                    Be.getGenesWithPhenotype(phenotype.hpoId).then(res => {
                         phenotypeAssociations[phenotype.hpoId] = { genes: res };
                         
                         let seenInTarget = new Set();
@@ -340,7 +341,7 @@
                 );
                 
                 let genePromises = targetPatient.genesList.map(gene =>
-                    hpoDb.getPhenotypesWithGene(gene.gene_id).then(res => {
+                    Be.getPhenotypesWithGene(gene.gene_id).then(res => {
                         geneAssociations[gene.gene_symbol] = { phenotypes: res };
                         let seen = new Set();
                         let seenNotInTarget = new Set();
