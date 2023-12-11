@@ -19,12 +19,11 @@
 </template>
 
 <script>
-    import NavBar from './NavBar.vue'
-    import LeftBar from './LeftBar.vue'
-    import MatchesPane from './MatchesPane.vue'
-    import TargetPatient from '../models/TargetPatient.js'
-    import * as Be from '../data/fetchFromBackend.js'
-    import { transformPatientMap } from '../data/getData'
+    import NavBar from './NavBar.vue';
+    import LeftBar from './LeftBar.vue';
+    import MatchesPane from './MatchesPane.vue';
+    import * as Be from '../data/fetchFromBackend.js';
+    import { transformPatientMap } from '../data/getData';
 
     export default {
         name: 'Main',

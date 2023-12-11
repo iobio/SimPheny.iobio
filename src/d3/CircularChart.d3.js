@@ -548,9 +548,9 @@ function determineFill(dataPoint, selectedMatches={}, hoveredMatches={}) {
     }
     
     //if not check if they are diagnosed or undiagnosed
-    if (dataPoint.dx === 'undiagnosed') {
+    if (dataPoint.dx === 'Undiagnosed') {
         color = colors.fillPurple;
-    } else if (dataPoint.dx === 'diagnosed') {
+    } else if (dataPoint.dx === 'Diagnosed') {
         color = colors.fillGreen;
     } else {
         color = colors.fillBlack; 
@@ -572,9 +572,9 @@ function determineStroke(dataPoint, selectedMatches={}, hoveredMatches={}) {
     }
     
     //if not check if they are diagnosed or undiagnosed
-    if (dataPoint.dx === 'undiagnosed') {
+    if (dataPoint.dx === 'Undiagnosed') {
         return colors.strokePurple;
-    } else if (dataPoint.dx === 'diagnosed') {
+    } else if (dataPoint.dx === 'Diagnosed') {
         return colors.strokeGreen;
     } else {
         return colors.strokeBlack; 
@@ -585,7 +585,7 @@ function determineShape(dataPoint) {
     // Create an SVG element based on the condition
     let symbol = d3.symbol().size(15);
 
-    if (dataPoint.dx === 'undiagnosed') {
+    if (dataPoint.dx === 'Undiagnosed') {
         symbol.type(d3.symbolCircle);
     } else {
         symbol.type(d3.symbolSquare2).size(30);

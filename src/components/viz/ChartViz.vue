@@ -331,7 +331,7 @@
             for (let patientId in this.patientMap) {
                 if (!this.filterOptions.showUndiagnosed) {
                     filterNeverFired = false;
-                    if (this.patientMap[patientId].dx === 'undiagnosed') {
+                    if (this.patientMap[patientId].dx === 'Undiagnosed') {
                         delete filteredPatientMap[patientId];
                         continue;
                     }
