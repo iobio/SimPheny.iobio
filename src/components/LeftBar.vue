@@ -3,6 +3,7 @@
         <div v-if="this.targetPtProp" id="left-bar-container" :class="{ expanded: showLeftBar, collapsed: !showLeftBar}">
             <div class="tab-container left-bar" :class="{ expanded: !showHpoDrawer, shortened: showHpoDrawer}">
                 <h1 class="section-head">Patient Information</h1>
+                <p v-if="this.targetPtProp && this.targetPtProp.dx.toLowerCase() == 'diagnosed'">DX: {{ this.targetPtProp.clinicalDiagnosis }}</p>
                 <v-tabs v-model="tab" fixed-tabs height="30px">
                     <v-tab value="phenotypes" variant="text">Phenotypes</v-tab>
                     <v-tab value="genes" variant="text">Genes</v-tab>

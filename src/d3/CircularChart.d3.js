@@ -599,7 +599,7 @@ function determineShape(dataPoint) {
 }
 
 function determineXY(dataPoint, centerX, centerY, radiusScale, anglesMap) {
-    if (dataPoint.id in anglesMap) {
+    if (anglesMap && dataPoint.id in anglesMap) {
         let angle = anglesMap[dataPoint.id];
         let radius = radiusScale(dataPoint.similarityScore);
         let coords = polarToCartesian(radius, angle, centerX, centerY);

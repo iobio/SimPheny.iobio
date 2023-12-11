@@ -11,7 +11,7 @@
             </ChartKeyPopout>
         </div>
         
-        <div ref="lin-chart-container" id="lin-chart-viz" v-if="targetPatient"></div>
+        <div ref="lin-chart-container" id="lin-chart-viz" v-if="requiredPresent()"></div>
         <div v-else id="lin-chart-alt-text">
             <p>No target patient defined.</p>
             <p>Input target patient to view matches.</p>
@@ -140,7 +140,7 @@
                 rankCutOff: 0,
                 scoreCutOff: 0.0,
             },
-            anglesMap: null,
+            anglesMap: {},
             zoomed: false,
         };
     },
@@ -174,6 +174,9 @@
         }
     },
     methods: {
+        requiredPresent() {
+            return this.targetPatient && this.patientMap && this.chartScales && this.filteredPatientMap && this.chartScalesFiltered;
+        },
         canApplyFilters() {
             return this.validRank(this.filterOptions.rankCutOff) && this.validScore(this.filterOptions.scoreCutOff);
         },
@@ -215,7 +218,7 @@
                     .setHoveredFromMatches(this.hoveredFromMatches)
                     .setHoveredObjFromMatches(hoveredMatchesMap)
                     .setSelectedMatchesObj(selectedMatchesMap);
-                if (this.anglesMap) {
+                if (Object.keys(this.anglesMap).length > 0) {
                     this.chart.setXYCoords(this.anglesMap);
                 }
                 this.chart(container, this.filteredPatientMap);
@@ -267,10 +270,6 @@
             this.chartScalesFiltered = this.chartScales;
             this.filteredPatientMap = this.patientMap;
             this.applyFilters();
-            //timeout to allow the chart to update
-            setTimeout(() => {
-                this.drawChart();
-            }, 10);
         },
         clearSelection() {
             //select all the matches
@@ -440,6 +439,7 @@
             handler: function (newVal) {
                 if (newVal && newVal !== this.targetPatient) {
                     this.clearSelection();
+                    this.anglesMap = {};
                     //clear the filters
                     this.filterOptions = {
                         showUndiagnosed: true,
@@ -449,14 +449,11 @@
                         rankCutOff: 0,
                         scoreCutOff: 0.0,
                     },
+                    
                         this.chartScalesFiltered = this.chartScales;
                     this.filteredPatientMap = this.patientMap;
                     this.showLoading = true;
                     this.applyFilters();
-                    //wait and then draw the chart
-                    setTimeout(() => {
-                        this.drawChart();
-                    }, 10);
                 }
             },
             deep: true
@@ -481,10 +478,9 @@
         },
         patientMap: {
             handler: function (newVal) {
-                if (this.patientMap == null) {
+                if (this.patientMap == null || this.patientMap !== newVal || newVal == null) {
                     //loading
-                }
-                else {
+                } else {
                     this.applyFilters();
                     this.showLoading = false;
                 }
@@ -506,7 +502,10 @@
             handler: function () {
                 if (this.chartScales) {
                     this.chartScalesFiltered = this.chartScales;
-                    this.drawChart();
+                    //timeout to allow the chart to update
+                    setTimeout(() => {
+                        this.drawChart();
+                    }, 10);
                 }
             },
             deep: true
