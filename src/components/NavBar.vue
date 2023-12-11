@@ -12,7 +12,6 @@
                 <h3>Input Target Patient Details</h3>
                 <div v-if="udnPatientIdsList" id="udn-id-input" class="input-container">
                     <v-autocomplete
-                    @update:modelValue="patientChanged"
                     v-model="udnId"
                     :items="udnPatientIdsList"
                     variant="solo-filled"
@@ -47,9 +46,6 @@
 </template>
 
 <script>
-    import TargetPatient from '../models/TargetPatient.js'
-    import Phenotype from '../models/Phenotype'
-
     export default {
         name: 'NavBar',
         components: {
@@ -57,6 +53,7 @@
         },
         props: {
             udnPatientIdsList: Array,
+            patientMap: Object,
             showPtSelectOverlay: Boolean,
             targetPatient: Object,
         },
@@ -73,8 +70,14 @@
         },
         methods: {
             patientChanged() {
-                this.phenotypesText = '';
-                this.genesText = '';
+                if (this.patientMap[this.udnId].Terms) { //When loading for the first time we have a different object
+                    this.phenotypesText = this.patientMap[String(this.udnId)].Terms.map((phenotype) => {return phenotype; }).join('; ');
+                    this.genesText = this.patientMap[String(this.udnId)].Genes.map((gene) => { return gene; }).join('; ');                    
+                } else {
+                    this.phenotypesText = this.patientMap[String(this.udnId)].phenotypeList.map((phenotype) => {return phenotype.hpoId; }).join('; ');
+                    this.genesText = this.patientMap[String(this.udnId)].genesList.map((gene) => { return gene.gene_symbol; }).join('; ');
+                }
+
             },
             async processPatient() {
                 //Set the target id
@@ -98,6 +101,11 @@
             },
         },
         watch: {
+            udnId: function(newVal, oldVal) {
+                if (newVal !== oldVal) {
+                    this.patientChanged();
+                }
+            },
             showPtSelectOverlay: function(newVal, oldVal) {
                 this.showOverlay = newVal;
             },

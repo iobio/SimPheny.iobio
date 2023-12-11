@@ -3,6 +3,7 @@
         :udnPatientIdsList="udnPatientIds"
         :showPtSelectOverlay="showPtSelectOverlay"
         :targetPatient="targetPatient"
+        :patientMap="ptMapObj"
         @set-target-patient="setPatientAndGetMatches"></NavBar>
 
     <div id="main-content-container">
@@ -71,6 +72,7 @@
                 this.showPtSelectOverlay = false;
                 await this.calcScores(this.targetTerms);
                 this.patientMap = await transformPatientMap(this.targetId, targetTerms, targetGenes, this.similarityMap, this.$hpoTermsMap);
+                this.ptMapObj = this.patientMap;
                 this.targetPatient = this.patientMap[this.targetId];
                 //delete the target patient from the patient map
                 delete this.patientMap[this.targetId];
