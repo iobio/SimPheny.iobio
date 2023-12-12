@@ -23,5 +23,4 @@ const vuetify = createVuetify({
 
 const app = createApp(App)
 app.use(vuetify)
-app.config.globalProperties.$hpoTermsMap = await Be.getAllPhenotypes()
 app.mount('#app')

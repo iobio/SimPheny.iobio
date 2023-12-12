@@ -46,6 +46,7 @@
                 similarityMap: {},
                 rankedList: [],
                 targetPatient: null,
+                hpoTermsMap: {},
                 targetId: null,
                 targetTerms: [],
                 targetGenes: [],
@@ -70,6 +71,7 @@
                 this.rankedList = similarityRes.scores_list;
             },
             async setPatientAndGetMatches(targetId, targetTerms, targetGenes) {
+                this.hpoTermsMap = await Be.getAllPhenotypes()
                 this.showLoading = true;
                 console.time('setPatientAndGetMatches');
 
@@ -82,7 +84,7 @@
                 await this.calcScores(this.targetTerms);
                 console.timeEnd('calcScores');
                 console.time('transformPatientMap');
-                this.patientMap = await transformPatientMap(this.targetId, targetTerms, targetGenes, this.similarityMap, this.$hpoTermsMap);
+                this.patientMap = await transformPatientMap(this.targetId, targetTerms, targetGenes, this.similarityMap, this.hpoTermsMap);
                 console.timeEnd('transformPatientMap');
                 this.ptMapObj = this.patientMap; //this is passed to the chooser overlay so will have all patients
                 this.targetPatient = this.patientMap[this.targetId];
