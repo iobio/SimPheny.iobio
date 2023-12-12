@@ -97,7 +97,6 @@
             },
             async reloadMatches(updatedPatient) {
                 this.showLoading = true;
-                console.time('reloadMatches');
 
                 this.targetPatient = updatedPatient;
                 let newTerms = this.targetPatient.getPhenotypeList().filter(term => term.relevant === true).map(term => term.hpoId);
@@ -107,9 +106,6 @@
                 this.chartScales.xMax = this.rankedList[1][1]; //for now we do this because targets are in the data set
                 this.patientMap = await updatePatientMap(this.similarityMap, this.patientMap);
 
-
-
-                console.timeEnd('reloadMatches');
                 this.showLoading = false;
             }
         },

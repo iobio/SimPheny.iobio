@@ -27,9 +27,9 @@ export async function transformPatientMap(targetPatientId, targetTerms, targetGe
 
         let matchPatient = new MatchPatient(patientId, patientObject, simObject);
         matchPatient.genPhenotypeList(phenotypesMap);
-        // matchPatient.genPhenotypesInCommon(targetPatient.getPhenotypeList());
+        matchPatient.genPhenotypesInCommon(targetPatient.getPhenotypeList());
         await matchPatient.genGenesList();
-        // matchPatient.genGenesInCommon(targetPatient.getGenesList());
+        matchPatient.genGenesInCommon(targetPatient.getGenesList());
 
         patientMap[patientId] = matchPatient;
       } else {
