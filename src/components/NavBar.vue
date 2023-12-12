@@ -12,7 +12,6 @@
                 <h3>Input Target Patient Details</h3>
                 <div v-if="udnPatientIdsList" id="udn-id-input" class="input-container">
                     <v-autocomplete
-                    @update:modelValue="patientChanged"
                     v-model="udnId"
                     :items="udnPatientIdsList"
                     variant="solo-filled"
@@ -47,10 +46,6 @@
 </template>
 
 <script>
-    import TargetPatient from '../models/TargetPatient.js'
-    import Phenotype from '../models/Phenotype'
-    import { getPhenotypeWithId, getPhenotypeWithName } from '../data/grabData.js'
-
     export default {
         name: 'NavBar',
         components: {
@@ -58,6 +53,7 @@
         },
         props: {
             udnPatientIdsList: Array,
+            patientMap: Object,
             showPtSelectOverlay: Boolean,
             targetPatient: Object,
         },
@@ -74,68 +70,42 @@
         },
         methods: {
             patientChanged() {
-                this.phenotypesText = '';
-                this.genesText = '';
+                if (this.patientMap[this.udnId].Terms) { //When loading for the first time we have a different object
+                    this.phenotypesText = this.patientMap[String(this.udnId)].Terms.map((phenotype) => {return phenotype; }).join('; ');
+                    this.genesText = this.patientMap[String(this.udnId)].Genes.map((gene) => { return gene; }).join('; ');                    
+                } else {
+                    this.phenotypesText = this.patientMap[String(this.udnId)].phenotypeList.map((phenotype) => {return phenotype.hpoId; }).join('; ');
+                    this.genesText = this.patientMap[String(this.udnId)].genesList.map((gene) => { return gene.gene_symbol; }).join('; ');
+                }
+
             },
             async processPatient() {
-                //create a new patient object
-                let patient = new TargetPatient(this.udnId);
+                //Set the target id
+                let targetId = this.udnId;
 
-                //add phenotypes
+                //Make the targetPhenotypes list
                 let phenotypes = this.phenotypesText.split(/[,;]+/).map((phenotype) => {
                     return phenotype.trim();
                 });
-                let phenotypeList = [];
-                let phenotypeMap = {};
-                for (let term of phenotypes) {
-                    if (term.slice(0,3).toUpperCase() == 'HP:') {
-                        //if the term is an hpo id then lookup the term by id
-                        let res = await getPhenotypeWithId(term);
-                        if (res) {
-                            if (phenotypeMap[res.term_id] != null || phenotypeMap[res.name] != null) {
-                                //dont add just continue because we already have this phenotype
-                                continue;
-                            }
-                            phenotypeMap[res.term_id] = res.name;
-                            let phenotype = new Phenotype(res.term_id, res.name, res.definition, res.comment, res.synonyms);
-                            phenotypeList.push(phenotype);
-                        }
-                    } else {
-                        //if the term is not an hpo id then lookup the term by name
-                        let res = await getPhenotypeWithName(term);
-                        if (res) {
-                            if (phenotypeMap[res.term_id] != null || phenotypeMap[res.name] != null) {
-                                //dont add just continue because we already have this phenotype
-                                continue;
-                            }
-                            phenotypeMap[res.name] = res.term_id;
-                            let phenotype = new Phenotype(res.term_id, res.name, res.definition, res.comment, res.synonyms);
-                            phenotypeList.push(phenotype);
-                        }
-                    }
-                }
-                patient.setPhenotypeList(phenotypeList);
 
-                //add genes
-                let genes = this.genesText.split(/[,;]+/).map((variant) => {
-                    return variant.trim();
+                //Make the targetGenes list
+                let genes = this.genesText.split(/[,;]+/).map((gene) => {
+                    return gene.trim().toUpperCase();
                 })
 
-                //make them all caps
-                genes = genes.map((variant) => {
-                    return variant.toUpperCase();
-                });
-                //set the patient gene list
-                patient.setGenesList(genes);
-
                 //set the target patient
-                this.$emit('set-target-patient', patient);
+                this.$emit('set-target-patient', targetId, phenotypes, genes);
 
                 //close the overlay
                 this.showOverlay = false;
             },
         },
         watch: {
+            udnId: function(newVal, oldVal) {
+                if (newVal !== oldVal) {
+                    this.patientChanged();
+                }
+            },
             showPtSelectOverlay: function(newVal, oldVal) {
                 this.showOverlay = newVal;
             },

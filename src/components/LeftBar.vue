@@ -3,6 +3,7 @@
         <div v-if="this.targetPtProp" id="left-bar-container" :class="{ expanded: showLeftBar, collapsed: !showLeftBar}">
             <div class="tab-container left-bar" :class="{ expanded: !showHpoDrawer, shortened: showHpoDrawer}">
                 <h1 class="section-head">Patient Information</h1>
+                <p v-if="this.targetPtProp && this.targetPtProp.dx.toLowerCase() == 'diagnosed'">DX: {{ this.targetPtProp.clinicalDiagnosis }}</p>
                 <v-tabs v-model="tab" fixed-tabs height="30px">
                     <v-tab value="phenotypes" variant="text">Phenotypes</v-tab>
                     <v-tab value="genes" variant="text">Genes</v-tab>
@@ -123,9 +124,8 @@
 </template>
 
 <script>
-    import { VueElement } from 'vue';
-import * as hpoDb from '../data/grabData.js'
     import * as d3 from 'd3';
+    import * as Be from '../data/fetchFromBackend.js';
 
     export default {
         name: 'LeftBar',
@@ -302,7 +302,7 @@ import * as hpoDb from '../data/grabData.js'
                 let phenotypeIdList = targetPatient.phenotypeList.map(phenotype => phenotype.hpoId);
 
                 let phenotypePromises = targetPatient.phenotypeList.map(phenotype => 
-                    hpoDb.getGenesWithPhenotype(phenotype.hpoId).then(res => {
+                    Be.getGenesWithPhenotype(phenotype.hpoId).then(res => {
                         phenotypeAssociations[phenotype.hpoId] = { genes: res };
                         
                         let seenInTarget = new Set();
@@ -342,7 +342,7 @@ import * as hpoDb from '../data/grabData.js'
                 );
                 
                 let genePromises = targetPatient.genesList.map(gene =>
-                    hpoDb.getPhenotypesWithGene(gene.gene_id).then(res => {
+                    Be.getPhenotypesWithGene(gene.gene_id).then(res => {
                         geneAssociations[gene.gene_symbol] = { phenotypes: res };
                         let seen = new Set();
                         let seenNotInTarget = new Set();
