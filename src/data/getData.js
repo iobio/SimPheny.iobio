@@ -41,3 +41,13 @@ export async function transformPatientMap(targetPatientId, targetTerms, targetGe
   }
   return patientMap;
 }
+
+export async function updatePatientMap(newSimMap, oldPatientMap) {
+  let updatedPatientMap = oldPatientMap;
+  for (let patientId in oldPatientMap) {
+    if (newSimMap.hasOwnProperty(patientId)) {
+      updatedPatientMap[patientId].setSimilarityScore(newSimMap[patientId].Score);
+    }
+  }
+  return updatedPatientMap;
+}

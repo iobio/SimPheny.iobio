@@ -24,7 +24,7 @@
     import LeftBar from './LeftBar.vue';
     import MatchesPane from './MatchesPane.vue';
     import * as Be from '../data/fetchFromBackend.js';
-    import { transformPatientMap } from '../data/getData';
+    import { transformPatientMap, updatePatientMap } from '../data/getData';
 
     export default {
         name: 'Main',
@@ -82,6 +82,10 @@
             },
             async reloadMatches(updatedPatient) {
                 this.targetPatient = updatedPatient;
+                let newTerms = this.targetPatient.getPhenotypeList().filter(term => term.relevant === true).map(term => term.hpoId);
+                let newGenes = this.targetPatient.getGenesList().filter(gene => gene.relevant === true).map(gene => gene.geneSymbol); //Not used yet
+                await this.calcScores(newTerms);
+                this.patientMap = await updatePatientMap(this.similarityMap, this.patientMap);
             }
         },
     }
