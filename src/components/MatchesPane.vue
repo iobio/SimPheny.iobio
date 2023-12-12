@@ -206,7 +206,7 @@
                     let phenNotInTarget = {};
                     let phenInCommon = {};
                     phenNotInTarget = selectedMatch.phenotypeList.reduce((obj, phenotype) => {
-                        let isInTarget = this.targetPatient.phenotypeList.some(targetPhenotype => targetPhenotype.hpoId == phenotype.hpoId)
+                        let isInTarget = this.targetPatient.phenotypeList.some(targetPhenotype => (targetPhenotype.hpoId == phenotype.hpoId) && (targetPhenotype.relevant))
                         if (!isInTarget) {
                             obj[phenotype.hpoId] = obj[phenotype.hpoId] || {phenotype: phenotype, count: 0, matches: []};
                             obj[phenotype.hpoId].count++;
@@ -225,7 +225,7 @@
                     let genesInCommon = {};
                     let genesNotInTarget = {};
                     genesNotInTarget = selectedMatch.genesList.reduce((obj, gene) => {
-                        let isInTarget = this.targetPatient.genesList.some(targetGene => targetGene.gene_symbol == gene.gene_symbol)
+                        let isInTarget = this.targetPatient.genesList.some(targetGene => (targetGene.gene_symbol == gene.gene_symbol) && (targetGene.relevant))
                         if (!isInTarget) {
                             obj[gene.gene_symbol] = obj[gene.gene_symbol] || {gene: gene, count: 0, matches: []};
                             obj[gene.gene_symbol].count++;
@@ -248,7 +248,7 @@
                     let phenInCommon = {};
                     this.selectedMatches.forEach(match => {
                         phenNotInTarget = match.phenotypeList.reduce((obj, phenotype) => {
-                            let isInTarget = this.targetPatient.phenotypeList.some(targetPhenotype => targetPhenotype.hpoId == phenotype.hpoId)
+                            let isInTarget = this.targetPatient.phenotypeList.some(targetPhenotype => (targetPhenotype.hpoId == phenotype.hpoId) && (targetPhenotype.relevant))
                             if (!isInTarget) {
                                 obj[phenotype.hpoId] = obj[phenotype.hpoId] || {phenotype: phenotype, count: 0, matches: []};
                                 obj[phenotype.hpoId].count++;
@@ -269,7 +269,7 @@
                     let genesInCommon = {};
                     this.selectedMatches.forEach(match => {
                         genesNotInTarget = match.genesList.reduce((obj, gene) => {
-                            let isInTarget = this.targetPatient.genesList.some(targetGene => targetGene.gene_symbol == gene.gene_symbol)
+                            let isInTarget = this.targetPatient.genesList.some(targetGene => (targetGene.gene_symbol == gene.gene_symbol) && (targetGene.relevant))
                             if (!isInTarget) {
                                 obj[gene.gene_symbol] = obj[gene.gene_symbol] || {gene: gene, count: 0, matches: []};
                                 obj[gene.gene_symbol].count++;
