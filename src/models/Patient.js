@@ -76,11 +76,14 @@ export default class Patient {
             return;
         }
         
-        //generates the genesList from the geneNamesList
-        let genesRes = await Be.getGeneList(this.geneNamesList);
-        for (let gene of genesRes) {
-            this.genesList.push(new Gene(gene["gene_id"], gene["gene_symbol"]));
+        for (let geneName of this.geneNamesList) {
+            this.genesList.push(new Gene("", geneName));
         }
+        //generates the genesList from the geneNamesList
+        // let genesRes = await Be.getGeneList(this.geneNamesList);
+        // for (let gene of genesRes) {
+        //     // this.genesList.push(new Gene(gene["gene_id"], gene["gene_symbol"]));
+        // }
     }
 
     getClinicalDiagnosis() {

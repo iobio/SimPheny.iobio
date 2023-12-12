@@ -1,4 +1,10 @@
 <template>
+    <div v-if="showLoading" id="loading-container">
+        <!-- Loading indicator -->
+        <v-progress-circular indeterminate color="#21351f" :size="110" :width="10">
+            <template v-slot:default>Loading...</template>
+        </v-progress-circular>
+    </div>
     <NavBar
         :udnPatientIdsList="udnPatientIds"
         :showPtSelectOverlay="showPtSelectOverlay"
@@ -45,6 +51,7 @@
                 targetGenes: [],
                 udnPatientIds: [],
                 showPtSelectOverlay: false,
+                showLoading: false,
                 chartScales: {
                     xMin: 0,
                     xMax: 1,
@@ -63,29 +70,47 @@
                 this.rankedList = similarityRes.scores_list;
             },
             async setPatientAndGetMatches(targetId, targetTerms, targetGenes) {
-                //inside of this function we need a signal to the application that the 
-                //target patient has changed and we are reloading the matches when we get the matches then we can set up everything again
+                this.showLoading = true;
+                console.time('setPatientAndGetMatches');
+
                 this.targetId = targetId;
                 this.targetTerms = targetTerms;
                 this.targetGenes = targetGenes;
 
                 this.showPtSelectOverlay = false;
+                console.time('calcScores');
                 await this.calcScores(this.targetTerms);
+                console.timeEnd('calcScores');
+                console.time('transformPatientMap');
                 this.patientMap = await transformPatientMap(this.targetId, targetTerms, targetGenes, this.similarityMap, this.$hpoTermsMap);
+                console.timeEnd('transformPatientMap');
                 this.ptMapObj = this.patientMap; //this is passed to the chooser overlay so will have all patients
                 this.targetPatient = this.patientMap[this.targetId];
                 //delete the target patient from the patient map
                 delete this.patientMap[this.targetId];
 
-                this.chartScales.xMin = this.rankedList[this.rankedList.length - 1].score;
-                this.chartScales.xMax = this.rankedList[1].score; //for now we do this because targets are in the data set
+                this.chartScales.xMin = this.rankedList[this.rankedList.length - 1][1];
+                this.chartScales.xMax = this.rankedList[1][1]; //for now we do this because targets are in the data set
+
+                console.timeEnd('setPatientAndGetMatches');
+                this.showLoading = false;
             },
             async reloadMatches(updatedPatient) {
+                this.showLoading = true;
+                console.time('reloadMatches');
+
                 this.targetPatient = updatedPatient;
                 let newTerms = this.targetPatient.getPhenotypeList().filter(term => term.relevant === true).map(term => term.hpoId);
                 let newGenes = this.targetPatient.getGenesList().filter(gene => gene.relevant === true).map(gene => gene.geneSymbol); //Not used yet
                 await this.calcScores(newTerms);
+                this.chartScales.xMin = this.rankedList[this.rankedList.length - 1][1];
+                this.chartScales.xMax = this.rankedList[1][1]; //for now we do this because targets are in the data set
                 this.patientMap = await updatePatientMap(this.similarityMap, this.patientMap);
+
+
+
+                console.timeEnd('reloadMatches');
+                this.showLoading = false;
             }
         },
     }
@@ -99,4 +124,16 @@
         flex-direction: row
         justify-content: flex-start
         align-items: flex-start
+    #loading-container
+        position: absolute
+        top: 0
+        left: 0
+        height: 100vh
+        width: 100vw
+        display: flex
+        flex-direction: column
+        align-items: center
+        justify-content: center
+        background-color: rgba(255, 255, 255, 0.75)
+        z-index: 9999
 </style>

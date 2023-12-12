@@ -65,4 +65,16 @@ export default class TargetPatient extends Patient {
             this.phenotypeList.push(new Phenotype(term, phen["name"], phen["definition"], phen["comment"], phen["synonyms"]));
         }
     }
+    async genGenesList() {
+        if (this.geneNamesList.length == 0) {
+            this.genesList = [];
+            return;
+        }
+        
+        // generates the genesList from the geneNamesList
+        let genesRes = await Be.getGeneList(this.geneNamesList);
+        for (let gene of genesRes) {
+            this.genesList.push(new Gene(gene["gene_id"], gene["gene_symbol"]));
+        }
+    }
 }

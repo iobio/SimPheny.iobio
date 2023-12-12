@@ -16,13 +16,6 @@
             <p>No target patient defined.</p>
             <p>Input target patient to view matches.</p>
         </div>
-
-        <!-- Loading indicator -->
-        <div v-if="targetPatient && showLoading" id="loading-container">
-            <v-progress-circular indeterminate color="#21351f" :size="110" :width="10">
-                <template v-slot:default>Loading...</template>
-            </v-progress-circular>
-        </div>
         
     </div>
     
@@ -126,7 +119,6 @@
         return {
             chart: null,
             resizeObserver: null,
-            showLoading: true,
             showChartOptions: true,
             showChartKey: false,
             selectedMatches: this.selectedMatchesProp,
@@ -452,7 +444,6 @@
                     
                         this.chartScalesFiltered = this.chartScales;
                     this.filteredPatientMap = this.patientMap;
-                    this.showLoading = true;
                     this.applyFilters();
                 }
             },
@@ -482,18 +473,6 @@
                     //loading
                 } else {
                     this.applyFilters();
-                    this.showLoading = false;
-                }
-            },
-            deep: true
-        },
-        chart: {
-            handler: function () {
-                if (!this.chart) {
-                    this.showLoading = true;
-                }
-                else {
-                    this.showLoading = false;
                 }
             },
             deep: true
@@ -687,14 +666,6 @@
             p
                 text-align: center
                 font-size: large
-        #loading-container
-            height: 80vh
-            max-height: 700px
-            width: 80vh
-            max-width: 700px
-            display: flex
-            flex-direction: column
-            align-items: center
     #lin-chart-tip 
         position: absolute
         visibility: hidden
