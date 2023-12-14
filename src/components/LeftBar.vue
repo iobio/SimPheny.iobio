@@ -36,7 +36,7 @@
                                 <input v-if="targetGenes" @change="patientInfoChanged()" type="checkbox" v-model="targetGenes[gene.gene_symbol].relevant">
                                 <span 
                                     @click="getPhenotypesForGene(gene)"
-                                    :class="{ selected: selectedGene && selectedGene.gene_id == gene.gene_id, dontUse: targetGenes[gene.gene_symbol].relevant == false}"  
+                                    :class="{ selected: selectedGene && selectedGene.gene_symbol == gene.gene_symbol, dontUse: targetGenes[gene.gene_symbol].relevant == false}"  
                                     class="gene-span left-bar">
                                     {{ gene.gene_symbol }}
                                 </span>
@@ -82,12 +82,14 @@
                         </div>
                         <v-window v-model="hpoTab">
                             <v-window-item value="phenToGene">
+                                <span v-if="selectedPhenotypeGenes.length == 0">No genes for the selected phenotype found.</span>
                                 <div class="hpo-list-div genes" v-if="selectedPhenotypeGenes && targetPatient" v-for="gene in selectedPhenotypeGenes" :class="{ inTarget: checkGeneInPatient(gene) }">
                                     <span>{{ gene.gene.gene_symbol }}</span>
                                     <span>{{ gene.numDiseases }}</span>
                                 </div>
                             </v-window-item>
                             <v-window-item value="geneToPhen">
+                                <span v-if="selectedGenePhenotypes.length == 0">No phenotypes for the selected gene found.</span>
                                 <div class="hpo-list-div phenotypes" v-if="selectedGenePhenotypes && targetPatient" v-for="phenotype in selectedGenePhenotypes" :class="{ inTarget: checkPhenotypeInPatient(phenotype) }">
                                     <span>{{ phenotype.phenotype.term_id }}</span>
                                     <span>{{ phenotype.phenotype.name }}</span>
