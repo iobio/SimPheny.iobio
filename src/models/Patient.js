@@ -6,7 +6,7 @@ export default class Patient {
     constructor(patientId, patientObject, simObject) {
         this.id = patientId
         this.similarityScore = simObject["Score"]
-        this.rank = simObject["Rank"]
+        this.rank = simObject["Rank"] - 1
         this.dx = patientObject["Dx/Udx"]
 
         let geneNames = patientObject["Genes"]
