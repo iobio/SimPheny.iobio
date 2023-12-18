@@ -693,14 +693,19 @@
         top: 0px;
         background-color: #e9ede9;
         width: 100%;
-        z-index: 1;
+        z-index: 2;
     }
     #hpo-drawer #annotations-list-container .hpo-list-div {
-        width: 100%;
         display: grid;
         padding-left: 10px;
         margin-bottom: 2px;
-        border-bottom: #bfc8bf 1px solid;
+        margin-left: 2px;
+        margin-right: 2px;
+        border-radius: 3px;
+        border: 1px solid #b7beb7;
+    }
+    #hpo-drawer #annotations-list-container .hpo-list-div:first-of-type {
+        margin-top: 2px;
     }
     #hpo-drawer #annotations-list-container .hpo-list-div.phenotypes {
         grid-template-columns: .6fr 1fr .35fr;
@@ -711,8 +716,6 @@
     #hpo-drawer #annotations-list-container .hpo-list-div.inTarget {
         color: #2e482e;
         background-color: #dae4da;
-        border-radius: 3px;
-        border: 1px solid #b7beb7;
     }
     
     #hpo-drawer #annotations-list-container .hpo-list-div span {
@@ -727,14 +730,15 @@
     #hpo-drawer #annotations-list-container .hpo-list-div.genes span:nth-of-type(2) {
         justify-content: flex-end;
         padding-right: 1rem;
-        z-index: 2;
+        z-index: 1;
         border-radius: 3px;
     }
     #hpo-drawer #annotations-list-container .hpo-list-div.phenotypes span:nth-of-type(3) {
         justify-content: flex-end;
         padding-right: 1rem;
-        z-index: 2;
+        z-index: 1;
         border-radius: 3px;
+        margin: 2px;
     }
     .disease-inspect-div {
         display: flex;
