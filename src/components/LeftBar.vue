@@ -717,19 +717,22 @@
     
     #hpo-drawer #annotations-list-container .hpo-list-div span {
         text-align: start;
+        display: flex;
+        align-items: center;
+        justify-content: start;
     }
     #hpo-drawer #annotations-list-container .hpo-list-div.genes span {
-        text-align: center;
+        justify-content: center;
     }
     #hpo-drawer #annotations-list-container .hpo-list-div.genes span:nth-of-type(2) {
-        text-align: end;
-        padding-right: 1.5rem;
+        justify-content: flex-end;
+        padding-right: 1rem;
         z-index: 2;
         border-radius: 3px;
     }
     #hpo-drawer #annotations-list-container .hpo-list-div.phenotypes span:nth-of-type(3) {
-        text-align: end;
-        padding-right: 1.5rem;
+        justify-content: flex-end;
+        padding-right: 1rem;
         z-index: 2;
         border-radius: 3px;
     }
