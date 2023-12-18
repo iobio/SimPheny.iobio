@@ -85,7 +85,10 @@
                                 <span v-if="selectedPhenotypeGenes.length == 0">No genes for the selected phenotype found.</span>
                                 <div class="hpo-list-div genes" v-if="selectedPhenotypeGenes && targetPatient" v-for="gene in selectedPhenotypeGenes" :class="{ inTarget: checkGeneInPatient(gene) }">
                                     <span>{{ gene.gene.gene_symbol }}</span>
-                                    <span>{{ gene.numDiseases }}</span>
+                                    <span class="clickable" @click="toggleDiseaseDetails(gene.gene.gene_symbol)">{{ gene.numDiseases }}</span>
+                                    <div v-if="inspectedDiseases && inspectedDiseases == gene.gene.gene_symbol">
+                                        <span v-for="disease in gene.diseases">{{ disease }}</span>
+                                    </div>
                                 </div>
                             </v-window-item>
                             <v-window-item value="geneToPhen">
@@ -93,7 +96,10 @@
                                 <div class="hpo-list-div phenotypes" v-if="selectedGenePhenotypes && targetPatient" v-for="phenotype in selectedGenePhenotypes" :class="{ inTarget: checkPhenotypeInPatient(phenotype) }">
                                     <span>{{ phenotype.phenotype.term_id }}</span>
                                     <span>{{ phenotype.phenotype.name }}</span>
-                                    <span>{{ phenotype.numDiseases }}</span>
+                                    <span class="clickable" @click="toggleDiseaseDetails(phenotype.phenotype.term_id)">{{ phenotype.numDiseases }}</span>
+                                    <div v-if="inspectedDiseases && inspectedDiseases == phenotype.phenotype.term_id ">
+                                        <span v-for="disease in phenotype.diseases">{{ disease }}</span>
+                                    </div>
                                 </div>
                             </v-window-item>
                         </v-window>
@@ -151,6 +157,7 @@
                 showReloadRevert: false,
                 targetPhenotypes: {},
                 targetGenes: {},
+                inspectedDiseases: null
             }
         },
         methods: {
@@ -167,6 +174,13 @@
                     copyGenes[gene.gene_symbol] = { relevant: gene.relevant };
                 }
                 this.targetGenes = copyGenes;
+            },
+            toggleDiseaseDetails(phenGeneId) {
+                if (this.inspectedDiseases == phenGeneId) {
+                    this.inspectedDiseases = null;
+                } else {
+                    this.inspectedDiseases = phenGeneId;
+                }
             },
             patientInfoChanged() {
                 if (!this.showReloadRevert) {
@@ -410,6 +424,13 @@
 </script>
 
 <style>
+    .clickable {
+        cursor: pointer;
+    }
+    .clickable:hover {
+        background-color: #042c09;
+        color: white;
+    }
     .list-item.left-bar {
         padding-left: 5px;
         padding-right: 5px;
