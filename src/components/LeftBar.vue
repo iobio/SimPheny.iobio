@@ -83,17 +83,27 @@
                         <v-window v-model="hpoTab">
                             <v-window-item value="phenToGene">
                                 <span v-if="selectedPhenotypeGenes.length == 0">No genes for the selected phenotype found.</span>
-                                <div class="hpo-list-div genes" v-if="selectedPhenotypeGenes && targetPatient" v-for="gene in selectedPhenotypeGenes" :class="{ inTarget: checkGeneInPatient(gene) }">
-                                    <span>{{ gene.gene.gene_symbol }}</span>
-                                    <span>{{ gene.numDiseases }}</span>
+                                <div  v-if="selectedPhenotypeGenes && targetPatient" v-for="gene in selectedPhenotypeGenes">
+                                    <div class="hpo-list-div genes" :class="{ inTarget: checkGeneInPatient(gene) }">
+                                        <span>{{ gene.gene.gene_symbol }}</span>
+                                        <span class="clickable" @click="toggleDiseaseDetails(gene.gene.gene_symbol)">{{ gene.numDiseases }}</span>
+                                    </div>
+                                    <div class="disease-inspect-div" v-if="inspectedDiseases && inspectedDiseases == gene.gene.gene_symbol">
+                                        <span v-for="disease in gene.diseases">{{ disease }}</span>
+                                    </div>
                                 </div>
                             </v-window-item>
                             <v-window-item value="geneToPhen">
                                 <span v-if="selectedGenePhenotypes.length == 0">No phenotypes for the selected gene found.</span>
-                                <div class="hpo-list-div phenotypes" v-if="selectedGenePhenotypes && targetPatient" v-for="phenotype in selectedGenePhenotypes" :class="{ inTarget: checkPhenotypeInPatient(phenotype) }">
-                                    <span>{{ phenotype.phenotype.term_id }}</span>
-                                    <span>{{ phenotype.phenotype.name }}</span>
-                                    <span>{{ phenotype.numDiseases }}</span>
+                                <div v-if="selectedGenePhenotypes && targetPatient" v-for="phenotype in selectedGenePhenotypes">
+                                    <div class="hpo-list-div phenotypes" :class="{ inTarget: checkPhenotypeInPatient(phenotype) }">
+                                        <span>{{ phenotype.phenotype.term_id }}</span>
+                                        <span>{{ phenotype.phenotype.name }}</span>
+                                        <span class="clickable" @click="toggleDiseaseDetails(phenotype.phenotype.term_id)">{{ phenotype.numDiseases }}</span>
+                                    </div>
+                                    <div class="disease-inspect-div" v-if="inspectedDiseases && inspectedDiseases == phenotype.phenotype.term_id ">
+                                        <span v-for="disease in phenotype.diseases">{{ disease }}</span>
+                                    </div>
                                 </div>
                             </v-window-item>
                         </v-window>
@@ -151,6 +161,7 @@
                 showReloadRevert: false,
                 targetPhenotypes: {},
                 targetGenes: {},
+                inspectedDiseases: null
             }
         },
         methods: {
@@ -167,6 +178,13 @@
                     copyGenes[gene.gene_symbol] = { relevant: gene.relevant };
                 }
                 this.targetGenes = copyGenes;
+            },
+            toggleDiseaseDetails(phenGeneId) {
+                if (this.inspectedDiseases == phenGeneId) {
+                    this.inspectedDiseases = null;
+                } else {
+                    this.inspectedDiseases = phenGeneId;
+                }
             },
             patientInfoChanged() {
                 if (!this.showReloadRevert) {
@@ -410,6 +428,13 @@
 </script>
 
 <style>
+    .clickable {
+        cursor: pointer;
+    }
+    .clickable:hover {
+        background-color: #6C7B6B;
+        color: white;
+    }
     .list-item.left-bar {
         padding-left: 5px;
         padding-right: 5px;
@@ -668,14 +693,19 @@
         top: 0px;
         background-color: #e9ede9;
         width: 100%;
-        z-index: 1;
+        z-index: 2;
     }
     #hpo-drawer #annotations-list-container .hpo-list-div {
-        width: 100%;
         display: grid;
-        padding-left: 20px;
+        padding-left: 10px;
         margin-bottom: 2px;
-        border-bottom: #bfc8bf 1px solid;
+        margin-left: 2px;
+        margin-right: 2px;
+        border-radius: 3px;
+        border: 1px solid #b7beb7;
+    }
+    #hpo-drawer #annotations-list-container .hpo-list-div:first-of-type {
+        margin-top: 2px;
     }
     #hpo-drawer #annotations-list-container .hpo-list-div.phenotypes {
         grid-template-columns: .6fr 1fr .35fr;
@@ -686,23 +716,38 @@
     #hpo-drawer #annotations-list-container .hpo-list-div.inTarget {
         color: #2e482e;
         background-color: #dae4da;
-        border-radius: 3px;
-        border: 1px solid #b7beb7;
     }
     
     #hpo-drawer #annotations-list-container .hpo-list-div span {
         text-align: start;
+        display: flex;
+        align-items: center;
+        justify-content: start;
     }
     #hpo-drawer #annotations-list-container .hpo-list-div.genes span {
-        text-align: center;
+        justify-content: center;
     }
     #hpo-drawer #annotations-list-container .hpo-list-div.genes span:nth-of-type(2) {
-        text-align: end;
-        padding-right: 1.5rem;
+        justify-content: flex-end;
+        padding-right: 1rem;
+        z-index: 1;
+        border-radius: 3px;
     }
     #hpo-drawer #annotations-list-container .hpo-list-div.phenotypes span:nth-of-type(3) {
-        text-align: end;
-        padding-right: 1.5rem;
+        justify-content: flex-end;
+        padding-right: 1rem;
+        z-index: 1;
+        border-radius: 3px;
+        margin: 2px;
+    }
+    .disease-inspect-div {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        padding-left: 20px;
+        padding-right: 20px;
+        padding-bottom: 5px;
+        padding-top: 5px;
     }
     .button-container.hpo-drawer {
         width: 100%;
