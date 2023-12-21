@@ -39,6 +39,7 @@ export async function transformPatientMap(targetPatientId, targetTerms, targetGe
       console.log("Error: patientMapRes does not have property " + patientId);
     }
   }
+  console.log("patientMap: ", patientMap);
   return patientMap;
 }
 

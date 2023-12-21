@@ -1,7 +1,7 @@
 var baseURL = "http://localhost:8911/"
 // var baseURL = "https://mosaic-staging.chpc.utah.edu/phenomatcher-backend/"
 //url for compare data
-var compareURL = baseURL + "compare?terms="
+var compareURL = baseURL + "compare/"
 //url for getting the patientMap
 var patientMapURL = baseURL + "population"
 
@@ -37,8 +37,13 @@ export async function getPhenotypeWithId(id) {
     return response.json();
   }
   
-  export async function getAllPhenotypes() {
-    let url = baseURL + "all/hpoTerms/"
+  export async function getAllPhenotypesById() {
+    let url = baseURL + "all/terms/ids/"
+    const response = await fetch(url);
+    return response.json();
+  }
+  export async function getAllPhenotypesByName() {
+    let url = baseURL + "all/terms/names/"
     const response = await fetch(url);
     return response.json();
   }
@@ -47,7 +52,7 @@ export async function getPhenotypeWithId(id) {
     /*
     Takes a phenotype id and returns the genes associated with that phenotype
     */
-    let url = baseURL + "id/getGenes/"
+    let url = baseURL + "id/get_genes/"
     const response = await fetch(url + encodeURI(id));
     //if the response is not ok then return null
     if (!response.ok) {
@@ -60,7 +65,7 @@ export async function getPhenotypeWithId(id) {
     /*
     Takes a gene id and returns the phenotypes associated with that gene
     */
-    let url = baseURL + "gene/getPhenotypes/"
+    let url = baseURL + "gene/get_terms/"
     const response = await fetch(url + encodeURI(id));
     //if the response is not ok then return null
     if (!response.ok) {
