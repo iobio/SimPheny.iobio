@@ -1,7 +1,7 @@
 <template>
     <div v-if="showLoading" id="loading-container">
         <!-- Loading indicator -->
-        <v-progress-circular indeterminate color="#21351f" :size="110" :width="10">
+        <v-progress-circular indeterminate="disable-shrink" color="#21351f" :size="110" :width="10">
             <template v-slot:default>Loading...</template>
         </v-progress-circular>
     </div>
@@ -135,4 +135,7 @@
         justify-content: center
         background-color: rgba(255, 255, 255, 0.75)
         z-index: 9999
+        .v-progress-circular
+            svg
+               animation-duration: .2s 
 </style>
