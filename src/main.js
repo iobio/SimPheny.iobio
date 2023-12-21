@@ -10,8 +10,6 @@ import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 
-//local things
-import * as Be from "./data/fetchFromBackend.js";
 
 const vuetify = createVuetify({
   components,
