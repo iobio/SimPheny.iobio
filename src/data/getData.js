@@ -39,7 +39,6 @@ export async function transformPatientMap(targetPatientId, targetTerms, targetGe
       console.log("Error: patientMapRes does not have property " + patientId);
     }
   }
-  console.log("patientMap: ", patientMap);
   return patientMap;
 }
 
@@ -47,7 +46,7 @@ export async function updatePatientMap(newSimMap, oldPatientMap) {
   let updatedPatientMap = oldPatientMap;
   for (let patientId in oldPatientMap) {
     if (newSimMap.hasOwnProperty(patientId)) {
-      updatedPatientMap[patientId].setSimilarityScore(newSimMap[patientId].Score);
+      updatedPatientMap[patientId].setSimilarityScore(newSimMap[patientId].score);
     }
   }
   return updatedPatientMap;

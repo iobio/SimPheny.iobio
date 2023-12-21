@@ -68,14 +68,11 @@
             async calcScores(targetTerms){
                 let similarityRes = await Be.getSimScores(targetTerms);
                 this.similarityMap = similarityRes.score_map.ScoreMap;
-                // console.log(this.similarityMap)
                 this.rankedList = similarityRes.ranked_vec.ScoreVec;
-                // console.log(this.rankedList)
             },
             async setPatientAndGetMatches(targetId, targetTerms, targetGenes) {
                 this.hpoTermsMap["byHpoId"] = await Be.getAllPhenotypesById()
                 this.hpoTermsMap["byTerm"] = await Be.getAllPhenotypesByName()
-                // console.log(this.hpoTermsMap)
                 this.showLoading = true;
                 console.time('setPatientAndGetMatches');
 
