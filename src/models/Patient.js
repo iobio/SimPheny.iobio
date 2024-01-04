@@ -5,8 +5,8 @@ import Gene from './Gene.js';
 export default class Patient {
     constructor(patientId, patientObject, simObject) {
         this.id = patientId
-        this.similarityScore = simObject["Score"]
-        this.rank = simObject["Rank"] - 1
+        this.similarityScore = simObject["score"]
+        this.rank = simObject["rank"] - 1
         this.dx = patientObject["Dx/Udx"]
 
         let geneNames = patientObject["Genes"]
@@ -26,6 +26,10 @@ export default class Patient {
 
         this.clinicalDiagnosis = patientObject["Clin diagnosis"]
         this.hpoIdList = patientObject["Terms"]
+        //if terms are a string split them into a list either with commas or semi colons and a space
+        if (typeof this.hpoIdList === "string") {
+            this.hpoIdList = this.hpoIdList.split(/[,;]\s?/);
+        }
         this.genesList = [] //generate this from the geneNamesList
         this.phenotypeList = [] //generate this from the hpoIdList
     }
