@@ -1,5 +1,5 @@
-var baseURL = "http://localhost:8911/"
-// var baseURL = "https://mosaic-staging.chpc.utah.edu/phenomatcher-backend/"
+// var baseURL = "http://localhost:8911/"
+var baseURL = "https://mosaic-staging.chpc.utah.edu/phenomatcher-backend/"
 //url for compare data
 var compareURL = baseURL + "compare/"
 //url for getting the patientMap
