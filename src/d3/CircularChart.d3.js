@@ -162,6 +162,15 @@ export default function CircularChart() {
             .attr("stroke", "white")
             .attr("opacity", 0.5);
 
+        //Add label on top that says "Slide to select range..." in italics
+        slider.append("text")
+            .text("Slide to select range. . .")
+            .attr("font-size", "10px")
+            .attr("font-style", "italic")
+            .attr("font-weight", "bold")
+            .attr("fill", colors.chartLettersGrey)
+            .attr("transform", `translate(15, 8)`);
+
         //Create a shadow for the handle to use with defs
         
         svg.append("defs")
