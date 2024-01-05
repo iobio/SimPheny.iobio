@@ -234,6 +234,10 @@ export default function CircularChart() {
                 //raise the slider handle to the top
                 sliderHandle.raise();
             })
+            .on("start", function(event) {
+                //make the pointer a grabbing hand
+                d3.select(this).style("cursor", "grabbing");
+            })
             .on( "end", function(event) {
                 let x = event.x - marginLeft + start*2 + 5 + 2; //The true x position useful for calculating the similarity score
                 let similarityScore = radiusScale.invert(x);
