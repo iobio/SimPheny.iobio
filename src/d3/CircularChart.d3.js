@@ -114,38 +114,102 @@ export default function CircularChart() {
                 .lower();
 
             //put a rectangle with rounded edges at the end of the arc on the bottom of the arc
-            arcSectionGroup.append("rect")
-                .attr("width", nextRadius - radius)
-                .attr("height", 10)
-                .attr("fill", colors.chartMain)
-                .attr("rx", 2)
-                .attr("ry", 2)
-                .attr("stroke", "white")
-                .attr("opacity", opacity)
-                .attr("cursor", "pointer")
-                .attr("transform", `translate(${marginLeft + radius},${height - marginBottom})`)
-                .on("mouseover", function(event) {
-                    //change the color to purple
-                    d3.select(this)
-                        .attr("fill", "purple")
-                        .attr("opacity", 1);
+            // arcSectionGroup.append("rect")
+            //     .attr("width", nextRadius - radius)
+            //     .attr("height", 10)
+            //     .attr("fill", colors.chartMain)
+            //     .attr("rx", 2)
+            //     .attr("ry", 2)
+            //     .attr("stroke", "white")
+            //     .attr("opacity", opacity)
+            //     .attr("cursor", "pointer")
+            //     .attr("transform", `translate(${marginLeft + radius},${height - marginBottom})`)
+            //     .on("mouseover", function(event) {
+            //         //change the color to purple
+            //         d3.select(this)
+            //             .attr("fill", "purple")
+            //             .attr("opacity", 1);
 
-                    //select the parent then get the first child 
-                    let arcSection = d3.select(this.parentNode).select(".arc-section");
-                    arcSection.attr("fill", "purple")
-                })
-                .on("mouseout", function(event) {
-                    //change back to its original color
-                    d3.select(this)
-                        .attr("fill", colors.chartMain)
-                        .attr("opacity", opacity);
+            //         //select the parent then get the first child 
+            //         let arcSection = d3.select(this.parentNode).select(".arc-section");
+            //         arcSection.attr("fill", "purple")
+            //     })
+            //     .on("mouseout", function(event) {
+            //         //change back to its original color
+            //         d3.select(this)
+            //             .attr("fill", colors.chartMain)
+            //             .attr("opacity", opacity);
                     
-                    //select the parent then get the first child which is the arc section
-                    let arcSection = d3.select(this.parentNode).select(".arc-section");
-                    arcSection.attr("fill", colors.chartMain)
-                })
-                .on("click", createRectangleClickHandler(tic, nextTic, matchesObj)); 
+            //         //select the parent then get the first child which is the arc section
+            //         let arcSection = d3.select(this.parentNode).select(".arc-section");
+            //         arcSection.attr("fill", colors.chartMain)
+            //     })
+            //     .on("click", createRectangleClickHandler(tic, nextTic, matchesObj)); 
         }
+        //Create the slider
+        //Slider bar should only be from the minimum radius to the max radius of the chart
+        let start = radiusScale(xHalfTics[0]);
+        let slider = svg.append("g")
+            .attr("transform", `translate(${marginLeft + start},${height - marginBottom})`);
+
+        //Create the slider rectangle
+        slider.append("rect")
+            .attr("width", maxRadius - start)
+            .attr("height", 10)
+            .attr("fill", colors.chartMain)
+            .attr("rx", 2)
+            .attr("ry", 2)
+            .attr("stroke", "white")
+            .attr("opacity", 0.5);
+
+        //Create the slider handle
+        let sliderHandle = slider.append("circle")
+            .attr("r", 7)
+            .attr("fill", colors.targetPurple)
+            .attr("stroke", "white")
+            .attr("stroke-width", 1)
+            .attr("cx", 0)
+            .attr("cy", 5)
+            .attr("cursor", "pointer");
+
+        //Make the slider handle draggable over the slider bar but the handle should return the corresponding similarity score value of its position
+        let drag = d3.drag()
+            .on("drag", function(event) {
+                //get the x position of the mouse event at the center of the handle
+                let x = event.x - marginLeft + start + 7 + 2;
+                //if the x position is less than 0 then set it to 0
+                if (x < 0) {
+                    x = 0;
+                }
+                //if the x position is greater than the max radius then set it to the max radius
+                if (x > maxRadius) {
+                    x = maxRadius;
+                }
+                //set the x position of the slider handle
+                sliderHandle.attr("cx", x);
+                //if arc path exists remove it
+                if (svg.select("#arc-path-for-slider").node()) {
+                    svg.select("#arc-path-for-slider").remove();
+                }
+
+                //make an arc based on the x position
+                //make sure the x position is in the middle of the slider handle
+                let arc = createArc((x + start), centerX - start, centerY);
+                //add the arc to the svg with an id, ensure it is in the middle of the slider handle
+                svg.append("path")
+                    .attr("d", arc)
+                    .attr("stroke", colors.targetPurple)
+                    .attr("stroke-width", 1)
+                    .attr("fill", "none")
+                    .attr("id", "arc-path-for-slider")
+                    .attr("transform", `translate(${start}, 0)`);
+
+                //get the similarity score based on the x position
+                let similarityScore = radiusScale.invert(x);
+            });
+
+        //Add the drag event to the slider
+        sliderHandle.call(drag);
 
         //Tic Labels
         svg.append("g")
