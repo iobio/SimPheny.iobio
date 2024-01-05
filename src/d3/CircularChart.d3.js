@@ -114,38 +114,139 @@ export default function CircularChart() {
                 .lower();
 
             //put a rectangle with rounded edges at the end of the arc on the bottom of the arc
-            arcSectionGroup.append("rect")
-                .attr("width", nextRadius - radius)
-                .attr("height", 10)
-                .attr("fill", colors.chartMain)
-                .attr("rx", 2)
-                .attr("ry", 2)
-                .attr("stroke", "white")
-                .attr("opacity", opacity)
-                .attr("cursor", "pointer")
-                .attr("transform", `translate(${marginLeft + radius},${height - marginBottom})`)
-                .on("mouseover", function(event) {
-                    //change the color to purple
-                    d3.select(this)
-                        .attr("fill", "purple")
-                        .attr("opacity", 1);
+            // arcSectionGroup.append("rect")
+            //     .attr("width", nextRadius - radius)
+            //     .attr("height", 10)
+            //     .attr("fill", colors.chartMain)
+            //     .attr("rx", 2)
+            //     .attr("ry", 2)
+            //     .attr("stroke", "white")
+            //     .attr("opacity", opacity)
+            //     .attr("cursor", "pointer")
+            //     .attr("transform", `translate(${marginLeft + radius},${height - marginBottom})`)
+            //     .on("mouseover", function(event) {
+            //         //change the color to purple
+            //         d3.select(this)
+            //             .attr("fill", "purple")
+            //             .attr("opacity", 1);
 
-                    //select the parent then get the first child 
-                    let arcSection = d3.select(this.parentNode).select(".arc-section");
-                    arcSection.attr("fill", "purple")
-                })
-                .on("mouseout", function(event) {
-                    //change back to its original color
-                    d3.select(this)
-                        .attr("fill", colors.chartMain)
-                        .attr("opacity", opacity);
+            //         //select the parent then get the first child 
+            //         let arcSection = d3.select(this.parentNode).select(".arc-section");
+            //         arcSection.attr("fill", "purple")
+            //     })
+            //     .on("mouseout", function(event) {
+            //         //change back to its original color
+            //         d3.select(this)
+            //             .attr("fill", colors.chartMain)
+            //             .attr("opacity", opacity);
                     
-                    //select the parent then get the first child which is the arc section
-                    let arcSection = d3.select(this.parentNode).select(".arc-section");
-                    arcSection.attr("fill", colors.chartMain)
-                })
-                .on("click", createRectangleClickHandler(tic, nextTic, matchesObj)); 
+            //         //select the parent then get the first child which is the arc section
+            //         let arcSection = d3.select(this.parentNode).select(".arc-section");
+            //         arcSection.attr("fill", colors.chartMain)
+            //     })
+            //     .on("click", createRectangleClickHandler(tic, nextTic, matchesObj)); 
         }
+        //Create the slider
+        //Slider bar should only be from the minimum radius to the max radius of the chart
+        let start = radiusScale(xHalfTics[0]);
+        let slider = svg.append("g")
+            .attr("transform", `translate(${marginLeft + start},${height - marginBottom + 2})`);
+
+        //Create the slider rectangle
+        slider.append("rect")
+            .attr("width", maxRadius - start)
+            .attr("height", 10)
+            .attr("fill", colors.chartMain)
+            .attr("rx", 2)
+            .attr("ry", 2)
+            .attr("stroke", "white")
+            .attr("opacity", 0.5);
+
+        //Add label on top that says "Slide to select range..." in italics
+        slider.append("text")
+            .text("← Slide to select range")
+            .attr("font-size", "10px")
+            .attr("font-style", "italic")
+            .attr("font-weight", "bold")
+            .attr("fill", colors.chartLettersGrey)
+            .attr("transform", `translate(15, 8)`);
+
+        //Create a shadow for the handle to use with defs
+        
+        svg.append("defs")
+            .append("filter")
+            .attr("id", "shadowFilter")
+            .attr("x", "-50%")
+            .attr("y", "-50%")
+            .attr("width", "200%")
+            .attr("height", "200%")
+            .append("feDropShadow")
+            .attr("dx", "0")  // No horizontal offset
+            .attr("dy", "0")  // No vertical offset
+            .attr("stdDeviation", "2")  // Blur amount
+            .attr("flood-color", "black");
+
+        //Create the slider handle
+        let sliderHandle = slider.append("rect")
+            .attr("width", 8)
+            .attr("height", 12)
+            .attr("fill", colors.targetPurple)
+            .attr("stroke", "white")
+            .attr("stroke-width", 1)
+            .attr("rx", 2)
+            .attr("ry", 2)
+            .attr("transform", `translate(0, -1)`)
+            .attr("cursor", "pointer")
+            .attr("filter", "url(#shadowFilter)");
+
+        //Make the slider handle draggable over the slider bar but the handle should return the corresponding similarity score value of its position
+        let drag = d3.drag()
+            .on("drag", function(event) {
+                //get the x position of the mouse event at the center of the handle
+                let x = event.x - marginLeft + start + 5 + 2;
+                //if the x position is less than 0 then set it to 0
+                if (x < 0) {
+                    x = 0;
+                }
+                //if the x position is greater than the max radius then set it to the max radius
+                if (x > (maxRadius - start)) {
+                    x = maxRadius - start;
+                }
+                //set the x position of the slider handle
+                sliderHandle.attr("x", x);
+                //if arc path exists remove it
+                if (svg.select("#arc-path-for-slider").node()) {
+                    svg.select("#arc-path-for-slider").remove();
+                }
+
+                //make an arc based on the x position
+                //make sure the x position is in the middle of the slider handle
+                let arc = createArc((x + start), (centerX - start ), centerY);
+                //add the arc to the svg with an id, ensure it is in the middle of the slider handle
+                svg.append("path")
+                    .attr("d", arc)
+                    .attr("stroke", colors.targetPurple)
+                    .attr("stroke-width", 2)
+                    .attr("fill", "none")
+                    .attr("id", "arc-path-for-slider")
+                    .attr("transform", `translate(${start}, 0)`);
+
+                //raise the slider handle to the top
+                sliderHandle.raise();
+            })
+            .on("start", function(event) {
+                //make the pointer a grabbing hand
+                d3.select(this).style("cursor", "grabbing");
+            })
+            .on( "end", function(event) {
+                let x = event.x - marginLeft + start*2 + 5 + 2; //The true x position useful for calculating the similarity score
+                let similarityScore = radiusScale.invert(x);
+                //call the callback function
+                sliderSelectHandler(similarityScore, matchesObj);
+            });
+
+        //Add the drag event to the slider
+        sliderHandle.call(drag);
 
         //Tic Labels
         svg.append("g")
@@ -272,6 +373,19 @@ export default function CircularChart() {
                 //call the callback function
                 onRectangleSelectedCallback(matches);
             };
+        }
+
+        //Handles the slider selection event
+        function sliderSelectHandler(similarityScore, matchesObj) {
+            let matches = [];
+            //just make sure all the matches that are higher than the x position are selected
+            for (let match of Object.values(matchesObj)) {
+                if (match.similarityScore >= similarityScore) {
+                    matches.push(match);
+                }
+            }
+            //call the callback function
+            onRectangleSelectedCallback(matches);
         }
 
         //Handles the single match click event
