@@ -150,7 +150,7 @@ export default function CircularChart() {
         //Slider bar should only be from the minimum radius to the max radius of the chart
         let start = radiusScale(xHalfTics[0]);
         let slider = svg.append("g")
-            .attr("transform", `translate(${marginLeft + start},${height - marginBottom})`);
+            .attr("transform", `translate(${marginLeft + start},${height - marginBottom + 2})`);
 
         //Create the slider rectangle
         slider.append("rect")
@@ -162,31 +162,49 @@ export default function CircularChart() {
             .attr("stroke", "white")
             .attr("opacity", 0.5);
 
+        //Create a shadow for the handle to use with defs
+        
+        svg.append("defs")
+            .append("filter")
+            .attr("id", "shadowFilter")
+            .attr("x", "-50%")
+            .attr("y", "-50%")
+            .attr("width", "200%")
+            .attr("height", "200%")
+            .append("feDropShadow")
+            .attr("dx", "0")  // No horizontal offset
+            .attr("dy", "0")  // No vertical offset
+            .attr("stdDeviation", "2")  // Blur amount
+            .attr("flood-color", "black");
+
         //Create the slider handle
-        let sliderHandle = slider.append("circle")
-            .attr("r", 7)
+        let sliderHandle = slider.append("rect")
+            .attr("width", 8)
+            .attr("height", 12)
             .attr("fill", colors.targetPurple)
             .attr("stroke", "white")
             .attr("stroke-width", 1)
-            .attr("cx", 0)
-            .attr("cy", 5)
-            .attr("cursor", "pointer");
+            .attr("rx", 2)
+            .attr("ry", 2)
+            .attr("transform", `translate(0, -1)`)
+            .attr("cursor", "pointer")
+            .attr("filter", "url(#shadowFilter)");
 
         //Make the slider handle draggable over the slider bar but the handle should return the corresponding similarity score value of its position
         let drag = d3.drag()
             .on("drag", function(event) {
                 //get the x position of the mouse event at the center of the handle
-                let x = event.x - marginLeft + start + 7 + 2;
+                let x = event.x - marginLeft + start + 5 + 2;
                 //if the x position is less than 0 then set it to 0
                 if (x < 0) {
                     x = 0;
                 }
                 //if the x position is greater than the max radius then set it to the max radius
-                if (x > maxRadius) {
-                    x = maxRadius;
+                if (x > (maxRadius - start)) {
+                    x = maxRadius - start;
                 }
                 //set the x position of the slider handle
-                sliderHandle.attr("cx", x);
+                sliderHandle.attr("x", x);
                 //if arc path exists remove it
                 if (svg.select("#arc-path-for-slider").node()) {
                     svg.select("#arc-path-for-slider").remove();
@@ -194,18 +212,24 @@ export default function CircularChart() {
 
                 //make an arc based on the x position
                 //make sure the x position is in the middle of the slider handle
-                let arc = createArc((x + start), centerX - start, centerY);
+                let arc = createArc((x + start), (centerX - start ), centerY);
                 //add the arc to the svg with an id, ensure it is in the middle of the slider handle
                 svg.append("path")
                     .attr("d", arc)
                     .attr("stroke", colors.targetPurple)
-                    .attr("stroke-width", 1)
+                    .attr("stroke-width", 2)
                     .attr("fill", "none")
                     .attr("id", "arc-path-for-slider")
                     .attr("transform", `translate(${start}, 0)`);
 
-                //get the similarity score based on the x position
+                //raise the slider handle to the top
+                sliderHandle.raise();
+            })
+            .on( "end", function(event) {
+                let x = event.x - marginLeft + start*2 + 5 + 2; //The true x position useful for calculating the similarity score
                 let similarityScore = radiusScale.invert(x);
+                //call the callback function
+                sliderSelectHandler(similarityScore, matchesObj);
             });
 
         //Add the drag event to the slider
@@ -336,6 +360,19 @@ export default function CircularChart() {
                 //call the callback function
                 onRectangleSelectedCallback(matches);
             };
+        }
+
+        //Handles the slider selection event
+        function sliderSelectHandler(similarityScore, matchesObj) {
+            let matches = [];
+            //just make sure all the matches that are higher than the x position are selected
+            for (let match of Object.values(matchesObj)) {
+                if (match.similarityScore >= similarityScore) {
+                    matches.push(match);
+                }
+            }
+            //call the callback function
+            onRectangleSelectedCallback(matches);
         }
 
         //Handles the single match click event
