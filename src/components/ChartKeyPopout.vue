@@ -1,29 +1,14 @@
 <template>
     <p id="chart-key-popout" :class="{show: showChartKey}">
     <span>
-        <svg height="8" width="8">
-            <rect x="1" y="1" width="6" height="6" style="fill:rgb(218, 180, 237); stroke: rgb(116, 4, 172);"></rect>
-        </svg>
-        = Diagnosed
-    </span>
-    <span>
-        <svg height="8" width="8">
-            <rect x="1" y="1" width="6" height="6" style="fill:rgb(9, 9, 9); stroke: rgb(14, 14, 14);"></rect>
-        </svg>
-        = Clinical Dx Only
-    </span>
-    <span>
-        <svg height="8" width="8">
-            <circle cx="4" cy="4" r="3" style="fill:rgb(189, 74, 247); stroke: rgb(116, 4, 172);"></circle>
-        </svg>
-        = Undiagnosed
-    </span>
-    <span>
         <svg height="10" width="10">
-            <circle cx="5" cy="5" r="4" style="fill:rgb(201, 153, 225); stroke: rgb(116, 4, 172);"></circle>
-        </svg> /
-        <svg height="10" width="10">
-            <rect x="1" y="1" width="8" height="8" style="fill:rgb(201, 153, 225); stroke: rgb(116, 4, 172);"></rect>
+            <circle cx="5" cy="5" r="4" style="fill:rgb(226, 203, 237); stroke: rgb(116, 4, 172);"></circle>
+        </svg> 
+        = No Genes in Common
+    </span>
+    <span>
+        <svg height="15" width="15">
+            <polygon points="7.5,0.75 3,14.25 14.25,5.625 0.75,5.625 12,14.25" style="fill:black; stroke: black;"></polygon>
         </svg>
         = Genes in Common
     </span>
