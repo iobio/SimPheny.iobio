@@ -21,8 +21,9 @@
     
     <div id="lin-chart-tip"></div>
 
-    <button @click="showChartOptions = !showChartOptions" id="chart-options-btn">
+    <button @mouseenter="showToggleOptTip" @mouseleave="unshowToggleOptTip" @click="showChartOptions = !showChartOptions" id="chart-options-btn">
         <v-icon color="white">mdi-dots-horizontal-circle-outline</v-icon>
+        <span id="toggle-options-tip">Chart Options</span>
     </button>
 
     <div id="chart-options-container" :class="{ hidden: showChartOptions === false}">
@@ -34,9 +35,22 @@
                     <input v-model="filterOptions.showGenesInCommonOnly" type="checkbox" name="" id="">
                 </div>
 
-                <div  class="group" id="filter-by-radios">
-                    <p>Filter By</p>
-                    <div class="filterby-wrapper">
+                <div class="group zoom-to-select">
+                    <label v-if="!zoomed" for="zoom-to-select">Zoom on Selection</label>
+                    <button v-if="!zoomed" @click="zoomToSelect()" :disabled="!selectedMatches || selectedMatches.length == 0"><v-icon>mdi-magnify-plus-outline</v-icon></button>
+                    
+                    <label v-if="zoomed" for="zoom-to-select">Return to Origin</label>
+                    <button v-if="zoomed" @click="applyFilters()"><v-icon>mdi-magnify-minus-outline</v-icon></button>
+                </div> 
+
+                <div class="group" id="filter-by-radios" :class="{filterByCollapsed: filterByRadiosCollapsed}">
+                    <p>More Filters 
+                        <div class="collapse-btn radios" @click="filterByRadiosCollapsed = !filterByRadiosCollapsed">
+                            <v-icon v-if="filterByRadiosCollapsed">mdi-chevron-down</v-icon>
+                            <v-icon v-else>mdi-chevron-up</v-icon>
+                        </div>
+                    </p>
+                    <div v-if="!filterByRadiosCollapsed" class="filterby-wrapper">
                         <div>
                             <input @click="selectFilter('rank')" type="checkbox" v-model="filterOptions.filterByRank">
                             <label for="rank">Rank</label>
@@ -56,7 +70,7 @@
                             </v-text-field>
                         </div>
                     </div>
-                    <div class="filterby-wrapper">
+                    <div v-if="!filterByRadiosCollapsed" class="filterby-wrapper">
                         <div>
                             <input @click="selectFilter('score')" type="checkbox" v-model="filterOptions.filterByScore">
                             <label for="score">Score</label> 
@@ -77,13 +91,6 @@
                         </div>
                     </div>                 
                 </div>  
-                <div class="group zoom-to-select">
-                    <label v-if="!zoomed" for="zoom-to-select">Zoom on Selection</label>
-                    <button v-if="!zoomed" @click="zoomToSelect()" :disabled="!selectedMatches || selectedMatches.length == 0"><v-icon>mdi-magnify-plus-outline</v-icon></button>
-                    
-                    <label v-if="zoomed" for="zoom-to-select">Return to Origin</label>
-                    <button v-if="zoomed" @click="applyFilters()"><v-icon>mdi-magnify-minus-outline</v-icon></button>
-                </div> 
             </div>
 
             <div id="options-buttons">
@@ -130,6 +137,7 @@
             },
             anglesMap: {},
             zoomed: false,
+            filterByRadiosCollapsed: true,
         };
     },
     mounted() {
@@ -162,6 +170,14 @@
         }
     },
     methods: {
+        showToggleOptTip() {
+            let tip = document.getElementById('toggle-options-tip');
+            tip.classList.add('shown');
+        },
+        unshowToggleOptTip() {
+            let tip = document.getElementById('toggle-options-tip');
+            tip.classList.remove('shown');
+        },
         requiredPresent() {
             return this.targetPatient && this.patientMap && this.chartScales && this.filteredPatientMap && this.chartScalesFiltered;
         },
@@ -502,6 +518,19 @@
 </script>
 
 <style lang="sass">
+    .collapse-btn.radios
+        cursor: pointer
+        color: black
+        width: 20px
+        height: 20px
+        display: inline-flex
+        transform: translateY(5px)
+        justify-content: center
+        align-items: center
+        border-radius: 50%
+        &:hover
+            background-color: #85C189
+            color: black
     #chart-key-hoverable
         position: absolute
         top: 5px
@@ -533,6 +562,22 @@
         height: 35px
         width: 35px
         z-index: 2
+    #toggle-options-tip
+        position: absolute
+        top: 4px
+        right: 36px
+        color: white
+        font-size: 10pt
+        background-color: #464C49
+        border-radius: 5px
+        overflow: hidden
+        width: 0px
+        white-space: nowrap
+        padding: 0px
+        transition: all .3s ease-in-out
+        &.shown
+            width: 100px
+            padding: 5px
     #chart-options-btn:hover
         box-shadow: 0px 2px 4px -1px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)), 0px 4px 5px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)), 0px 1px 10px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.12))
     #options-buttons
@@ -562,13 +607,15 @@
         border-radius: 5px
         display: flex
         flex-direction: column
-        justify-content: space-evenly
+        justify-content: flex-start
         align-items: center
         width: 30%
         max-width: 310px
-        height: 90%
+        height: fit-content
         max-height: 500px
         margin-left: 10px
+        padding-top: 10px
+        padding-bottom: 10px
         background-color: white
         transition: all .45s ease-in-out
         box-shadow: 0px 2px 4px -1px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)), 0px 4px 5px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)), 0px 1px 10px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.12))
