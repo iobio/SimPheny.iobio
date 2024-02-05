@@ -399,6 +399,16 @@
                 newSelectedMatches = [];
             }
             this.zoomed = false;
+            //sort the filtered patient map my similarity score and then re-rank them
+            let sortedFilteredPatientMap = Object.values(filteredPatientMap).sort((a, b) => {
+                return parseFloat(b.similarityScore) - parseFloat(a.similarityScore);
+            });
+
+            //re-rank the patients
+            for (let i = 0; i < sortedFilteredPatientMap.length; i++) {
+                sortedFilteredPatientMap[i].rank = i + 1;
+            }
+
             this.filteredPatientMap = filteredPatientMap;
             this.selectMatches(newSelectedMatches);
             this.drawChart();
