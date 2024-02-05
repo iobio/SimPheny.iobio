@@ -94,7 +94,7 @@ export default function CircularChart() {
             }
 
             //increase opacity as i increases
-            let opacity = 1 - ((i) * 0.06);
+            let opacity = 1 - ((i) * 0.08);
 
             //create a group for the arcSection and the rectangle
             let arcSectionGroup = svg.append("g");
@@ -106,7 +106,7 @@ export default function CircularChart() {
             arcSectionGroup.append("path")
                 .attr("d", arcSection)
                 .attr("stroke", 'white')
-                .attr("fill", colors.chartMain)
+                .attr("fill", '#DDE3E0')
                 .attr("class", "arc-section")
                 .attr("opacity", opacity)
                 .attr("transform", `translate(${marginLeft},${height - marginBottom})`)
@@ -156,7 +156,7 @@ export default function CircularChart() {
         slider.append("rect")
             .attr("width", maxRadius - start)
             .attr("height", 10)
-            .attr("fill", colors.chartMain)
+            .attr("fill", '#C6D2CE')
             .attr("rx", 2)
             .attr("ry", 2)
             .attr("stroke", "white")
@@ -319,6 +319,12 @@ export default function CircularChart() {
                         }
                     }
                     return false;
+            })
+            .classed("gene-in-common", function(d) {
+                if (d.genesInCommon.length > 0) {
+                    return true;
+                }
+                return false;
             })
             .attr("transform", function(d) {
                 let result = determineXY(d, centerX, centerY, radiusScale, anglesMap)
@@ -658,16 +664,16 @@ function determineFill(dataPoint, selectedMatches={}, hoveredMatches={}) {
 
     //if they have genes in common stop there
     if (dataPoint.genesInCommon.length > 0) {
-        return colors.fillTeal; //teal-blue color
+        return colors.fillBlack; //teal-blue color
     }
     
     //if not check if they are diagnosed or undiagnosed
     if (dataPoint.dx === 'Undiagnosed') {
-        color = colors.fillPurple;
+        color = colors.fillGreen;
     } else if (dataPoint.dx === 'Diagnosed') {
         color = colors.fillGreen;
     } else {
-        color = colors.fillBlack; 
+        color = colors.fillGreen; 
     }
 
     return color;
@@ -682,16 +688,16 @@ function determineStroke(dataPoint, selectedMatches={}, hoveredMatches={}) {
 
     //if they have genes in common stop there
     if (dataPoint.genesInCommon.length > 0) {
-        return colors.strokeTeal; 
+        return colors.strokeBlack; 
     }
     
     //if not check if they are diagnosed or undiagnosed
     if (dataPoint.dx === 'Undiagnosed') {
-        return colors.strokePurple;
+        return colors.strokeGreen;
     } else if (dataPoint.dx === 'Diagnosed') {
         return colors.strokeGreen;
     } else {
-        return colors.strokeBlack; 
+        return colors.strokeGreen; 
     }
 }
 
@@ -702,11 +708,11 @@ function determineShape(dataPoint) {
     if (dataPoint.dx === 'Undiagnosed') {
         symbol.type(d3.symbolCircle);
     } else {
-        symbol.type(d3.symbolSquare2).size(30);
+        symbol.type(d3.symbolCircle).size(30);
     }
 
     if (dataPoint.genesInCommon.length > 0) {
-        symbol.size(50);
+        symbol.type(d3.symbolStar).size(50);
     }
 
     return symbol();
