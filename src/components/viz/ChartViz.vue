@@ -30,10 +30,6 @@
 
             <div id="options-content">
                 <div class="group">
-                    <p>Show Undiagnosed</p>
-                    <input v-model="filterOptions.showUndiagnosed" type="checkbox" name="" id="">
-                </div>
-                <div class="group">
                     <p>Genes In Common Only</p>
                     <input v-model="filterOptions.showGenesInCommonOnly" type="checkbox" name="" id="">
                 </div>
@@ -125,7 +121,7 @@
             chartScalesFiltered: this.chartScales,
             filteredPatientMap: this.patientMap,
             filterOptions: {
-                showUndiagnosed: true,
+                showUndiagnosed: false,
                 showGenesInCommonOnly: false,
                 filterByRank: false,
                 filterByScore: false,
@@ -252,7 +248,7 @@
             this.clearSelection();
             //reset the filters to default
             this.filterOptions = {
-                showUndiagnosed: true,
+                showUndiagnosed: false,
                 showGenesInCommonOnly: false,
                 filterByRank: false,
                 filterByScore: false,
@@ -328,7 +324,7 @@
                     }
                     else {
                         //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
-                        if (this.selectedMatches.includes(this.patientMap[patientId])) {
+                        if (this.selectedMatches && this.selectedMatches.includes(this.patientMap[patientId])) {
                             newSelectedMatches.push(this.patientMap[patientId]);
                         }
                     }
@@ -341,7 +337,7 @@
                     }
                     else {
                         //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
-                        if (this.selectedMatches.includes(this.patientMap[patientId])) {
+                        if (this.selectedMatches && this.selectedMatches.includes(this.patientMap[patientId])) {
                             newSelectedMatches.push(this.patientMap[patientId]);
                         }
                     }
@@ -355,7 +351,7 @@
                     }
                     else {
                         //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
-                        if (this.selectedMatches.includes(this.patientMap[patientId])) {
+                        if (this.selectedMatches && this.selectedMatches.includes(this.patientMap[patientId])) {
                             newSelectedMatches.push(this.patientMap[patientId]);
                         }
                     }
@@ -369,7 +365,7 @@
                     }
                     else {
                         //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
-                        if (this.selectedMatches.includes(this.patientMap[patientId])) {
+                        if (this.selectedMatches && this.selectedMatches.includes(this.patientMap[patientId])) {
                             newSelectedMatches.push(this.patientMap[patientId]);
                         }
                     }
@@ -432,9 +428,10 @@
                 if (newVal && newVal !== this.targetPatient) {
                     this.clearSelection();
                     this.anglesMap = {};
+
                     //clear the filters
                     this.filterOptions = {
-                        showUndiagnosed: true,
+                        showUndiagnosed: false,
                         showGenesInCommonOnly: false,
                         filterByRank: false,
                         filterByScore: false,
@@ -442,7 +439,7 @@
                         scoreCutOff: 0.0,
                     },
                     
-                        this.chartScalesFiltered = this.chartScales;
+                    this.chartScalesFiltered = this.chartScales;
                     this.filteredPatientMap = this.patientMap;
                     this.applyFilters();
                 }

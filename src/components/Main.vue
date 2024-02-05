@@ -85,6 +85,7 @@
                 await this.calcScores(this.targetTerms);
                 console.timeEnd('calcScores');
                 console.time('transformPatientMap');
+                
                 this.patientMap = await transformPatientMap(this.targetId, targetTerms, targetGenes, this.similarityMap, this.hpoTermsMap);
                 console.timeEnd('transformPatientMap');
                 this.ptMapObj = this.patientMap; //this is passed to the chooser overlay so will have all patients
