@@ -93,8 +93,11 @@ export default function CircularChart() {
                 var nextRadius = maxRadius; //the last tic should be the max radius
             }
 
-            //increase opacity as i increases
-            let opacity = 1 - ((i) * 0.08);
+            //increase opacity as i increases scale based on xHalfTics.length keep opacity between 0.5 and .95
+            let opacity = 0.1 + (i / xHalfTics.length) * 0.9;
+
+            // Inverse the opacity
+            let strokeOpacity = 1 - opacity;
 
             //create a group for the arcSection and the rectangle
             let arcSectionGroup = svg.append("g");
@@ -105,46 +108,14 @@ export default function CircularChart() {
             //add the arc section to the svg
             arcSectionGroup.append("path")
                 .attr("d", arcSection)
-                .attr("stroke", 'white')
+                .attr("stroke", 'purple')
                 .attr("fill", '#DDE3E0')
                 .attr("class", "arc-section")
-                .attr("opacity", opacity)
+                .attr("fill-opacity", opacity)
+                .attr("stroke-opacity", strokeOpacity)
                 .attr("transform", `translate(${marginLeft},${height - marginBottom})`)
                 //the arc needs to be behind the points so that the mouseover event can be handled
                 .lower();
-
-            //put a rectangle with rounded edges at the end of the arc on the bottom of the arc
-            // arcSectionGroup.append("rect")
-            //     .attr("width", nextRadius - radius)
-            //     .attr("height", 10)
-            //     .attr("fill", colors.chartMain)
-            //     .attr("rx", 2)
-            //     .attr("ry", 2)
-            //     .attr("stroke", "white")
-            //     .attr("opacity", opacity)
-            //     .attr("cursor", "pointer")
-            //     .attr("transform", `translate(${marginLeft + radius},${height - marginBottom})`)
-            //     .on("mouseover", function(event) {
-            //         //change the color to purple
-            //         d3.select(this)
-            //             .attr("fill", "purple")
-            //             .attr("opacity", 1);
-
-            //         //select the parent then get the first child 
-            //         let arcSection = d3.select(this.parentNode).select(".arc-section");
-            //         arcSection.attr("fill", "purple")
-            //     })
-            //     .on("mouseout", function(event) {
-            //         //change back to its original color
-            //         d3.select(this)
-            //             .attr("fill", colors.chartMain)
-            //             .attr("opacity", opacity);
-                    
-            //         //select the parent then get the first child which is the arc section
-            //         let arcSection = d3.select(this.parentNode).select(".arc-section");
-            //         arcSection.attr("fill", colors.chartMain)
-            //     })
-            //     .on("click", createRectangleClickHandler(tic, nextTic, matchesObj)); 
         }
         //Create the slider
         //Slider bar should only be from the minimum radius to the max radius of the chart
@@ -260,7 +231,7 @@ export default function CircularChart() {
                     let coords = polarToCartesian(radiusScale(d), 0, centerX, centerY);
                     return coords.x;
                 })
-                .attr("y", height - marginBottom + 18)
+                .attr("y", height - marginBottom + 20)
                 .attr("font-size", "10px")
                 .attr("text-anchor", "middle")
                 .attr("alignment-baseline", "middle")
