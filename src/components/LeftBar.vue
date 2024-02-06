@@ -293,9 +293,15 @@
                         let p = peek.append("p");
                         p.html(gene.gene_symbol);
                     }
-                    peek.style("top", event.target.offsetTop + 120 + "px");
-                    peek.style("left", event.target.offsetLeft + 35 + "px");
+                    //get the position of the mouse for y
+                    let y = event.clientY;
                     peek.style("display", "block");
+                    //get the calculated height of the peek
+                    let peekHeight = peek.node().getBoundingClientRect().height;
+                    //set peek style for y
+                    peek.style("top", y - (peekHeight/2) + "px");
+                    peek.style("right", -105 + "px");
+
                     peek.style("min-width", "100px");
                 } else if (type == 'phenotypes') {
                     
@@ -304,9 +310,13 @@
                         let p = peek.append("p");
                         p.html(phenotype.name);
                     }
-                    peek.style("top", event.target.offsetTop + 120 + "px");
-                    peek.style("left", event.target.offsetLeft + 35 + "px");
+                    //get the position of the mouse for y
+                    let y = event.clientY;
                     peek.style("display", "block");
+                    let peekHeight = peek.node().getBoundingClientRect().height;
+
+                    peek.style("top", y - (peekHeight/2) + "px");
+                    peek.style("right", -205 + "px");
                     peek.style("min-width", "200px")
                 } else {
                     //hide the tip
