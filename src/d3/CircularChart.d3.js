@@ -96,9 +96,6 @@ export default function CircularChart() {
             //increase opacity as i increases scale based on xHalfTics.length keep opacity between 0.5 and .95
             let opacity = 0.1 + (i / xHalfTics.length) * 0.9;
 
-            // Inverse the opacity
-            let strokeOpacity = 1 - opacity;
-
             //create a group for the arcSection and the rectangle
             let arcSectionGroup = svg.append("g");
         
@@ -112,7 +109,7 @@ export default function CircularChart() {
                 .attr("fill", '#DDE3E0')
                 .attr("class", "arc-section")
                 .attr("fill-opacity", opacity)
-                .attr("stroke-opacity", strokeOpacity)
+                .attr("stroke-opacity", .25)
                 .attr("transform", `translate(${marginLeft},${height - marginBottom})`)
                 //the arc needs to be behind the points so that the mouseover event can be handled
                 .lower();
@@ -467,17 +464,25 @@ function mouseOverMatch(event, d, svg, radiusScale, centerX, centerY) {
     let radius = radiusScale(d.similarityScore);
     let arc = createArc(radius, centerX, centerY);
 
+    //add a group for the arc and the point
+    let arcGroup = svg.append("g");
+
+    //add the event.currentTarget to the group
+    arcGroup.append(() => event.currentTarget);
+
     //add the arc to the svg
-    svg.append("path")
+    arcGroup.append("path")
         .attr("d", arc)
         .attr("stroke", determineStroke(d))
         .attr("stroke-width", 1)
         .attr("fill", "none")
+        .attr("fill-opacity", 1)
+        .attr("stroke-opacity", 1)
         .attr("id", "arc-path-for-hover")
         //the arc needs to be behind the points so that the mouseover event can be handled
-        .lower();
-    
-    //raise the hovered point to the top
+        .raise();
+
+    //raise the element to the top
     d3.select(event.currentTarget).raise();
 }
 
