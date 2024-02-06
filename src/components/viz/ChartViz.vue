@@ -123,7 +123,7 @@
         return {
             chart: null,
             resizeObserver: null,
-            showChartOptions: true,
+            showChartOptions: false,
             showChartKey: false,
             selectedMatches: this.selectedMatchesProp,
             chartScalesFiltered: this.chartScales,
