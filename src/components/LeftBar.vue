@@ -443,7 +443,11 @@
         border-bottom: 1px #f4f6f4 solid;
     }
     .list-item.left-bar:hover {
+        position: relative;
         background-color: #bfc8bf;
+        border-radius: 3px;
+        opacity: .9;
+        z-index: 3;
     }
     .list-item.left-bar input {
         margin-right: 10px; 
@@ -547,6 +551,7 @@
     }
     #left-bar-container.expanded {
         width: 30vw;
+        max-width: 320px;
         border-right: 2px solid #21351f;
         box-shadow: 5px 0px 5px -2px rgba(0,0,0,0.2);
     }
@@ -750,7 +755,7 @@
         padding-top: 5px;
     }
     .button-container.hpo-drawer {
-        width: 100%;
+        width: 35px;
         height: 35px;
         background-color: transparent;
 
