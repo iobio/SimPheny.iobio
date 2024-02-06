@@ -326,6 +326,7 @@
         },
         applyFilters() {
             let filteredPatientMap = { ...this.patientMap };
+            let ptWithGeneInCommon = {};
             let newSelectedMatches = [];
             let filterNeverFired = true;
             let newMinSimilartyScore = this.chartScales.xMin;
@@ -348,16 +349,20 @@
                 }
                 if (this.filterOptions.showGenesInCommonOnly) {
                     filterNeverFired = false;
-                    if (this.patientMap[patientId].genesInCommon.length === 0) {
-                        delete filteredPatientMap[patientId];
-                        continue;
+
+                    if (this.patientMap[patientId].genesInCommon.length !== 0) {
+                        ptWithGeneInCommon[patientId] = this.patientMap[patientId];
                     }
-                    else {
-                        //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
-                        if (this.selectedMatches && this.selectedMatches.includes(this.patientMap[patientId])) {
-                            newSelectedMatches.push(this.patientMap[patientId]);
-                        }
-                    }
+                    // if (this.patientMap[patientId].genesInCommon.length === 0) {
+                    //     delete filteredPatientMap[patientId];
+                    //     continue;
+                    // }
+                    // else {
+                    //     //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
+                    //     if (this.selectedMatches && this.selectedMatches.includes(this.patientMap[patientId])) {
+                    //         newSelectedMatches.push(this.patientMap[patientId]);
+                    //     }
+                    // }
                 }
                 if (this.filterOptions.filterByRank) {
                     filterNeverFired = false;
@@ -416,6 +421,7 @@
                 newSelectedMatches = [];
             }
             this.zoomed = false;
+
             //sort the filtered patient map my similarity score and then re-rank them
             let sortedFilteredPatientMap = Object.values(filteredPatientMap).sort((a, b) => {
                 return parseFloat(b.similarityScore) - parseFloat(a.similarityScore);
@@ -424,6 +430,18 @@
             //re-rank the patients
             for (let i = 0; i < sortedFilteredPatientMap.length; i++) {
                 sortedFilteredPatientMap[i].rank = i + 1;
+            }
+
+            //if we are filtering by genes in common only then we need to update the filtered patient map
+            if (this.filterOptions.showGenesInCommonOnly) {
+                //We need to check the genes in common map and take out any that arent in the filtered patient map
+                let newFilteredPatientMap = {};
+                for (let patientId in ptWithGeneInCommon) {
+                    if (filteredPatientMap[patientId]) {
+                        newFilteredPatientMap[patientId] = filteredPatientMap[patientId];
+                    }
+                }
+                filteredPatientMap = newFilteredPatientMap;
             }
 
             this.filteredPatientMap = filteredPatientMap;
