@@ -6,10 +6,17 @@ export async function transformPatientMap(targetPatientId, targetTerms, targetGe
   let patientMapRes = await Be.getPatientMap();
 
   let patientMap = {};
+  let patientObject;
+  let simObject;
 
   //first just generate and add the target patient
-  let patientObject = patientMapRes[targetPatientId];
-  let simObject = simScoresObj[targetPatientId];
+  if (targetPatientId !== 'custom') {
+    patientObject = patientMapRes[targetPatientId];
+    simObject = simScoresObj[targetPatientId];
+  } else {
+    patientObject = {"Dx/Udx": "Custom", "Genes": targetGenes, "Clin diagnosis": "Custom", "Terms": targetTerms};
+    simObject = {"score": 1, "rank": 1};
+  }
 
   let targetPatient = new TargetPatient(targetPatientId, patientObject, simObject);
   targetPatient.setUserInputGenesList(targetGenes);

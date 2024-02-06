@@ -34,7 +34,7 @@
                     <v-textarea 
                         v-model="genesText" 
                         variant="solo-filled"
-                        label="Genes" 
+                        label="Genes (optional)" 
                         density="compact"
                         no-resize 
                         hint="insert comma or semi-colon separated list of genes"></v-textarea>
@@ -59,6 +59,7 @@
         },
         data: function() {
             return {
+                internalUdnPtIdsList: this.udnPatientIdsList,
                 showOverlay: this.showPtSelectOverlay,
                 udnId: 'UDN287643',
                 phenotypesText: 'HP:0001188; HP:0001252; HP:0001263; HP:0001276; HP:0001290; HP:0001324; HP:0001332; HP:0002015; HP:0002058; HP:0002072; HP:0002134; HP:0002355; HP:0002376; HP:0003701; HP:0004305; HP:0006789; HP:0007183; HP:0010862',
@@ -66,10 +67,15 @@
             }
         },
         mounted: function() {
-
         },
         methods: {
             patientChanged() {
+                if (!this.patientMap[String(this.udnId)]) {
+                        this.phenotypesText = '';
+                        this.genesText = '';
+                        return;
+                }
+
                 if (this.patientMap[this.udnId].Terms) { //When loading for the first time we have a different object
                     this.phenotypesText = this.patientMap[String(this.udnId)].Terms.map((phenotype) => {return phenotype; }).join('; ');
                     this.genesText = this.patientMap[String(this.udnId)].Genes.map((gene) => { return gene; }).join('; ');                    
@@ -77,16 +83,17 @@
                     this.phenotypesText = this.patientMap[String(this.udnId)].phenotypeList.map((phenotype) => {return phenotype.hpoId; }).join('; ');
                     this.genesText = this.patientMap[String(this.udnId)].genesList.map((gene) => { return gene.gene_symbol; }).join('; ');
                 }
-
             },
             async processPatient() {
                 //Set the target id
                 let targetId = this.udnId;
 
                 //Make the targetPhenotypes list
+                //take off any trailing or leading spaces or ; or , and split on the remaining either , or ;
+
                 let phenotypes = this.phenotypesText.split(/[,;]+/).map((phenotype) => {
-                    return phenotype.trim();
-                });
+                    return phenotype.trim().toUpperCase();
+                })
 
                 //Make the targetGenes list
                 let genes = this.genesText.split(/[,;]+/).map((gene) => {
@@ -117,6 +124,10 @@
                         this.genesText = newVal.genesList.map((gene) => { return gene.gene_symbol; }).join('; ');
                     }
                 }, deep: true
+            },
+            udnPatientIdsList(newVal, oldVal) {
+                this.internalUdnPtIdsList = newVal;
+                this.internalUdnPtIdsList.push('custom');
             }
         }
     }
