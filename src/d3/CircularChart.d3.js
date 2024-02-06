@@ -132,7 +132,7 @@ export default function CircularChart() {
 
         //Add label on top that says "Slide to select range..." in italics
         slider.append("text")
-            .text("← Slide to select range")
+            .text("← Slide to select range (click to clear)")
             .attr("font-size", "10px")
             .attr("font-style", "italic")
             .attr("font-weight", "bold")
