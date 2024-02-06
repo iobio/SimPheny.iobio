@@ -20,83 +20,84 @@
     </div>
     
     <div id="lin-chart-tip"></div>
+    <div id="chart-opt-and-button">
+        <button @mouseenter="showToggleOptTip" @mouseleave="unshowToggleOptTip" @click="showChartOptions = !showChartOptions" id="chart-options-btn">
+            <v-icon color="white">mdi-dots-horizontal-circle-outline</v-icon>
+            <span id="toggle-options-tip">Chart Options</span>
+        </button>
 
-    <button @mouseenter="showToggleOptTip" @mouseleave="unshowToggleOptTip" @click="showChartOptions = !showChartOptions" id="chart-options-btn">
-        <v-icon color="white">mdi-dots-horizontal-circle-outline</v-icon>
-        <span id="toggle-options-tip">Chart Options</span>
-    </button>
+        <div id="chart-options-container" :class="{ hidden: showChartOptions === false}">
+                <h3>Chart Options</h3>
 
-    <div id="chart-options-container" :class="{ hidden: showChartOptions === false}">
-            <h3>Chart Options</h3>
+                <div id="options-content">
+                    <div class="group">
+                        <p>Genes In Common Only</p>
+                        <input v-model="filterOptions.showGenesInCommonOnly" type="checkbox" name="" id="">
+                    </div>
 
-            <div id="options-content">
-                <div class="group">
-                    <p>Genes In Common Only</p>
-                    <input v-model="filterOptions.showGenesInCommonOnly" type="checkbox" name="" id="">
+                    <div class="group zoom-to-select">
+                        <label v-if="!zoomed" for="zoom-to-select">Zoom on Selection</label>
+                        <button v-if="!zoomed" @click="zoomToSelect()" :disabled="!selectedMatches || selectedMatches.length == 0"><v-icon>mdi-magnify-plus-outline</v-icon></button>
+                        
+                        <label v-if="zoomed" for="zoom-to-select">Return to Origin</label>
+                        <button v-if="zoomed" @click="applyFilters()"><v-icon>mdi-magnify-minus-outline</v-icon></button>
+                    </div> 
+
+                    <div class="group" id="filter-by-radios" :class="{filterByCollapsed: filterByRadiosCollapsed}">
+                        <p>More Filters 
+                            <div class="collapse-btn radios" @click="filterByRadiosCollapsed = !filterByRadiosCollapsed">
+                                <v-icon v-if="filterByRadiosCollapsed">mdi-chevron-down</v-icon>
+                                <v-icon v-else>mdi-chevron-up</v-icon>
+                            </div>
+                        </p>
+                        <div v-if="!filterByRadiosCollapsed" class="filterby-wrapper">
+                            <div>
+                                <input @click="selectFilter('rank')" type="checkbox" v-model="filterOptions.filterByRank">
+                                <label for="rank">Rank</label>
+                            </div>
+                            <div class="filter-num-input">
+                                <v-text-field
+                                    ref="rankField"
+                                    :rules="[validRank]"
+                                    variant="outlined" 
+                                    label="Max"
+                                    type="number"
+                                    density="compact"
+                                    step="5"
+                                    v-model="filterOptions.rankCutOff"
+                                    :disabled="!filterOptions.filterByRank"
+                                    :hint="'0 <= N => ' + Object.keys(filteredPatientMap).length">
+                                </v-text-field>
+                            </div>
+                        </div>
+                        <div v-if="!filterByRadiosCollapsed" class="filterby-wrapper">
+                            <div>
+                                <input @click="selectFilter('score')" type="checkbox" v-model="filterOptions.filterByScore">
+                                <label for="score">Score</label> 
+                            </div>
+                            <div class="filter-num-input">
+                                <v-text-field
+                                    ref="scoreField"
+                                    :rules="[validScore]"
+                                    variant="outlined" 
+                                    label="Min"
+                                    type="number"
+                                    density="compact"
+                                    step=".1"
+                                    v-model="filterOptions.scoreCutOff"
+                                    :disabled="!filterOptions.filterByScore"
+                                    hint="0 <= N => 1">
+                                </v-text-field>
+                            </div>
+                        </div>                 
+                    </div>  
                 </div>
 
-                <div class="group zoom-to-select">
-                    <label v-if="!zoomed" for="zoom-to-select">Zoom on Selection</label>
-                    <button v-if="!zoomed" @click="zoomToSelect()" :disabled="!selectedMatches || selectedMatches.length == 0"><v-icon>mdi-magnify-plus-outline</v-icon></button>
-                    
-                    <label v-if="zoomed" for="zoom-to-select">Return to Origin</label>
-                    <button v-if="zoomed" @click="applyFilters()"><v-icon>mdi-magnify-minus-outline</v-icon></button>
-                </div> 
-
-                <div class="group" id="filter-by-radios" :class="{filterByCollapsed: filterByRadiosCollapsed}">
-                    <p>More Filters 
-                        <div class="collapse-btn radios" @click="filterByRadiosCollapsed = !filterByRadiosCollapsed">
-                            <v-icon v-if="filterByRadiosCollapsed">mdi-chevron-down</v-icon>
-                            <v-icon v-else>mdi-chevron-up</v-icon>
-                        </div>
-                    </p>
-                    <div v-if="!filterByRadiosCollapsed" class="filterby-wrapper">
-                        <div>
-                            <input @click="selectFilter('rank')" type="checkbox" v-model="filterOptions.filterByRank">
-                            <label for="rank">Rank</label>
-                        </div>
-                        <div class="filter-num-input">
-                            <v-text-field
-                                ref="rankField"
-                                :rules="[validRank]"
-                                variant="outlined" 
-                                label="Max"
-                                type="number"
-                                density="compact"
-                                step="5"
-                                v-model="filterOptions.rankCutOff"
-                                :disabled="!filterOptions.filterByRank"
-                                :hint="'0 <= N => ' + Object.keys(filteredPatientMap).length">
-                            </v-text-field>
-                        </div>
-                    </div>
-                    <div v-if="!filterByRadiosCollapsed" class="filterby-wrapper">
-                        <div>
-                            <input @click="selectFilter('score')" type="checkbox" v-model="filterOptions.filterByScore">
-                            <label for="score">Score</label> 
-                        </div>
-                        <div class="filter-num-input">
-                            <v-text-field
-                                ref="scoreField"
-                                :rules="[validScore]"
-                                variant="outlined" 
-                                label="Min"
-                                type="number"
-                                density="compact"
-                                step=".1"
-                                v-model="filterOptions.scoreCutOff"
-                                :disabled="!filterOptions.filterByScore"
-                                hint="0 <= N => 1">
-                            </v-text-field>
-                        </div>
-                    </div>                 
-                </div>  
-            </div>
-
-            <div id="options-buttons">
-                <button @click="applyFilters()" :disabled="!canApplyFilters()">Apply<v-icon v-if="zoomed">mdi-magnify-minus-outline</v-icon></button>
-                <button @click="resetChart()">Reset <v-icon>mdi-reload-alert</v-icon></button>
-            </div>
+                <div id="options-buttons">
+                    <button @click="applyFilters()" :disabled="!canApplyFilters()">Apply<v-icon v-if="zoomed">mdi-magnify-minus-outline</v-icon></button>
+                    <button @click="resetChart()">Reset <v-icon>mdi-reload-alert</v-icon></button>
+                </div>
+        </div>
     </div>
 </template>
 
@@ -553,11 +554,21 @@
             border: 1px solid #21351F
         .v-icon
             font-size: 14pt
+    #chart-opt-and-button
+        width: fit-content
+        height: 90%
+        max-height: 700px
+        display: flex
+        flex-direction: column
+        justify-content: flex-start
+        align-items: flex-start
+        align-self: center
+        position: relative
     #chart-options-btn
         background-color: #21351f
-        position: absolute
-        top: 55px
-        right: 20px
+        position: relative
+        top: 0px
+        left: 10px
         border-radius: 50%
         height: 35px
         width: 35px
@@ -565,7 +576,7 @@
     #toggle-options-tip
         position: absolute
         top: 4px
-        right: 36px
+        left: 36px
         color: white
         font-size: 10pt
         background-color: #464C49
@@ -604,19 +615,24 @@
                 background-color: #FF5C5C
                 color: black
     #chart-options-container
+        position: relative
+        top: 5px
+        left: 10px
         border-radius: 5px
         display: flex
         flex-direction: column
         justify-content: flex-start
         align-items: center
-        width: 30%
-        max-width: 310px
+        width: 250px
         height: fit-content
         max-height: 500px
         margin-left: 10px
         padding-top: 10px
         padding-bottom: 10px
         background-color: white
+        opacity: 0.9
+        overflow: hidden
+        white-space: nowrap
         transition: all .45s ease-in-out
         box-shadow: 0px 2px 4px -1px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)), 0px 4px 5px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)), 0px 1px 10px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.12))
         #options-content
@@ -628,6 +644,7 @@
             width: 85%
             .group
                 width: 100%
+                text-overflow: wrap
                 display: flex
                 flex-direction: column
                 justify-content: center
@@ -688,11 +705,8 @@
                 cursor: pointer
                 background-color: #1a2e1a
     #chart-options-container.hidden
-        height: 0px
         width: 0px
         border: 0px solid transparent
-        button
-            display: none
         *
             overflow: hidden
     #linear-chart-container 
