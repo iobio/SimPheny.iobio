@@ -1,6 +1,6 @@
 <template>
     <div id="nav-bar">
-        <v-app-bar density="compact" color="#21351f">
+        <v-app-bar density="compact" color="#19354D">
             <v-btn @click="showOverlay=true" v-if="!targetPatient" variant="outlined">Add/Select Patient</v-btn>
             <v-btn @click="showOverlay=true" v-if="targetPatient" variant="outlined">Edit Patient</v-btn>
             <v-toolbar-title>Pheno-Matcher.iobio</v-toolbar-title>
@@ -215,7 +215,7 @@
                     text-align: center
                     margin-bottom: 20px
                 .v-btn
-                    background-color: #40673C
+                    background-color: #2E5F8A
                     color: white
                     &.close-button
                         background-color: red
@@ -236,7 +236,7 @@
                         justify-content: flex-start
                         align-items: center
                         margin-left: 20px
-                        background-color: #f6f6f6
+                        background-color: #f6f6f6 //this is the approximate color of the other vuetify inputs
                         padding: 5px
                         border-radius: 5px
                         margin-bottom: 22px
@@ -244,20 +244,4 @@
                         label
                             font-size: 12px
                             color: gray
-                        input
-                            border: 1px solid black
-                            border-radius: 5px
-                            padding: 5px
-                            cursor: pointer
-                            &:checked
-                                background-color: #40673C
-                                color: white
-                                border: 1px solid #40673C
-                                &:after
-                                    content: '✓'
-                                    font-size: 20px
-                                    position: absolute
-                                    top: -5px
-                                    left: 0
-                                    color: white
 </style>

@@ -1,7 +1,7 @@
 <template>
     <div v-if="showLoading" id="loading-container">
         <!-- Loading indicator -->
-        <v-progress-circular indeterminate="disable-shrink" color="#21351f" :size="110" :width="10">
+        <v-progress-circular indeterminate="disable-shrink" color="#19354D" :size="110" :width="10">
             <template v-slot:default>Loading...</template>
         </v-progress-circular>
     </div>
@@ -151,7 +151,7 @@
         display: flex
         align-items: center
         justify-content: center
-        background-color: #ff0000
+        background-color: #ff0000 //Red has heck
         color: white
         font-size: 1.5em
         z-index: 9999
@@ -174,7 +174,7 @@
         flex-direction: column
         align-items: center
         justify-content: center
-        background-color: rgba(255, 255, 255, 0.75)
+        background-color: rgba(255, 255, 255, 0.75) //just a little transparent grey-ish
         z-index: 9999
         .v-progress-circular
             svg
