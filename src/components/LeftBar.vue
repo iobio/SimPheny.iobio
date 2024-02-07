@@ -436,7 +436,7 @@
     }
 </script>
 
-<style>
+<style lang="css">
     .clickable {
         cursor: pointer;
     }
