@@ -1,11 +1,5 @@
 @import '@mdi/font/css/materialdesignicons.min.css';
 
-:root {
-    --dark-green: #21351f;
-    --light-green: #CBD4C2;
-    --white: #FFFCFF;
-}
-
 html{
     margin: 0;
     padding: 0;
