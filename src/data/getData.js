@@ -14,7 +14,7 @@ export async function transformPatientMap(targetPatientId, targetTerms, targetGe
     patientObject = patientMapRes[targetPatientId];
     simObject = simScoresObj[targetPatientId];
   } else {
-    patientObject = {"Dx/Udx": "Custom", "Genes": targetGenes, "Clin diagnosis": "Custom", "Terms": targetTerms};
+    patientObject = {"Dx/Udx": "None-Target", "Genes": targetGenes, "Clin diagnosis": "None-Target", "Terms": targetTerms};
     simObject = {"score": 1, "rank": 1};
   }
 

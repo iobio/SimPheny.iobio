@@ -16,7 +16,14 @@
                     :items="udnPatientIdsList"
                     variant="solo-filled"
                     label="UDN Patient Id" 
-                    density="compact"></v-autocomplete>
+                    density="compact"
+                    clearable
+                    @update:modelValue="checkInputPatient"
+                    clear-on-select></v-autocomplete>
+                    <div id="custom-pt-container">
+                        <label for="custom-patient">Custom Patient</label>
+                        <input type="checkbox" name="custom" id="custom-patient" v-model="customPatient">
+                    </div>
                 </div>
 
                 <!-- Phenotype List Input -->
@@ -39,7 +46,7 @@
                         no-resize 
                         hint="insert comma or semi-colon separated list of genes"></v-textarea>
                 </div>
-                <v-btn @click="processPatient">Compare Patient</v-btn>
+                <v-btn @click="processPatient" :disabled="phenotypesPresent">Compare Patient</v-btn>
             </div>
         </v-overlay>
     </div>
@@ -60,10 +67,13 @@
         data: function() {
             return {
                 internalUdnPtIdsList: this.udnPatientIdsList,
+                internalPatientMap: {},
                 showOverlay: this.showPtSelectOverlay,
                 udnId: '',
                 phenotypesText: '',
                 genesText: '',
+                customPatient: false,
+                firstLoading: true
             }
         },
         mounted: function() {
@@ -71,23 +81,19 @@
         },
         methods: {
             patientChanged() {
-                if (!this.patientMap[String(this.udnId)]) {
+                if (!this.internalPatientMap[String(this.udnId)]) {
                         this.phenotypesText = '';
                         this.genesText = '';
                         return;
                 }
-
-                if (this.patientMap[this.udnId].Terms && typeof this.patientMap[this.udnId].Terms === 'string') { //When loading for the first time we have a different object
-                    console.log("genes", this.patientMap[this.udnId].Genes)
+                if (this.internalPatientMap[this.udnId].Terms && typeof this.internalPatientMap[this.udnId].Terms === 'string') { //When loading for the first time we have a different object
                     //if this happens they come in as a string we need just to replace any commas with semicolons
-                    this.phenotypesText = this.patientMap[String(this.udnId)].Terms.replace(/\[|\]|\'|\"/g, '').replace(/\s+/g, ' ').replace(/\s+,/g, '').replace(/,/g, ';');
+                    this.phenotypesText = this.internalPatientMap[String(this.udnId)].Terms.replace(/\[|\]|\'|\"/g, '').replace(/\s+/g, ' ').replace(/\s+,/g, '').replace(/,/g, ';');
                     //also remove any spaces
-                    this.genesText = this.patientMap[String(this.udnId)].Genes.replace(/\[|\]|\'|\"/g, '').replace(/\s+/g, ' ').replace(/\s,/g, '').replace(/,/g, ';'); 
-                    console.log("genes", this.patientMap[this.udnId].Genes)
+                    this.genesText = this.internalPatientMap[String(this.udnId)].Genes.replace(/\[|\]|\'|\"/g, '').replace(/\s+/g, ' ').replace(/\s,/g, '').replace(/,/g, ';'); 
                 } else {
-                    console.log('phenotype list', this.patientMap[String(this.udnId)].phenotypeList);
-                    this.phenotypesText = this.patientMap[String(this.udnId)].phenotypeList.map((phenotype) => {return phenotype.hpoId; }).join('; ');
-                    this.genesText = this.patientMap[String(this.udnId)].genesList.map((gene) => { return gene.gene_symbol; }).join('; ');
+                    this.phenotypesText = this.internalPatientMap[String(this.udnId)].phenotypeList.map((phenotype) => {return phenotype.hpoId; }).join('; ');
+                    this.genesText = this.internalPatientMap[String(this.udnId)].genesList.map((gene) => { return gene.gene_symbol; }).join('; ');
                 }
             },
             async processPatient() {
@@ -120,12 +126,27 @@
                 //close the overlay
                 this.showOverlay = false;
             },
+            checkInputPatient() {
+                if (this.udnId == null || this.udnId == '' || this.udnId == undefined) {
+                    this.customPatient = true;
+                    this.udnId = 'custom';
+                } else {
+                    this.customPatient = false;
+                }
+            },
+        },
+        computed: {
+            phenotypesPresent() {
+                if (this.phenotypesText == null || this.phenotypesText == '' || this.phenotypesText == undefined) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
         },
         watch: {
             udnId: function(newVal, oldVal) {
-                if (newVal !== oldVal) {
-                    this.patientChanged();
-                }
+                this.patientChanged();
             },
             showPtSelectOverlay: function(newVal, oldVal) {
                 this.showOverlay = newVal;
@@ -144,6 +165,19 @@
                 this.internalUdnPtIdsList.push('custom');
 
                 this.udnId = this.internalUdnPtIdsList[0];
+            },
+            customPatient(newVal, oldVal) {
+                if (newVal == true) {
+                    this.udnId = 'custom';
+                } else {
+                    this.udnId = this.internalUdnPtIdsList[0];
+                }
+            },
+            patientMap(newVal, oldVal) {
+                if (this.firstLoading) {
+                    this.internalPatientMap = newVal;
+                    this.firstLoading = false;
+                }
             }
         }
     }
@@ -195,5 +229,35 @@
                     flex-direction: row
                     justify-content: center   
                 #udn-id-input.input-container
-                    width: 50%     
+                    width: 70%     
+                    #custom-pt-container
+                        display: flex
+                        flex-direction: column
+                        justify-content: flex-start
+                        align-items: center
+                        margin-left: 20px
+                        background-color: #f6f6f6
+                        padding: 5px
+                        border-radius: 5px
+                        margin-bottom: 22px
+                        box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 3px 1px -2px rgba(0,0,0,0.12)
+                        label
+                            font-size: 12px
+                            color: gray
+                        input
+                            border: 1px solid black
+                            border-radius: 5px
+                            padding: 5px
+                            cursor: pointer
+                            &:checked
+                                background-color: #40673C
+                                color: white
+                                border: 1px solid #40673C
+                                &:after
+                                    content: '✓'
+                                    font-size: 20px
+                                    position: absolute
+                                    top: -5px
+                                    left: 0
+                                    color: white
 </style>
