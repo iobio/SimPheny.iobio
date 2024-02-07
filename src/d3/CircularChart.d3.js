@@ -101,15 +101,15 @@ export default function CircularChart() {
         
             //create the arc section
             let arcSection = createArcSection(radius, nextRadius);
-
+            //#DDE3E0
             //add the arc section to the svg
             arcSectionGroup.append("path")
                 .attr("d", arcSection)
-                .attr("stroke", 'purple')
-                .attr("fill", '#DDE3E0')
+                .attr("stroke", 'grey')
+                .attr("fill", 'white')
                 .attr("class", "arc-section")
                 .attr("fill-opacity", opacity)
-                .attr("stroke-opacity", .25)
+                .attr("stroke-opacity", .3)
                 .attr("transform", `translate(${marginLeft},${height - marginBottom})`)
                 //the arc needs to be behind the points so that the mouseover event can be handled
                 .lower();
