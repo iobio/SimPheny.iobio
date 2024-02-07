@@ -139,7 +139,7 @@
             </div>
 
             <div class="button-container matches">
-            <v-btn icon @click="showDetailsBar = !showDetailsBar" :class="{ expanded: showDetailsBar, collapsed: !showDetailsBar}" class="btn umbrella matches" height="35px" width="35px" color="#21351f">
+            <v-btn icon @click="showDetailsBar = !showDetailsBar" :class="{ expanded: showDetailsBar, collapsed: !showDetailsBar}" class="btn umbrella matches" height="35px" width="35px" color="#19354D">
                 <v-tooltip offset="3" location="right" activator="parent">
                     <span v-if="!showDetailsBar">Expand match details</span>
                     <span v-if="showDetailsBar">Collapse match details</span>
@@ -342,7 +342,7 @@
 
     .lower.matches.expanded {
         height: 40vh;
-        border-top: 2px solid #21351f;
+        border-top: 2px solid #19354D;
         box-shadow: 0px -5px 5px -2px rgba(0,0,0,0.2);
     }
 
@@ -384,7 +384,7 @@
     .lower.matches .column-container .column h4 {
         margin-bottom: 5px;
         margin-top: 10px;
-        background-color: #d7ded7;
+        background-color: #d7dbde;
         padding-left: 10px;
         border-radius: 3px;
     }
@@ -417,7 +417,7 @@
     }
     .column .list-item {
         border-radius: 3px;
-        border: 1px solid #b7beb7;
+        border: 1px solid #b7babe;
         margin-bottom: 2px;
         margin-right: 5px;
         margin-left: 5px;
@@ -429,21 +429,21 @@
         cursor: default;
     }
     .column .list-item:hover {
-        background-color: #e9ede9;
+        background-color: #e9ebed;
     }
     .column .list-item.diagnosis {
         text-transform: uppercase;
         font-size: small;
     }
     .column .list-item.inTarget {
-        color: #2e482e;
-        background-color: #dae4da;
+        color: #19354D;
+        background-color: #c1cdd9;
         border-radius: 3px;
-        border: 1px solid #b7beb7;
+        border: 1px solid #b7bbbe;
 
     }
     .column .list-item.inTarget:hover {
-        background-color: #e9ede9;
+        background-color: #e9ebed;
     }
     .column .list-item .v-icon {
         stroke: none;
@@ -461,9 +461,9 @@
         width: 25;
         padding: 2px;
         border-radius: 5px;
-        border: 1px solid #b7beb7;
-        background-color: #3d4a3c;
-        color: #E9EDE8;
+        border: 1px solid #b7bcbe;
+        background-color: #19354D;
+        color: #e8eced;
         display: flex;
         flex-direction: column;
         justify-content: center;

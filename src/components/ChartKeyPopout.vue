@@ -4,13 +4,13 @@
         <svg height="10" width="10">
             <circle cx="5" cy="5" r="4" style="fill:rgb(226, 203, 237); stroke: rgb(116, 4, 172);"></circle>
         </svg> 
-        = No Genes in Common
+         No Genes in Common
     </span>
     <span>
         <svg height="15" width="15">
             <polygon points="7.5,0.75 3,14.25 14.25,5.625 0.75,5.625 12,14.25" style="fill:black; stroke: black;"></polygon>
         </svg>
-        = Genes in Common
+         Genes in Common
     </span>
 </p>
 </template>
@@ -46,7 +46,7 @@ export default {
         transition: all .45s ease-in-out
     #chart-key-popout.show
         height: 100px
-        width: 160px
+        width: 100px
         padding: 5px
         border: 1px solid #E9EDEA
         color: #21351F
