@@ -61,12 +61,13 @@
             return {
                 internalUdnPtIdsList: this.udnPatientIdsList,
                 showOverlay: this.showPtSelectOverlay,
-                udnId: 'UDN287643',
-                phenotypesText: 'HP:0001188; HP:0001252; HP:0001263; HP:0001276; HP:0001290; HP:0001324; HP:0001332; HP:0002015; HP:0002058; HP:0002072; HP:0002134; HP:0002355; HP:0002376; HP:0003701; HP:0004305; HP:0006789; HP:0007183; HP:0010862',
-                genesText: 'FAM86B1; LRCH3; SHC1; ARMCX4; KCNV2; C1QTNF1-AS1; LINC01473; CTBP1; MED11; UBE3A; DLC1; TBC1D5; RPL12P21; KIF26A; RNF17; OLFM3; SNHG14; KCTD19; MCM10; C6orf52; FCHO1; GPR176; CNTD1; PUM3; TIAL1',
+                udnId: '',
+                phenotypesText: '',
+                genesText: '',
             }
         },
         mounted: function() {
+            this.udnId = this.internalUdnPtIdsList[0];
         },
         methods: {
             patientChanged() {
@@ -76,10 +77,15 @@
                         return;
                 }
 
-                if (this.patientMap[this.udnId].Terms) { //When loading for the first time we have a different object
-                    this.phenotypesText = this.patientMap[String(this.udnId)].Terms.map((phenotype) => {return phenotype; }).join('; ');
-                    this.genesText = this.patientMap[String(this.udnId)].Genes.map((gene) => { return gene; }).join('; ');                    
+                if (this.patientMap[this.udnId].Terms && typeof this.patientMap[this.udnId].Terms === 'string') { //When loading for the first time we have a different object
+                    console.log("genes", this.patientMap[this.udnId].Genes)
+                    //if this happens they come in as a string we need just to replace any commas with semicolons
+                    this.phenotypesText = this.patientMap[String(this.udnId)].Terms.replace(/\[|\]|\'|\"/g, '').replace(/\s+/g, ' ').replace(/\s+,/g, '').replace(/,/g, ';');
+                    //also remove any spaces
+                    this.genesText = this.patientMap[String(this.udnId)].Genes.replace(/\[|\]|\'|\"/g, '').replace(/\s+/g, ' ').replace(/\s,/g, '').replace(/,/g, ';'); 
+                    console.log("genes", this.patientMap[this.udnId].Genes)
                 } else {
+                    console.log('phenotype list', this.patientMap[String(this.udnId)].phenotypeList);
                     this.phenotypesText = this.patientMap[String(this.udnId)].phenotypeList.map((phenotype) => {return phenotype.hpoId; }).join('; ');
                     this.genesText = this.patientMap[String(this.udnId)].genesList.map((gene) => { return gene.gene_symbol; }).join('; ');
                 }
@@ -95,10 +101,18 @@
                     return phenotype.trim().toUpperCase();
                 })
 
+                if (phenotypes[phenotypes.length - 1] === '') {
+                    phenotypes.pop();
+                }
+
                 //Make the targetGenes list
                 let genes = this.genesText.split(/[,;]+/).map((gene) => {
                     return gene.trim().toUpperCase();
                 })
+
+                if (genes[genes.length - 1] === '') {
+                    genes.pop();
+                }
 
                 //set the target patient
                 this.$emit('set-target-patient', targetId, phenotypes, genes);
@@ -128,6 +142,8 @@
             udnPatientIdsList(newVal, oldVal) {
                 this.internalUdnPtIdsList = newVal;
                 this.internalUdnPtIdsList.push('custom');
+
+                this.udnId = this.internalUdnPtIdsList[0];
             }
         }
     }
