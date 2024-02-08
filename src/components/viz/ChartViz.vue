@@ -548,13 +548,13 @@
         align-items: center
         border-radius: 50%
         &:hover
-            background-color: #85C189
+            background-color: #DCE1E5
             color: black
     #chart-key-hoverable
         position: absolute
         top: 5px
         right: 5px
-        background-color: #21351f
+        background-color: #19354D
         color: #E9EDEA
         border: 1px solid #E9EDEA
         border-radius: 50%
@@ -567,9 +567,8 @@
         cursor: pointer
         z-index: 2
         &:hover
-            color: #21351F
-            background-color: #E9EDE8
-            border: 1px solid #21351F
+            background-color: #2E5F8A
+            border: 1px solid #DCE1E5
         .v-icon
             font-size: 14pt
     #chart-opt-and-button
@@ -583,7 +582,7 @@
         align-self: center
         position: relative
     #chart-options-btn
-        background-color: #21351f
+        background-color: #19354D
         position: relative
         top: 0px
         left: 10px
@@ -617,7 +616,7 @@
         width: 100%
         font-size: 11pt
         button:nth-of-type(1)
-            background-color: #21351f
+            background-color: #448849
             &:hover
                 background-color: #85C189
                 color: black
@@ -678,9 +677,9 @@
                 align-items: center
                 button
                     width: 40px
+                    background-color: #19354D
                     &:hover
-                        background-color: #85C189
-                        color: black
+                        background-color: #2E5F8A
                     &:disabled
                         background-color: #D4DAD4
                         font-style: italic
@@ -713,7 +712,7 @@
             border-radius: 5px
             text-align: center
         button
-            background-color: #21351f
+            background-color: #2E5F8A
             color: white
             border: none
             border-radius: 5px
@@ -721,7 +720,7 @@
             width: 30%
             &:hover
                 cursor: pointer
-                background-color: #1a2e1a
+                background-color: #2E5F8A
     #chart-options-container.hidden
         width: 0px
         border: 0px solid transparent
