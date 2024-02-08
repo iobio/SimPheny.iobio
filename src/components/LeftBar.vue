@@ -302,7 +302,7 @@
                     peek.style("top", y - (peekHeight/2) + "px");
                     peek.style("right", -105 + "px");
 
-                    peek.style("min-width", "100px");
+                    peek.style("width", "100px");
                 } else if (type == 'phenotypes') {
                     
                     for (let key in uniqueObj) {
@@ -317,7 +317,7 @@
 
                     peek.style("top", y - (peekHeight/2) + "px");
                     peek.style("right", -205 + "px");
-                    peek.style("min-width", "200px")
+                    peek.style("width", "200px")
                 } else {
                     //hide the tip
                     peek.style("display", "none");
@@ -491,7 +491,7 @@
         z-index: 2;
     }
     #associations-peek p {
-        border-bottom: #a7b9a6 1px solid;
+        border-bottom: #a6afb9 1px solid;
         text-align: center;
     }
     #associations-peek p:last-of-type {
