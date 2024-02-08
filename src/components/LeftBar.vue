@@ -3,7 +3,6 @@
         <div v-if="this.targetPtProp" id="left-bar-container" :class="{ expanded: showLeftBar, collapsed: !showLeftBar}">
             <div class="tab-container left-bar" :class="{ expanded: !showHpoDrawer, shortened: showHpoDrawer}">
                 <h1 class="section-head">Patient Information</h1>
-                <p v-if="this.targetPtProp && this.targetPtProp.dx.toLowerCase() == 'diagnosed'">DX: {{ this.targetPtProp.clinicalDiagnosis }}</p>
                 <v-tabs v-model="tab" fixed-tabs height="30px">
                     <v-tab value="phenotypes" variant="text">Phenotypes</v-tab>
                     <v-tab value="genes" variant="text">Genes</v-tab>
@@ -55,7 +54,7 @@
 
             <div id="hpo-drawer" :class="{ expanded: showHpoDrawer, collapsed: !showHpoDrawer}">
                 <div class="button-container hpo-drawer">
-                    <v-btn icon @click="showHpoDrawer = !showHpoDrawer" :class="{ expanded: showHpoDrawer, collapsed: !showHpoDrawer}" class="btn toggle hpo-drawer" height="35px" width="35px" color="#21351f">
+                    <v-btn icon @click="showHpoDrawer = !showHpoDrawer" :class="{ expanded: showHpoDrawer, collapsed: !showHpoDrawer}" class="btn toggle hpo-drawer" height="35px" width="35px" color="#19354D">
                         <v-tooltip offset="3" location="right" activator="parent">
                             <span v-if="!showHpoDrawer">Expand HPO annotations</span>
                             <span v-if="showHpoDrawer">Collapse HPO annotations</span>
@@ -113,7 +112,7 @@
         </div>
 
         <div class="button-container left-bar" :class="{ expanded: showLeftBar, collapsed: !showLeftBar}">
-            <v-btn icon @click="showLeftBar = !showLeftBar" class="btn toggle" height="35px" width="35px" color="#21351f">
+            <v-btn icon @click="showLeftBar = !showLeftBar" class="btn toggle" height="35px" width="35px" color="#19354D">
                 <v-tooltip offset="3" location="right" activator="parent">
                     <span v-if="!showLeftBar">Expand patient details</span>
                     <span v-if="showLeftBar">Collapse patient details</span>
@@ -294,10 +293,16 @@
                         let p = peek.append("p");
                         p.html(gene.gene_symbol);
                     }
-                    peek.style("top", event.target.offsetTop + 120 + "px");
-                    peek.style("left", event.target.offsetLeft + 35 + "px");
+                    //get the position of the mouse for y
+                    let y = event.clientY;
                     peek.style("display", "block");
-                    peek.style("min-width", "100px");
+                    //get the calculated height of the peek
+                    let peekHeight = peek.node().getBoundingClientRect().height;
+                    //set peek style for y
+                    peek.style("top", y - (peekHeight/2) + "px");
+                    peek.style("right", -105 + "px");
+
+                    peek.style("width", "100px");
                 } else if (type == 'phenotypes') {
                     
                     for (let key in uniqueObj) {
@@ -305,10 +310,14 @@
                         let p = peek.append("p");
                         p.html(phenotype.name);
                     }
-                    peek.style("top", event.target.offsetTop + 120 + "px");
-                    peek.style("left", event.target.offsetLeft + 35 + "px");
+                    //get the position of the mouse for y
+                    let y = event.clientY;
                     peek.style("display", "block");
-                    peek.style("min-width", "200px")
+                    let peekHeight = peek.node().getBoundingClientRect().height;
+
+                    peek.style("top", y - (peekHeight/2) + "px");
+                    peek.style("right", -205 + "px");
+                    peek.style("width", "200px")
                 } else {
                     //hide the tip
                     peek.style("display", "none");
@@ -427,12 +436,12 @@
     }
 </script>
 
-<style>
+<style lang="css">
     .clickable {
         cursor: pointer;
     }
     .clickable:hover {
-        background-color: #6C7B6B;
+        background-color: #6b737b;
         color: white;
     }
     .list-item.left-bar {
@@ -440,10 +449,14 @@
         padding-right: 5px;
         display: flex;
         flex-direction: row;
-        border-bottom: 1px #f4f6f4 solid;
+        border-bottom: 1px #f4f5f6 solid;
     }
     .list-item.left-bar:hover {
-        background-color: #bfc8bf;
+        position: relative;
+        background-color: #adb6c2;
+        border-radius: 3px;
+        opacity: .9;
+        z-index: 3;
     }
     .list-item.left-bar input {
         margin-right: 10px; 
@@ -455,8 +468,8 @@
         padding: 0%;
         margin: 0%;
         border-radius: 50%;
-        background-color: #4d5a4f;
-        border: 1px solid #c2cfc4;
+        background-color: #40576b;
+        border: 1px solid #b2c4cf;
         color: white;
         text-align: center;
         line-height: 1.4em;
@@ -470,22 +483,22 @@
         position: absolute;
         display: none;
         background-color: white;
-        color: #133910;
-        border: #133910 1px solid;
+        color: #19354D;
+        border: #19354D 1px solid;
         opacity: .9;
         border-radius: 5px;        
         padding: 10px 5px;
         z-index: 2;
     }
     #associations-peek p {
-        border-bottom: #a7b9a6 1px solid;
+        border-bottom: #a6afb9 1px solid;
         text-align: center;
     }
     #associations-peek p:last-of-type {
         border-bottom: none;
     }
     .list-item.left-bar .num-in-target:hover {
-        background-color: #81977f;
+        background-color: #264776;
         width: 1.8em;
         height: 1.8em;
         line-height: 1.6em;
@@ -498,12 +511,12 @@
         border-radius: 3px;
     }
     .phenotype-span.left-bar.selected {
-        background-color: #6c7b6b;
+        background-color: #497290;
         color: white;
     }
     .phenotype-span.left-bar.dontUse {
         text-decoration: line-through;
-        color: #4d5a4f;
+        color: #4d525a;
     }
     .gene-span.left-bar {
         width: 100%;
@@ -513,12 +526,12 @@
         border-radius: 3px;
     }
     .gene-span.left-bar.selected {
-        background-color: #6c7b6b;
+        background-color: #497290;
         color: white;
     }
     .gene-span.left-bar.dontUse {
         text-decoration: line-through;
-        color: #4d5a4f;
+        color: #4d525a;
     }
     .section-container.left-bar {
         height: 100%;
@@ -547,7 +560,8 @@
     }
     #left-bar-container.expanded {
         width: 30vw;
-        border-right: 2px solid #21351f;
+        max-width: 320px;
+        border-right: 2px solid #19354D;
         box-shadow: 5px 0px 5px -2px rgba(0,0,0,0.2);
     }
     .button-container.left-bar {
@@ -596,8 +610,8 @@
     }
 
     .tab-container.left-bar .v-tab--selected {
-        background-color: #e9ede9;
-        color: #133910;
+        background-color: #e9ebed;
+        color: #19354D;
     }
 
     .tab-container.left-bar .v-tab--selected .v-tab__slider {
@@ -608,7 +622,7 @@
         flex-grow: 1;
         padding: 10px;
         padding-right: 0px;
-        background-color: #e9ede9;
+        background-color: #e9ebed;
         height: 100%;
         overflow-y: hidden;
     }
@@ -625,7 +639,7 @@
     #hpo-drawer {
         width: 100%;
         justify-self: flex-end;
-        border-top: 2px solid #21351f;
+        border-top: 2px solid #19354D;
         transition: all .45s ease-in-out;
         display: flex;
         flex-direction: column;
@@ -640,10 +654,10 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        color: #042c09;
+        color: #19354D;
     }
     #hpo-drawer #annotations-list-container h3 {
-        color: #0d6b04;
+        color: #046aaa;
         font-style: italic;
         font-size: 1em;
     }
@@ -669,7 +683,7 @@
         padding-right: 10px;
         align-self: center;
         width: 100%;
-        border-bottom: #dde0dd 1px solid;
+        border-bottom: #d7dde3 1px solid;
     }
     #hpo-drawer h4.genes-h4 {
         grid-template-columns: 1fr .25fr;
@@ -691,7 +705,7 @@
     #hpo-drawer #annotations-list-container .hpo-anno-header {
         position: sticky;
         top: 0px;
-        background-color: #e9ede9;
+        background-color: #e9ebed;
         width: 100%;
         z-index: 2;
     }
@@ -702,7 +716,7 @@
         margin-left: 2px;
         margin-right: 2px;
         border-radius: 3px;
-        border: 1px solid #b7beb7;
+        border: 1px solid #d7dde3;
     }
     #hpo-drawer #annotations-list-container .hpo-list-div:first-of-type {
         margin-top: 2px;
@@ -714,8 +728,8 @@
         grid-template-columns: 1fr .25fr;
     }
     #hpo-drawer #annotations-list-container .hpo-list-div.inTarget {
-        color: #2e482e;
-        background-color: #dae4da;
+        color: #19354D;
+        background-color: #dae1e4;
     }
     
     #hpo-drawer #annotations-list-container .hpo-list-div span {
@@ -750,7 +764,7 @@
         padding-top: 5px;
     }
     .button-container.hpo-drawer {
-        width: 100%;
+        width: 35px;
         height: 35px;
         background-color: transparent;
 
@@ -787,7 +801,7 @@
         min-height: 100px
         padding: 10px
         border-radius: 5px
-        background-color: #21351f
+        background-color: #19354D
         position: absolute
         display: flex
         flex-direction: column

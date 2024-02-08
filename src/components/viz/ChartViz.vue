@@ -20,80 +20,84 @@
     </div>
     
     <div id="lin-chart-tip"></div>
+    <div id="chart-opt-and-button">
+        <button @mouseenter="showToggleOptTip" @mouseleave="unshowToggleOptTip" @click="showChartOptions = !showChartOptions" id="chart-options-btn">
+            <v-icon color="white">mdi-dots-horizontal-circle-outline</v-icon>
+            <span id="toggle-options-tip">Chart Options</span>
+        </button>
 
-    <button @click="showChartOptions = !showChartOptions" id="chart-options-btn">
-        <v-icon color="white">mdi-dots-horizontal-circle-outline</v-icon>
-    </button>
+        <div id="chart-options-container" :class="{ hidden: showChartOptions === false}">
+                <h3>Chart Options</h3>
 
-    <div id="chart-options-container" :class="{ hidden: showChartOptions === false}">
-            <h3>Chart Options</h3>
-
-            <div id="options-content">
-                <div class="group">
-                    <p>Show Undiagnosed</p>
-                    <input v-model="filterOptions.showUndiagnosed" type="checkbox" name="" id="">
-                </div>
-                <div class="group">
-                    <p>Genes In Common Only</p>
-                    <input v-model="filterOptions.showGenesInCommonOnly" type="checkbox" name="" id="">
-                </div>
-
-                <div  class="group" id="filter-by-radios">
-                    <p>Filter By</p>
-                    <div class="filterby-wrapper">
-                        <div>
-                            <input @click="selectFilter('rank')" type="checkbox" v-model="filterOptions.filterByRank">
-                            <label for="rank">Rank</label>
-                        </div>
-                        <div class="filter-num-input">
-                            <v-text-field
-                                ref="rankField"
-                                :rules="[validRank]"
-                                variant="outlined" 
-                                label="Max"
-                                type="number"
-                                density="compact"
-                                step="5"
-                                v-model="filterOptions.rankCutOff"
-                                :disabled="!filterOptions.filterByRank"
-                                :hint="'0 <= N => ' + Object.keys(filteredPatientMap).length">
-                            </v-text-field>
-                        </div>
+                <div id="options-content">
+                    <div class="group">
+                        <p>Genes In Common Only</p>
+                        <input v-model="filterOptions.showGenesInCommonOnly" type="checkbox" name="" id="">
                     </div>
-                    <div class="filterby-wrapper">
-                        <div>
-                            <input @click="selectFilter('score')" type="checkbox" v-model="filterOptions.filterByScore">
-                            <label for="score">Score</label> 
-                        </div>
-                        <div class="filter-num-input">
-                            <v-text-field
-                                ref="scoreField"
-                                :rules="[validScore]"
-                                variant="outlined" 
-                                label="Min"
-                                type="number"
-                                density="compact"
-                                step=".1"
-                                v-model="filterOptions.scoreCutOff"
-                                :disabled="!filterOptions.filterByScore"
-                                hint="0 <= N => 1">
-                            </v-text-field>
-                        </div>
-                    </div>                 
-                </div>  
-                <div class="group zoom-to-select">
-                    <label v-if="!zoomed" for="zoom-to-select">Zoom on Selection</label>
-                    <button v-if="!zoomed" @click="zoomToSelect()" :disabled="!selectedMatches || selectedMatches.length == 0"><v-icon>mdi-magnify-plus-outline</v-icon></button>
-                    
-                    <label v-if="zoomed" for="zoom-to-select">Return to Origin</label>
-                    <button v-if="zoomed" @click="applyFilters()"><v-icon>mdi-magnify-minus-outline</v-icon></button>
-                </div> 
-            </div>
 
-            <div id="options-buttons">
-                <button @click="applyFilters()" :disabled="!canApplyFilters()">Apply<v-icon v-if="zoomed">mdi-magnify-minus-outline</v-icon></button>
-                <button @click="resetChart()">Reset <v-icon>mdi-reload-alert</v-icon></button>
-            </div>
+                    <div class="group zoom-to-select">
+                        <label v-if="!zoomed" for="zoom-to-select">Zoom on Selection</label>
+                        <button v-if="!zoomed" @click="zoomToSelect()" :disabled="!selectedMatches || selectedMatches.length == 0"><v-icon>mdi-magnify-plus-outline</v-icon></button>
+                        
+                        <label v-if="zoomed" for="zoom-to-select">Return to Origin</label>
+                        <button v-if="zoomed" @click="applyFilters()"><v-icon>mdi-magnify-minus-outline</v-icon></button>
+                    </div> 
+
+                    <div class="group" id="filter-by-radios" :class="{filterByCollapsed: filterByRadiosCollapsed}">
+                        <p>More Filters 
+                            <div class="collapse-btn radios" @click="filterByRadiosCollapsed = !filterByRadiosCollapsed">
+                                <v-icon v-if="filterByRadiosCollapsed">mdi-chevron-down</v-icon>
+                                <v-icon v-else>mdi-chevron-up</v-icon>
+                            </div>
+                        </p>
+                        <div v-if="!filterByRadiosCollapsed" class="filterby-wrapper">
+                            <div>
+                                <input @click="selectFilter('rank')" type="checkbox" v-model="filterOptions.filterByRank">
+                                <label for="rank">Rank</label>
+                            </div>
+                            <div class="filter-num-input">
+                                <v-text-field
+                                    ref="rankField"
+                                    :rules="[validRank]"
+                                    variant="outlined" 
+                                    label="Max"
+                                    type="number"
+                                    density="compact"
+                                    step="5"
+                                    v-model="filterOptions.rankCutOff"
+                                    :disabled="!filterOptions.filterByRank"
+                                    :hint="'0 <= N => ' + Object.keys(filteredPatientMap).length">
+                                </v-text-field>
+                            </div>
+                        </div>
+                        <div v-if="!filterByRadiosCollapsed" class="filterby-wrapper">
+                            <div>
+                                <input @click="selectFilter('score')" type="checkbox" v-model="filterOptions.filterByScore">
+                                <label for="score">Score</label> 
+                            </div>
+                            <div class="filter-num-input">
+                                <v-text-field
+                                    ref="scoreField"
+                                    :rules="[validScore]"
+                                    variant="outlined" 
+                                    label="Min"
+                                    type="number"
+                                    density="compact"
+                                    step=".1"
+                                    v-model="filterOptions.scoreCutOff"
+                                    :disabled="!filterOptions.filterByScore"
+                                    hint="0 <= N => 1">
+                                </v-text-field>
+                            </div>
+                        </div>                 
+                    </div>  
+                </div>
+
+                <div id="options-buttons">
+                    <button @click="applyFilters()" :disabled="!canApplyFilters()">Apply<v-icon v-if="zoomed">mdi-magnify-minus-outline</v-icon></button>
+                    <button @click="resetChart()">Reset <v-icon>mdi-reload-alert</v-icon></button>
+                </div>
+        </div>
     </div>
 </template>
 
@@ -119,13 +123,13 @@
         return {
             chart: null,
             resizeObserver: null,
-            showChartOptions: true,
+            showChartOptions: false,
             showChartKey: false,
             selectedMatches: this.selectedMatchesProp,
             chartScalesFiltered: this.chartScales,
             filteredPatientMap: this.patientMap,
             filterOptions: {
-                showUndiagnosed: true,
+                showUndiagnosed: false,
                 showGenesInCommonOnly: false,
                 filterByRank: false,
                 filterByScore: false,
@@ -134,6 +138,7 @@
             },
             anglesMap: {},
             zoomed: false,
+            filterByRadiosCollapsed: true,
         };
     },
     mounted() {
@@ -166,6 +171,14 @@
         }
     },
     methods: {
+        showToggleOptTip() {
+            let tip = document.getElementById('toggle-options-tip');
+            tip.classList.add('shown');
+        },
+        unshowToggleOptTip() {
+            let tip = document.getElementById('toggle-options-tip');
+            tip.classList.remove('shown');
+        },
         requiredPresent() {
             return this.targetPatient && this.patientMap && this.chartScales && this.filteredPatientMap && this.chartScalesFiltered;
         },
@@ -252,7 +265,7 @@
             this.clearSelection();
             //reset the filters to default
             this.filterOptions = {
-                showUndiagnosed: true,
+                showUndiagnosed: false,
                 showGenesInCommonOnly: false,
                 filterByRank: false,
                 filterByScore: false,
@@ -313,6 +326,7 @@
         },
         applyFilters() {
             let filteredPatientMap = { ...this.patientMap };
+            let ptWithGeneInCommon = {};
             let newSelectedMatches = [];
             let filterNeverFired = true;
             let newMinSimilartyScore = this.chartScales.xMin;
@@ -328,23 +342,27 @@
                     }
                     else {
                         //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
-                        if (this.selectedMatches.includes(this.patientMap[patientId])) {
+                        if (this.selectedMatches && this.selectedMatches.includes(this.patientMap[patientId])) {
                             newSelectedMatches.push(this.patientMap[patientId]);
                         }
                     }
                 }
                 if (this.filterOptions.showGenesInCommonOnly) {
                     filterNeverFired = false;
-                    if (this.patientMap[patientId].genesInCommon.length === 0) {
-                        delete filteredPatientMap[patientId];
-                        continue;
+
+                    if (this.patientMap[patientId].genesInCommon.length !== 0) {
+                        ptWithGeneInCommon[patientId] = this.patientMap[patientId];
                     }
-                    else {
-                        //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
-                        if (this.selectedMatches.includes(this.patientMap[patientId])) {
-                            newSelectedMatches.push(this.patientMap[patientId]);
-                        }
-                    }
+                    // if (this.patientMap[patientId].genesInCommon.length === 0) {
+                    //     delete filteredPatientMap[patientId];
+                    //     continue;
+                    // }
+                    // else {
+                    //     //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
+                    //     if (this.selectedMatches && this.selectedMatches.includes(this.patientMap[patientId])) {
+                    //         newSelectedMatches.push(this.patientMap[patientId]);
+                    //     }
+                    // }
                 }
                 if (this.filterOptions.filterByRank) {
                     filterNeverFired = false;
@@ -355,7 +373,7 @@
                     }
                     else {
                         //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
-                        if (this.selectedMatches.includes(this.patientMap[patientId])) {
+                        if (this.selectedMatches && this.selectedMatches.includes(this.patientMap[patientId])) {
                             newSelectedMatches.push(this.patientMap[patientId]);
                         }
                     }
@@ -369,7 +387,7 @@
                     }
                     else {
                         //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
-                        if (this.selectedMatches.includes(this.patientMap[patientId])) {
+                        if (this.selectedMatches && this.selectedMatches.includes(this.patientMap[patientId])) {
                             newSelectedMatches.push(this.patientMap[patientId]);
                         }
                     }
@@ -403,6 +421,29 @@
                 newSelectedMatches = [];
             }
             this.zoomed = false;
+
+            //sort the filtered patient map my similarity score and then re-rank them
+            let sortedFilteredPatientMap = Object.values(filteredPatientMap).sort((a, b) => {
+                return parseFloat(b.similarityScore) - parseFloat(a.similarityScore);
+            });
+
+            //re-rank the patients
+            for (let i = 0; i < sortedFilteredPatientMap.length; i++) {
+                sortedFilteredPatientMap[i].rank = i + 1;
+            }
+
+            //if we are filtering by genes in common only then we need to update the filtered patient map
+            if (this.filterOptions.showGenesInCommonOnly) {
+                //We need to check the genes in common map and take out any that arent in the filtered patient map
+                let newFilteredPatientMap = {};
+                for (let patientId in ptWithGeneInCommon) {
+                    if (filteredPatientMap[patientId]) {
+                        newFilteredPatientMap[patientId] = filteredPatientMap[patientId];
+                    }
+                }
+                filteredPatientMap = newFilteredPatientMap;
+            }
+
             this.filteredPatientMap = filteredPatientMap;
             this.selectMatches(newSelectedMatches);
             this.drawChart();
@@ -432,9 +473,10 @@
                 if (newVal && newVal !== this.targetPatient) {
                     this.clearSelection();
                     this.anglesMap = {};
+
                     //clear the filters
                     this.filterOptions = {
-                        showUndiagnosed: true,
+                        showUndiagnosed: false,
                         showGenesInCommonOnly: false,
                         filterByRank: false,
                         filterByScore: false,
@@ -442,7 +484,7 @@
                         scoreCutOff: 0.0,
                     },
                     
-                        this.chartScalesFiltered = this.chartScales;
+                    this.chartScalesFiltered = this.chartScales;
                     this.filteredPatientMap = this.patientMap;
                     this.applyFilters();
                 }
@@ -495,11 +537,24 @@
 </script>
 
 <style lang="sass">
+    .collapse-btn.radios
+        cursor: pointer
+        color: black
+        width: 20px
+        height: 20px
+        display: inline-flex
+        transform: translateY(5px)
+        justify-content: center
+        align-items: center
+        border-radius: 50%
+        &:hover
+            background-color: #DCE1E5
+            color: black
     #chart-key-hoverable
         position: absolute
         top: 5px
         right: 5px
-        background-color: #21351f
+        background-color: #19354D
         color: #E9EDEA
         border: 1px solid #E9EDEA
         border-radius: 50%
@@ -512,20 +567,45 @@
         cursor: pointer
         z-index: 2
         &:hover
-            color: #21351F
-            background-color: #E9EDE8
-            border: 1px solid #21351F
+            background-color: #2E5F8A
+            border: 1px solid #DCE1E5
         .v-icon
             font-size: 14pt
+    #chart-opt-and-button
+        width: fit-content
+        height: 90%
+        max-height: 700px
+        display: flex
+        flex-direction: column
+        justify-content: flex-start
+        align-items: flex-start
+        align-self: center
+        position: relative
     #chart-options-btn
-        background-color: #21351f
-        position: absolute
-        top: 55px
-        right: 20px
+        background-color: #19354D
+        position: relative
+        top: 0px
+        left: 10px
         border-radius: 50%
         height: 35px
         width: 35px
         z-index: 2
+    #toggle-options-tip
+        position: absolute
+        top: 4px
+        left: 36px
+        color: white
+        font-size: 10pt
+        background-color: #464C49
+        border-radius: 5px
+        overflow: hidden
+        width: 0px
+        white-space: nowrap
+        padding: 0px
+        transition: all .3s ease-in-out
+        &.shown
+            width: 100px
+            padding: 5px
     #chart-options-btn:hover
         box-shadow: 0px 2px 4px -1px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)), 0px 4px 5px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)), 0px 1px 10px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.12))
     #options-buttons
@@ -536,7 +616,7 @@
         width: 100%
         font-size: 11pt
         button:nth-of-type(1)
-            background-color: #21351f
+            background-color: #448849
             &:hover
                 background-color: #85C189
                 color: black
@@ -552,17 +632,24 @@
                 background-color: #FF5C5C
                 color: black
     #chart-options-container
+        position: relative
+        top: 5px
+        left: 10px
         border-radius: 5px
         display: flex
         flex-direction: column
-        justify-content: space-evenly
+        justify-content: flex-start
         align-items: center
-        width: 30%
-        max-width: 310px
-        height: 90%
+        width: 250px
+        height: fit-content
         max-height: 500px
         margin-left: 10px
+        padding-top: 10px
+        padding-bottom: 10px
         background-color: white
+        opacity: 0.9
+        overflow: hidden
+        white-space: nowrap
         transition: all .45s ease-in-out
         box-shadow: 0px 2px 4px -1px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)), 0px 4px 5px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)), 0px 1px 10px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.12))
         #options-content
@@ -574,6 +661,7 @@
             width: 85%
             .group
                 width: 100%
+                text-overflow: wrap
                 display: flex
                 flex-direction: column
                 justify-content: center
@@ -589,9 +677,9 @@
                 align-items: center
                 button
                     width: 40px
+                    background-color: #19354D
                     &:hover
-                        background-color: #85C189
-                        color: black
+                        background-color: #2E5F8A
                     &:disabled
                         background-color: #D4DAD4
                         font-style: italic
@@ -624,7 +712,7 @@
             border-radius: 5px
             text-align: center
         button
-            background-color: #21351f
+            background-color: #2E5F8A
             color: white
             border: none
             border-radius: 5px
@@ -632,13 +720,10 @@
             width: 30%
             &:hover
                 cursor: pointer
-                background-color: #1a2e1a
+                background-color: #2E5F8A
     #chart-options-container.hidden
-        height: 0px
         width: 0px
         border: 0px solid transparent
-        button
-            display: none
         *
             overflow: hidden
     #linear-chart-container 

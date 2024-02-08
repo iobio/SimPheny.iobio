@@ -1,6 +1,6 @@
 <template>
     <div id="nav-bar">
-        <v-app-bar density="compact" color="#21351f">
+        <v-app-bar density="compact" color="#19354D">
             <v-btn @click="showOverlay=true" v-if="!targetPatient" variant="outlined">Add/Select Patient</v-btn>
             <v-btn @click="showOverlay=true" v-if="targetPatient" variant="outlined">Edit Patient</v-btn>
             <v-toolbar-title>Pheno-Matcher.iobio</v-toolbar-title>
@@ -16,7 +16,14 @@
                     :items="udnPatientIdsList"
                     variant="solo-filled"
                     label="UDN Patient Id" 
-                    density="compact"></v-autocomplete>
+                    density="compact"
+                    clearable
+                    @update:modelValue="checkInputPatient"
+                    clear-on-select></v-autocomplete>
+                    <div id="custom-pt-container">
+                        <label for="custom-patient">Custom Patient</label>
+                        <input type="checkbox" name="custom" id="custom-patient" v-model="customPatient">
+                    </div>
                 </div>
 
                 <!-- Phenotype List Input -->
@@ -34,12 +41,12 @@
                     <v-textarea 
                         v-model="genesText" 
                         variant="solo-filled"
-                        label="Genes" 
+                        label="Genes (optional)" 
                         density="compact"
                         no-resize 
                         hint="insert comma or semi-colon separated list of genes"></v-textarea>
                 </div>
-                <v-btn @click="processPatient">Compare Patient</v-btn>
+                <v-btn @click="processPatient" :disabled="phenotypesPresent">Compare Patient</v-btn>
             </div>
         </v-overlay>
     </div>
@@ -59,39 +66,59 @@
         },
         data: function() {
             return {
+                internalUdnPtIdsList: this.udnPatientIdsList,
+                internalPatientMap: {},
                 showOverlay: this.showPtSelectOverlay,
-                udnId: 'UDN287643',
-                phenotypesText: 'HP:0001188; HP:0001252; HP:0001263; HP:0001276; HP:0001290; HP:0001324; HP:0001332; HP:0002015; HP:0002058; HP:0002072; HP:0002134; HP:0002355; HP:0002376; HP:0003701; HP:0004305; HP:0006789; HP:0007183; HP:0010862',
-                genesText: 'FAM86B1; LRCH3; SHC1; ARMCX4; KCNV2; C1QTNF1-AS1; LINC01473; CTBP1; MED11; UBE3A; DLC1; TBC1D5; RPL12P21; KIF26A; RNF17; OLFM3; SNHG14; KCTD19; MCM10; C6orf52; FCHO1; GPR176; CNTD1; PUM3; TIAL1',
+                udnId: '',
+                phenotypesText: '',
+                genesText: '',
+                customPatient: false,
+                firstLoading: true
             }
         },
         mounted: function() {
-
+            this.udnId = this.internalUdnPtIdsList[0];
         },
         methods: {
             patientChanged() {
-                if (this.patientMap[this.udnId].Terms) { //When loading for the first time we have a different object
-                    this.phenotypesText = this.patientMap[String(this.udnId)].Terms.map((phenotype) => {return phenotype; }).join('; ');
-                    this.genesText = this.patientMap[String(this.udnId)].Genes.map((gene) => { return gene; }).join('; ');                    
-                } else {
-                    this.phenotypesText = this.patientMap[String(this.udnId)].phenotypeList.map((phenotype) => {return phenotype.hpoId; }).join('; ');
-                    this.genesText = this.patientMap[String(this.udnId)].genesList.map((gene) => { return gene.gene_symbol; }).join('; ');
+                if (!this.internalPatientMap[String(this.udnId)]) {
+                        this.phenotypesText = '';
+                        this.genesText = '';
+                        return;
                 }
-
+                if (this.internalPatientMap[this.udnId].Terms && typeof this.internalPatientMap[this.udnId].Terms === 'string') { //When loading for the first time we have a different object
+                    //if this happens they come in as a string we need just to replace any commas with semicolons
+                    this.phenotypesText = this.internalPatientMap[String(this.udnId)].Terms.replace(/\[|\]|\'|\"/g, '').replace(/\s+/g, ' ').replace(/\s+,/g, '').replace(/,/g, ';');
+                    //also remove any spaces
+                    this.genesText = this.internalPatientMap[String(this.udnId)].Genes.replace(/\[|\]|\'|\"/g, '').replace(/\s+/g, ' ').replace(/\s,/g, '').replace(/,/g, ';'); 
+                } else {
+                    this.phenotypesText = this.internalPatientMap[String(this.udnId)].phenotypeList.map((phenotype) => {return phenotype.hpoId; }).join('; ');
+                    this.genesText = this.internalPatientMap[String(this.udnId)].genesList.map((gene) => { return gene.gene_symbol; }).join('; ');
+                }
             },
             async processPatient() {
                 //Set the target id
                 let targetId = this.udnId;
 
                 //Make the targetPhenotypes list
+                //take off any trailing or leading spaces or ; or , and split on the remaining either , or ;
+
                 let phenotypes = this.phenotypesText.split(/[,;]+/).map((phenotype) => {
-                    return phenotype.trim();
-                });
+                    return phenotype.trim().toUpperCase();
+                })
+
+                if (phenotypes[phenotypes.length - 1] === '') {
+                    phenotypes.pop();
+                }
 
                 //Make the targetGenes list
                 let genes = this.genesText.split(/[,;]+/).map((gene) => {
                     return gene.trim().toUpperCase();
                 })
+
+                if (genes[genes.length - 1] === '') {
+                    genes.pop();
+                }
 
                 //set the target patient
                 this.$emit('set-target-patient', targetId, phenotypes, genes);
@@ -99,12 +126,27 @@
                 //close the overlay
                 this.showOverlay = false;
             },
+            checkInputPatient() {
+                if (this.udnId == null || this.udnId == '' || this.udnId == undefined) {
+                    this.customPatient = true;
+                    this.udnId = 'custom';
+                } else {
+                    this.customPatient = false;
+                }
+            },
+        },
+        computed: {
+            phenotypesPresent() {
+                if (this.phenotypesText == null || this.phenotypesText == '' || this.phenotypesText == undefined) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
         },
         watch: {
             udnId: function(newVal, oldVal) {
-                if (newVal !== oldVal) {
-                    this.patientChanged();
-                }
+                this.patientChanged();
             },
             showPtSelectOverlay: function(newVal, oldVal) {
                 this.showOverlay = newVal;
@@ -117,6 +159,25 @@
                         this.genesText = newVal.genesList.map((gene) => { return gene.gene_symbol; }).join('; ');
                     }
                 }, deep: true
+            },
+            udnPatientIdsList(newVal, oldVal) {
+                this.internalUdnPtIdsList = newVal;
+                this.internalUdnPtIdsList.push('custom');
+
+                this.udnId = this.internalUdnPtIdsList[0];
+            },
+            customPatient(newVal, oldVal) {
+                if (newVal == true) {
+                    this.udnId = 'custom';
+                } else {
+                    this.udnId = this.internalUdnPtIdsList[0];
+                }
+            },
+            patientMap(newVal, oldVal) {
+                if (this.firstLoading) {
+                    this.internalPatientMap = newVal;
+                    this.firstLoading = false;
+                }
             }
         }
     }
@@ -154,7 +215,7 @@
                     text-align: center
                     margin-bottom: 20px
                 .v-btn
-                    background-color: #40673C
+                    background-color: #2E5F8A
                     color: white
                     &.close-button
                         background-color: red
@@ -168,5 +229,19 @@
                     flex-direction: row
                     justify-content: center   
                 #udn-id-input.input-container
-                    width: 50%     
+                    width: 70%     
+                    #custom-pt-container
+                        display: flex
+                        flex-direction: column
+                        justify-content: flex-start
+                        align-items: center
+                        margin-left: 20px
+                        background-color: #f6f6f6 //this is the approximate color of the other vuetify inputs
+                        padding: 5px
+                        border-radius: 5px
+                        margin-bottom: 22px
+                        box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 3px 1px -2px rgba(0,0,0,0.12)
+                        label
+                            font-size: 12px
+                            color: gray
 </style>

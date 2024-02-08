@@ -1,10 +1,15 @@
 <template>
     <div v-if="showLoading" id="loading-container">
         <!-- Loading indicator -->
-        <v-progress-circular indeterminate="disable-shrink" color="#21351f" :size="110" :width="10">
+        <v-progress-circular indeterminate="disable-shrink" color="#19354D" :size="110" :width="10">
             <template v-slot:default>Loading...</template>
         </v-progress-circular>
     </div>
+
+    <div id="error-toast">
+        <div>Unable to load patient matches from provided phenotypes or genes.</div>
+    </div>
+
     <NavBar
         :udnPatientIdsList="udnPatientIds"
         :showPtSelectOverlay="showPtSelectOverlay"
@@ -65,38 +70,59 @@
             this.showPtSelectOverlay = true;
         },
         methods: {
+            showErrorToast() {
+                let toast = document.getElementById('error-toast');
+                toast.style.height = '100px';
+                setTimeout(() => {
+                    toast.style.height = '0';
+                }, 3000);
+            },
             async calcScores(targetTerms){
                 let similarityRes = await Be.getSimScores(targetTerms);
-                this.similarityMap = similarityRes.score_map.ScoreMap;
-                this.rankedList = similarityRes.ranked_vec.ScoreVec;
+
+                if (similarityRes === null) {
+                    throw new Error('No similarity scores returned from backend');
+                } else {
+                    this.similarityMap = similarityRes.score_map.ScoreMap;
+                    this.rankedList = similarityRes.ranked_vec.ScoreVec;
+                }
             },
             async setPatientAndGetMatches(targetId, targetTerms, targetGenes) {
                 this.hpoTermsMap["byHpoId"] = await Be.getAllPhenotypesById()
                 this.hpoTermsMap["byTerm"] = await Be.getAllPhenotypesByName()
                 this.showLoading = true;
-                console.time('setPatientAndGetMatches');
 
                 this.targetId = targetId;
                 this.targetTerms = targetTerms;
                 this.targetGenes = targetGenes;
 
                 this.showPtSelectOverlay = false;
-                console.time('calcScores');
-                await this.calcScores(this.targetTerms);
-                console.timeEnd('calcScores');
-                console.time('transformPatientMap');
-                this.patientMap = await transformPatientMap(this.targetId, targetTerms, targetGenes, this.similarityMap, this.hpoTermsMap);
-                console.timeEnd('transformPatientMap');
-                this.ptMapObj = this.patientMap; //this is passed to the chooser overlay so will have all patients
-                this.targetPatient = this.patientMap[this.targetId];
-                //delete the target patient from the patient map
-                delete this.patientMap[this.targetId];
 
-                this.chartScales.xMin = this.rankedList[this.rankedList.length - 1][1];
-                this.chartScales.xMax = this.rankedList[1][1]; //for now we do this because targets are in the data set
+                try {
+                    await this.calcScores(this.targetTerms);
 
-                console.timeEnd('setPatientAndGetMatches');
-                this.showLoading = false;
+                    this.patientMap = await transformPatientMap(this.targetId, targetTerms, targetGenes, this.similarityMap, this.hpoTermsMap);
+
+                    this.ptMapObj = this.patientMap; //this is passed to the chooser overlay so will have all patients
+                    this.targetPatient = this.patientMap[this.targetId];
+                    //delete the target patient from the patient map
+                    delete this.patientMap[this.targetId];
+
+                    this.chartScales.xMin = this.rankedList[this.rankedList.length - 1][1];
+                    this.chartScales.xMax = this.rankedList[1][1]; //for now we do this because targets are in the data set
+
+                    this.showLoading = false;
+                } catch (error) {
+                    this.similarityMap = {};
+                    this.rankedList = [];
+                    this.patientMap = {};
+                    this.showErrorToast();
+                    this.showLoading = false;
+                    //show the patient select overlay again
+                    this.showPtSelectOverlay = true;
+                }
+                
+
             },
             async reloadMatches(updatedPatient) {
                 this.showLoading = true;
@@ -116,6 +142,21 @@
 </script>
 
 <style lang="sass">
+    #error-toast
+        position: fixed
+        top: 0
+        left: 0
+        height: 0px
+        width: 100%
+        display: flex
+        align-items: center
+        justify-content: center
+        background-color: #ff0000 //Red has heck
+        color: white
+        font-size: 1.5em
+        z-index: 9999
+        overflow: hidden
+        transition: height 0.25s
     #main-content-container 
         height: 100%
         width: 100%
@@ -133,7 +174,7 @@
         flex-direction: column
         align-items: center
         justify-content: center
-        background-color: rgba(255, 255, 255, 0.75)
+        background-color: rgba(255, 255, 255, 0.75) //just a little transparent grey-ish
         z-index: 9999
         .v-progress-circular
             svg

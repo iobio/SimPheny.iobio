@@ -13,8 +13,13 @@ export async function getPatientMap() {
 export async function getSimScores(terms) {
     //make terms into a comma separated string for use in url
     terms = terms.join(",")
-    let simScoresResponse = await fetch(compareURL + terms)
-    return simScoresResponse.json() //will ultimately return an object with the scores_dict and the scores_list
+
+    try {
+      let simScoresResponse = await fetch(compareURL + terms);
+      return simScoresResponse.json()
+    } catch (error) {
+      return null
+    }
 }
 
 export async function getPhenotypeWithId(id) {

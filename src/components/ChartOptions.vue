@@ -5,6 +5,7 @@
             <div id="options-content">
                 <div class="group">
                     <p>Show Undiagnosed</p>
+                    <p>test</p>
                     <input v-model="filterOptions.showUndiagnosed" type="checkbox" name="" id="">
                 </div>
 
