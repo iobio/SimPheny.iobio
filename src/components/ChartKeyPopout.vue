@@ -2,7 +2,7 @@
     <p id="chart-key-popout" :class="{show: showChartKey}">
     <span>
         <svg height="10" width="10">
-            <circle cx="5" cy="5" r="4" style="fill:rgb(226, 203, 237); stroke: rgb(116, 4, 172);"></circle>
+            <circle cx="5" cy="5" r="4" style="fill:#EAAB71; stroke: #D37620;"></circle>
         </svg> 
          No Genes in Common
     </span>
