@@ -306,7 +306,7 @@ export default function CircularChart() {
             });
         
         matchPoints.raise();
-        d3.selectAll(".gene-in-common").raise();
+        matchPoints.selectAll(".gene-in-common").raise();
 
         if (hoveredMatchesList.length > 0) {
             //raise the hovered matches to the top
