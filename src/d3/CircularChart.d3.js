@@ -2,33 +2,18 @@ import * as d3 from "d3";
 
 //Setting colors for organization
 const colors = {
-    // "strokeGreen": "#099509",
-    "strokeGreen": "#78049F",
-    // "fillGreen": "#18F218",
-    "fillGreen": "#FAEBFF",
-
-    "strokePurple": "#8A05B6",
-    "fillPurple": "#D765FC",
+    "strokeGreen": "#D37620", //Actually is dark orange
+    "fillGreen": "#EAAB71", //Actually is light orange
 
     "strokeBlack": "#0A0A0A",
     "fillBlack": "#333333",
 
-    // "strokeTeal": "#007991",
-    "strokeTeal": "#78049F",
-    // "fillTeal": "#33DDFF",
-    "fillTeal": "#EFC2FE",
+    "strokeBlue": "#19354D", //reflects the color darkblue
+    "fillBlue": "#2E5F8A", //reflects the color lightblue
 
-    // "strokeBlue": "#3855A5",
-    "strokeBlue": "#047600",
-    // "fillBlue": "#3855A5",
-    "fillBlue": "#21E438",
+    "targetPurple": "#D37620", //Actually is dark orange
 
-    "targetPurple": "purple",
-    // "chartMain": "#376C35",
-    "chartMain": "#3C5D3A",
     "chartLettersGrey": "#5F5661",
-    // "chartLightPurple": "#DCCFDD",
-    "chartLightPurple": "#CEE0CD",
 }
 
 export default function CircularChart() {
@@ -321,32 +306,11 @@ export default function CircularChart() {
             });
         
         matchPoints.raise();
+        d3.selectAll(".gene-in-common").raise();
 
         if (hoveredMatchesList.length > 0) {
             //raise the hovered matches to the top
             d3.selectAll(".hovered-from-matches").raise();
-        }
-
-        //Handles the rectangle click event
-        function createRectangleClickHandler(tic, nextTic, matchesObj) {
-            return function(event) {
-                let matches = [];
-                let alreadySelected = d3.selectAll(".selected-match").data();
-
-                for (let match of Object.values(matchesObj)) {
-                    if ((match.similarityScore <= tic) && (match.similarityScore >= nextTic)) {
-                        if (alreadySelected.includes(match)) {
-                            alreadySelected.splice(alreadySelected.indexOf(match), 1);
-                            continue;
-                        } else {
-                            matches.push(match);
-                        }
-                    }
-                }
-                matches = matches.concat(alreadySelected);
-                //call the callback function
-                onRectangleSelectedCallback(matches);
-            };
         }
 
         //Handles the slider selection event
@@ -602,8 +566,8 @@ function createOriginSymbols(svg, marginLeft, height, marginBottom) {
         svg.append("g")
             .append("circle")
             .attr("r", 16)
-            .attr("fill", colors.chartLightPurple)
-            .attr("stroke", colors.chartMain)
+            .attr("fill", "#DCE1E5")
+            .attr("stroke", colors.strokeBlue)
             .attr("stroke-width", 1)
             .attr("transform", `translate(${marginLeft - 20},${(height - marginBottom) + 18})`);
 
@@ -611,7 +575,7 @@ function createOriginSymbols(svg, marginLeft, height, marginBottom) {
         svg.append("g")
             .append("path")
             .attr("d", "M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V22H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z")
-            .attr("fill", "purple")
+            .attr("fill", colors.targetPurple)
             .attr("transform", `translate(${marginLeft - 35},${(height - marginBottom) + 5}) scale(1.3)`);
 
         // put a label that says "Patient" under the person symbol
@@ -619,7 +583,7 @@ function createOriginSymbols(svg, marginLeft, height, marginBottom) {
             .append("text")
             .text("Patient")
             .attr("font-size", "11px")
-            .attr("fill", "purple")
+            .attr("fill", colors.strokeBlue)
             .attr("font-weight", "bold")
             .attr("transform", `translate(${marginLeft - 37},${(height - marginBottom) + 44})`);
 }
