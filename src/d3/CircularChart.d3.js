@@ -29,6 +29,7 @@ export default function CircularChart() {
     var marginLeft = 40;
     var chartId = "CircularChartD3";
 
+    var targetPatient;
     var selectedMatches = [];
     var selectedMatchesObj = {};
     var hoveredMatchesList = [];
@@ -256,7 +257,7 @@ export default function CircularChart() {
             .data(matchesArray)
             .enter()
             .append("path")
-            .attr("d", d => determineShape(d))
+            .attr("d", d => determineShape(d, targetPatient))
             .classed("selected-match", function(d) {
                     if (selectedMatchesObj && Object.keys(selectedMatchesObj).length > 0) {
                         if (d.id in selectedMatchesObj) {
@@ -275,7 +276,12 @@ export default function CircularChart() {
             })
             .classed("gene-in-common", function(d) {
                 if (d.genesInCommon.length > 0) {
-                    return true;
+                    let targetGenes = targetPatient.getGenesList();
+                    for (let gene of d.genesInCommon) {
+                        if (targetGenes.some(targetGene => targetGene.gene_symbol === gene.gene_symbol && targetGene.relevant === true)) {
+                            return true;
+                        }
+                    }
                 }
                 return false;
             })
@@ -291,11 +297,11 @@ export default function CircularChart() {
                 }
                 return xy;
             })
-            .attr("fill", d => determineFill(d, selectedMatchesObj, hoveredMatchesObj))
-            .attr("stroke", d => determineStroke(d, selectedMatchesObj, hoveredMatchesObj))
+            .attr("fill", d => determineFill(d, targetPatient, selectedMatchesObj, hoveredMatchesObj))
+            .attr("stroke", d => determineStroke(d, targetPatient, selectedMatchesObj, hoveredMatchesObj))
             .attr("stroke-width", 1)
             .on("mouseover", function(event, d) {
-                mouseOverMatch(event, d, svg, radiusScale, centerX, centerY);
+                mouseOverMatch(event, d, targetPatient, svg, radiusScale, centerX, centerY);
             })
             .on("mouseout", function(event, d) {
                 mouseOutMatch(event, d, svg, radiusScale, centerX, centerY);
@@ -365,6 +371,11 @@ export default function CircularChart() {
         return chart;
     }
 
+    chart.setTargetPatient = function(newTargetPatient) {
+        targetPatient = newTargetPatient;
+        return chart;
+    }
+
     chart.setSelectedMatches = function(newSelectedMatches) {
         selectedMatches = newSelectedMatches;
         return chart;
@@ -407,7 +418,7 @@ export default function CircularChart() {
 
 //USER INTERACTION FUNCTIONS ------------------------------------------------------------------------
 
-function mouseOverMatch(event, d, svg, radiusScale, centerX, centerY) {
+function mouseOverMatch(event, d, targetPatient, svg, radiusScale, centerX, centerY) {
     //get the similarity score
     let simScore = Number.parseFloat(d.similarityScore).toFixed(3);
 
@@ -437,7 +448,7 @@ function mouseOverMatch(event, d, svg, radiusScale, centerX, centerY) {
     //add the arc to the svg
     arcGroup.append("path")
         .attr("d", arc)
-        .attr("stroke", determineStroke(d))
+        .attr("stroke", determineStroke(d, targetPatient))
         .attr("stroke-width", 1)
         .attr("fill", "none")
         .attr("fill-opacity", 1)
@@ -459,51 +470,6 @@ function mouseOutMatch(event, d, svg, radiusScale, centerX, centerY) {
 
     //remove the arc
     svg.select("#arc-path-for-hover").remove();
-}
-
-function clickMatch(event, d, svg, radiusScale, centerX, centerY) {
-    //Clear and remove the tooltip but delay it so that the click event can be handled
-    setTimeout(function() {
-        //clear the tooltip
-        let tooltip = d3.select("#lin-chart-tip")
-        
-        tooltip.selectAll("p").remove();
-        tooltip.style("visibility", "hidden");
-    }, 100);
-
-    let clickedSvg = d3.select(event.currentTarget); //the svg that was clicked
-    let clickedData = d; //the data that was clicked
-    let isSelected = clickedSvg.classed("selected-match"); //if the point clicked is already selected (boolean)
-
-    if (isSelected) { //if the point clicked is already selected just deselect it
-        clickedSvg
-            .classed("selected-match", false)
-            .style("stroke", determineStroke(clickedData))
-            .attr("fill", determineFill(clickedData));
-            
-            svg.select("#" + clickedData.id +"-arc").remove(); //remove the arc
-    } else {
-        //add the selected class to the point
-        clickedSvg
-            .classed("selected-match", true)
-            .raise()
-            .style("stroke", determineStroke(clickedData, [clickedData]))
-            .attr("fill", determineFill(clickedData, [clickedData]));
-
-        //create the arc based on the similarity score
-        let radius = radiusScale(clickedData.similarityScore);
-        let arc = createArc(radius, centerX, centerY);
-        
-        //add the arc to the svg
-        svg.append("path")
-            .attr("d", arc)
-            .attr("stroke", colors.strokeBlue)
-            .attr("stroke-width", 1)
-            .attr("fill", "none")
-            .attr("id", clickedData.id + "-arc")
-            //the arc needs to be behind the points so that the mouseover event can be handled
-            .lower();
-    }
 }
 
 //ARC HELPER FUNCTIONS ----------------------------------------------------------------------------------
@@ -588,7 +554,7 @@ function createOriginSymbols(svg, marginLeft, height, marginBottom) {
             .attr("transform", `translate(${marginLeft - 37},${(height - marginBottom) + 44})`);
 }
 
-function determineFill(dataPoint, selectedMatches={}, hoveredMatches={}) {
+function determineFill(dataPoint, targetPatient={}, selectedMatches={}, hoveredMatches={}) {
     let color = colors.fillBlack;
     //if they are in hovered maches they will be yellow
     if (hoveredMatches && Object.keys(hoveredMatches).length > 0) {
@@ -604,7 +570,13 @@ function determineFill(dataPoint, selectedMatches={}, hoveredMatches={}) {
 
     //if they have genes in common stop there
     if (dataPoint.genesInCommon.length > 0) {
-        return colors.fillBlack; //teal-blue color
+        //make sure the genes in common are relevant
+        let targetGenes = targetPatient.getGenesList();
+        for (let gene of dataPoint.genesInCommon) {
+            if (targetGenes.some(targetGene => targetGene.gene_symbol === gene.gene_symbol && targetGene.relevant === true)) {
+                return colors.fillBlack;
+            }
+        }
     }
     
     //if not check if they are diagnosed or undiagnosed
@@ -619,7 +591,7 @@ function determineFill(dataPoint, selectedMatches={}, hoveredMatches={}) {
     return color;
 }
 
-function determineStroke(dataPoint, selectedMatches={}, hoveredMatches={}) {
+function determineStroke(dataPoint, targetPatient={}, selectedMatches={}, hoveredMatches={}) {
     if (selectedMatches && Object.keys(selectedMatches).length > 0) { 
         if (dataPoint.id in selectedMatches) {
             return colors.strokeBlue;
@@ -628,7 +600,13 @@ function determineStroke(dataPoint, selectedMatches={}, hoveredMatches={}) {
 
     //if they have genes in common stop there
     if (dataPoint.genesInCommon.length > 0) {
-        return colors.strokeBlack; 
+        //make sure the genes in common are relevant
+        let targetGenes = targetPatient.getGenesList();
+        for (let gene of dataPoint.genesInCommon) {
+            if (targetGenes.some(targetGene => targetGene.gene_symbol === gene.gene_symbol && targetGene.relevant === true)) {
+                return colors.strokeBlack;
+            }
+        }
     }
     
     //if not check if they are diagnosed or undiagnosed
@@ -641,7 +619,7 @@ function determineStroke(dataPoint, selectedMatches={}, hoveredMatches={}) {
     }
 }
 
-function determineShape(dataPoint) {
+function determineShape(dataPoint, targetPatient={}) {
     // Create an SVG element based on the condition
     let symbol = d3.symbol().size(15);
 
@@ -652,7 +630,13 @@ function determineShape(dataPoint) {
     }
 
     if (dataPoint.genesInCommon.length > 0) {
-        symbol.type(d3.symbolStar).size(50);
+        //make sure the genes in common are relevant
+        let targetGenes = targetPatient.getGenesList();
+        for (let gene of dataPoint.genesInCommon) {
+            if (targetGenes.some(targetGene => targetGene.gene_symbol === gene.gene_symbol && targetGene.relevant === true)) {
+                symbol.type(d3.symbolStar).size(50);
+            }
+        }
     }
 
     return symbol();

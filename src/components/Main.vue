@@ -129,11 +129,11 @@
 
                 this.targetPatient = updatedPatient;
                 let newTerms = this.targetPatient.getPhenotypeList().filter(term => term.relevant === true).map(term => term.hpoId);
-                let newGenes = this.targetPatient.getGenesList().filter(gene => gene.relevant === true).map(gene => gene.geneSymbol); //Not used yet
+                let newGenes = this.targetPatient.getGenesList().filter(gene => gene.relevant === true); //Not used yet
                 await this.calcScores(newTerms);
                 this.chartScales.xMin = this.rankedList[this.rankedList.length - 1][1];
                 this.chartScales.xMax = this.rankedList[1][1]; //for now we do this because targets are in the data set
-                this.patientMap = await updatePatientMap(this.similarityMap, this.patientMap);
+                this.patientMap = await updatePatientMap(this.similarityMap, this.patientMap, newGenes);
 
                 this.showLoading = false;
             }

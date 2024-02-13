@@ -222,7 +222,8 @@
                     .onRectangleSelected(this.selectRectangle)
                     .setHoveredFromMatches(this.hoveredFromMatches)
                     .setHoveredObjFromMatches(hoveredMatchesMap)
-                    .setSelectedMatchesObj(selectedMatchesMap);
+                    .setSelectedMatchesObj(selectedMatchesMap)
+                    .setTargetPatient(this.targetPatient);
                 if (Object.keys(this.anglesMap).length > 0) {
                     this.chart.setXYCoords(this.anglesMap);
                 }

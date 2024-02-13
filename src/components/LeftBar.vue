@@ -301,8 +301,8 @@
                     //set peek style for y
                     peek.style("top", y - (peekHeight/2) + "px");
                     peek.style("right", -105 + "px");
-
                     peek.style("width", "100px");
+                    peek.style("z-index", 3);
                 } else if (type == 'phenotypes') {
                     
                     for (let key in uniqueObj) {
@@ -318,6 +318,7 @@
                     peek.style("top", y - (peekHeight/2) + "px");
                     peek.style("right", -205 + "px");
                     peek.style("width", "200px")
+                    peek.style("z-index", 3);
                 } else {
                     //hide the tip
                     peek.style("display", "none");

@@ -49,11 +49,14 @@ export async function transformPatientMap(targetPatientId, targetTerms, targetGe
   return patientMap;
 }
 
-export async function updatePatientMap(newSimMap, oldPatientMap) {
+export async function updatePatientMap(newSimMap, oldPatientMap, newTargetGeneList=null) {
   let updatedPatientMap = oldPatientMap;
   for (let patientId in oldPatientMap) {
     if (newSimMap.hasOwnProperty(patientId)) {
       updatedPatientMap[patientId].setSimilarityScore(newSimMap[patientId].score);
+      if (newTargetGeneList !== null) {
+        updatedPatientMap[patientId].genGenesInCommon(newTargetGeneList);
+      }
     }
   }
   return updatedPatientMap;
