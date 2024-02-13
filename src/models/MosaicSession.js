@@ -58,7 +58,7 @@ export default class MosaicSession {
 
   getCurrentUser() {
     let self = this;
-
+    console.log(self.api + '/user')
     return $.ajax({
       url: self.api + '/user',
       type: 'GET',

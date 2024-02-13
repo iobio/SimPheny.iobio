@@ -71,33 +71,53 @@
         async mounted() {
             this.ptMapObj = await Be.getPatientMap();
             this.udnPatientIds = Object.keys(this.ptMapObj);
-            this.showPtSelectOverlay = true;
+            this.initMosaicSession();
         },
         created(){
-            //grab the url params and store the token in local storage
+            let access_token='0c644b2e1bb7669ba370a2cbf04b69a84969155c' //TESTING
+
             this.mosaicUrlParams = new URLSearchParams(window.location.search);
             if (this.mosaicUrlParams.get('access_token')){
                 localStorage.setItem('mosaic-iobio-tkn', this.mosaicUrlParams.get('access_token'));
             } else {
                 localStorage.setItem('mosaic-iobio-tkn', '');
             }
+            localStorage.setItem('mosaic-iobio-tkn', access_token); //TESTING
         },
         methods: {
             async initMosaicSession() {
                 if (localStorage.getItem('mosaic-iobio-tkn') && localStorage.getItem('mosaic-iobio-tkn').length > 0){
-                    //Get all the parameters from the url
-                    this.mosaicProjectId = Number(this.mosaicUrlParams.get('project_id'));
-                    this.mosaicSampleId = Number(this.mosaicUrlParams.get('sample_id'));
-                    let tokenType = this.mosaicUrlParams.get('token_type');
-                    let source = this.mosaicUrlParams.get('source');
-                    let clientAppNumber = this.mosaicUrlParams.get('client_application_id');
+                    let tokenType = 'Bearer' //TESTING
+                    let source = 'https%3A%2F%2Fmosaic.chpc.utah.edu' //TESTING
+                    source = decodeURIComponent(source) //TESTING
+                    this.mosaicProjectId = 1281 //TESTING
+                    let clientAppNumber = 2 //TESTING
+                    this.mosaicSampleId = 56980 //TESTING
+
+                    //Gets everything from the URL and assigns what is needed
+                    // this.mosaicProjectId = Number(this.mosaicUrlParams.get('project_id'));
+                    // this.mosaicSampleId = Number(this.mosaicUrlParams.get('sample_id'));
+                    // let tokenType = this.mosaicUrlParams.get('token_type');
+                    // let source = this.mosaicUrlParams.get('source');
+                    // source = decodeURIComponent(source);
+                    // let clientAppNumber = this.mosaicUrlParams.get('client_application_id');
 
                     //Create a new MosaicSession object
                     let session = new MosaicSession(clientAppNumber);
                     session.promiseInit(source, this.mosaicProjectId, tokenType, this.mosaicSampleId);
 
                     //grab the hpo terms from the session
-                    let hpoTerms = await session.promiseGetSampleHpoTerms(this.mosaicProjectId, this.mosaicSampleId);
+                    let terms = await session.promiseGetSampleHpoTerms(this.mosaicProjectId, this.mosaicSampleId);
+                    // turn the terms into just the hpo ids
+                    terms = terms.map(term => term.hpo_id);
+                    // set the target patient and get the matches
+                    this.targetId = 'custom'
+                    this.targetGenes = []
+                    this.targetTerms = terms
+
+                    this.setPatientAndGetMatches(this.targetId, this.targetTerms, this.targetGenes);
+                } else {
+                    this.showPtSelectOverlay = true;
                 }
             },
             showErrorToast() {
