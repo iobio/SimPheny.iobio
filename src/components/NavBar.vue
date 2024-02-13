@@ -122,6 +122,7 @@
 
                 //set the target patient
                 this.$emit('set-target-patient', targetId, phenotypes, genes);
+                this.$emit('set-mosaic-false');
 
                 //close the overlay
                 this.showOverlay = false;

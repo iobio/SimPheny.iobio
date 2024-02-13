@@ -15,11 +15,13 @@
         :showPtSelectOverlay="showPtSelectOverlay"
         :targetPatient="targetPatient"
         :patientMap="ptMapObj"
-        @set-target-patient="setPatientAndGetMatches"></NavBar>
+        @set-target-patient="setPatientAndGetMatches"
+        @set-mosaic-false="fromMosaic = false"></NavBar>
 
     <div id="main-content-container">
         <LeftBar
             :targetPtProp="targetPatient"
+            :fromMosaic="fromMosaic"
             @patientInfoChanged="reloadMatches"></LeftBar>
             
         <MatchesPane
@@ -50,6 +52,7 @@
                 mosaicUrlParams: null,
                 mosaicProjectId: null,
                 mosaicSampleId: null,
+                fromMosaic: false,
                 patientMap: {},
                 ptMapObj: {},
                 similarityMap: {},
@@ -114,7 +117,7 @@
                     this.targetId = 'custom'
                     this.targetGenes = []
                     this.targetTerms = terms
-
+                    this.fromMosaic = true;
                     this.setPatientAndGetMatches(this.targetId, this.targetTerms, this.targetGenes);
                 } else {
                     this.showPtSelectOverlay = true;

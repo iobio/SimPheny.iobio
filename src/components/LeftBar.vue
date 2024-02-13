@@ -3,6 +3,7 @@
         <div v-if="this.targetPtProp" id="left-bar-container" :class="{ expanded: showLeftBar, collapsed: !showLeftBar}">
             <div class="tab-container left-bar" :class="{ expanded: !showHpoDrawer, shortened: showHpoDrawer}">
                 <h1 class="section-head">Patient Information</h1>
+                <h2 id="mosaic-patient-tag" v-if="fromMosaic">Mosaic Patient</h2>
                 <v-tabs v-model="tab" fixed-tabs height="30px">
                     <v-tab value="phenotypes" variant="text">Phenotypes</v-tab>
                     <v-tab value="genes" variant="text">Genes</v-tab>
@@ -142,6 +143,7 @@
         name: 'LeftBar',
         props: {
             targetPtProp: Object,
+            fromMosaic: Boolean
         },
         data: function() {
             return {
@@ -438,6 +440,18 @@
 </script>
 
 <style lang="css">
+    #mosaic-patient-tag {
+        text-align: center;
+        font-size: small;
+        font-style: italic;
+        padding: 1px 5px;
+        margin: 0px 0px 5px 5px;
+        color: #D37620;
+        width: fit-content;
+        align-self: flex-start;
+        border-radius: 5px;
+        border: 2px solid #D37620;
+    }
     .clickable {
         cursor: pointer;
     }
