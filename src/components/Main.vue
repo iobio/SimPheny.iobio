@@ -34,6 +34,7 @@
     import NavBar from './NavBar.vue';
     import LeftBar from './LeftBar.vue';
     import MatchesPane from './MatchesPane.vue';
+    import MosaicSession from '../models/MosaicSession.js';
     import * as Be from '../data/fetchFromBackend.js';
     import { transformPatientMap, updatePatientMap } from '../data/getData';
 
@@ -46,6 +47,9 @@
         },
         data() {
             return {
+                mosaicUrlParams: null,
+                mosaicProjectId: null,
+                mosaicSampleId: null,
                 patientMap: {},
                 ptMapObj: {},
                 similarityMap: {},
@@ -69,7 +73,33 @@
             this.udnPatientIds = Object.keys(this.ptMapObj);
             this.showPtSelectOverlay = true;
         },
+        created(){
+            //grab the url params and store the token in local storage
+            this.mosaicUrlParams = new URLSearchParams(window.location.search);
+            if (this.mosaicUrlParams.get('access_token')){
+                localStorage.setItem('mosaic-iobio-tkn', this.mosaicUrlParams.get('access_token'));
+            } else {
+                localStorage.setItem('mosaic-iobio-tkn', '');
+            }
+        },
         methods: {
+            async initMosaicSession() {
+                if (localStorage.getItem('mosaic-iobio-tkn') && localStorage.getItem('mosaic-iobio-tkn').length > 0){
+                    //Get all the parameters from the url
+                    this.mosaicProjectId = Number(this.mosaicUrlParams.get('project_id'));
+                    this.mosaicSampleId = Number(this.mosaicUrlParams.get('sample_id'));
+                    let tokenType = this.mosaicUrlParams.get('token_type');
+                    let source = this.mosaicUrlParams.get('source');
+                    let clientAppNumber = this.mosaicUrlParams.get('client_application_id');
+
+                    //Create a new MosaicSession object
+                    let session = new MosaicSession(clientAppNumber);
+                    session.promiseInit(source, this.mosaicProjectId, tokenType, this.mosaicSampleId);
+
+                    //grab the hpo terms from the session
+                    let hpoTerms = await session.promiseGetSampleHpoTerms(this.mosaicProjectId, this.mosaicSampleId);
+                }
+            },
             showErrorToast() {
                 let toast = document.getElementById('error-toast');
                 toast.style.height = '100px';
