@@ -74,7 +74,7 @@
             this.initMosaicSession();
         },
         created(){
-            let access_token='0c644b2e1bb7669ba370a2cbf04b69a84969155c' //TESTING
+            // let access_token='0c644b2e1bb7669ba370a2cbf04b69a84969155c' //TESTING
 
             this.mosaicUrlParams = new URLSearchParams(window.location.search);
             if (this.mosaicUrlParams.get('access_token')){
@@ -82,25 +82,25 @@
             } else {
                 localStorage.setItem('mosaic-iobio-tkn', '');
             }
-            localStorage.setItem('mosaic-iobio-tkn', access_token); //TESTING
+            // localStorage.setItem('mosaic-iobio-tkn', access_token); //TESTING
         },
         methods: {
             async initMosaicSession() {
                 if (localStorage.getItem('mosaic-iobio-tkn') && localStorage.getItem('mosaic-iobio-tkn').length > 0){
-                    let tokenType = 'Bearer' //TESTING
-                    let source = 'https%3A%2F%2Fmosaic.chpc.utah.edu' //TESTING
-                    source = decodeURIComponent(source) //TESTING
-                    this.mosaicProjectId = 1281 //TESTING
-                    let clientAppNumber = 2 //TESTING
-                    this.mosaicSampleId = 56980 //TESTING
+                    // let tokenType = 'Bearer' //TESTING
+                    // let source = 'https%3A%2F%2Fmosaic.chpc.utah.edu' //TESTING
+                    // source = decodeURIComponent(source) //TESTING
+                    // this.mosaicProjectId = 1281 //TESTING
+                    // let clientAppNumber = 2 //TESTING
+                    // this.mosaicSampleId = 56980 //TESTING
 
                     //Gets everything from the URL and assigns what is needed
-                    // this.mosaicProjectId = Number(this.mosaicUrlParams.get('project_id'));
-                    // this.mosaicSampleId = Number(this.mosaicUrlParams.get('sample_id'));
-                    // let tokenType = this.mosaicUrlParams.get('token_type');
-                    // let source = this.mosaicUrlParams.get('source');
-                    // source = decodeURIComponent(source);
-                    // let clientAppNumber = this.mosaicUrlParams.get('client_application_id');
+                    this.mosaicProjectId = Number(this.mosaicUrlParams.get('project_id'));
+                    this.mosaicSampleId = Number(this.mosaicUrlParams.get('sample_id'));
+                    let tokenType = this.mosaicUrlParams.get('token_type');
+                    let source = this.mosaicUrlParams.get('source');
+                    source = decodeURIComponent(source);
+                    let clientAppNumber = this.mosaicUrlParams.get('client_application_id');
 
                     //Create a new MosaicSession object
                     let session = new MosaicSession(clientAppNumber);
