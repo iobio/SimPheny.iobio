@@ -421,6 +421,7 @@ export default function CircularChart() {
 function mouseOverMatch(event, d, targetPatient, svg, radiusScale, centerX, centerY) {
     //get the similarity score
     let simScore = Number.parseFloat(d.similarityScore).toFixed(3);
+    let udnId = d.id;
 
     //clear the tooltip
     let tooltip = d3.select("#lin-chart-tip")
@@ -434,6 +435,9 @@ function mouseOverMatch(event, d, targetPatient, svg, radiusScale, centerX, cent
 
     tooltip.append("p")
         .text("Score: " + simScore);
+
+    tooltip.append("p")
+        .text("Id: " + udnId);
 
     //create the arc based on the similarity score
     let radius = radiusScale(d.similarityScore);
