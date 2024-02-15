@@ -77,7 +77,7 @@
             this.initMosaicSession();
         },
         created(){
-            // let access_token='0c644b2e1bb7669ba370a2cbf04b69a84969155c' //TESTING
+            // let access_token='f77e77f1bf35364bf0c5db506c7e9c0bacb5d608' //TESTING
 
             this.mosaicUrlParams = new URLSearchParams(window.location.search);
             if (this.mosaicUrlParams.get('access_token')){
