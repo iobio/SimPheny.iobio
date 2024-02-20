@@ -2,11 +2,11 @@ import * as d3 from "d3";
 
 //Setting colors for organization
 const colors = {
-    "strokeGreen": "#D37620", //Actually is dark orange
-    "fillGreen": "#EAAB71", //Actually is light orange
+    "strokeGreen": "#403B3A", //Actually is dark grey
+    "fillGreen": "#8B817E", //Actually is light grey
 
-    "strokeBlack": "#0A0A0A",
-    "fillBlack": "#333333",
+    "strokeBlack": "#FF0000",//Red
+    "fillBlack": "#FF0000", //Red
 
     "strokeBlue": "#19354D", //reflects the color darkblue
     "fillBlue": "#2E5F8A", //reflects the color lightblue
@@ -638,7 +638,7 @@ function determineShape(dataPoint, targetPatient={}) {
         let targetGenes = targetPatient.getGenesList();
         for (let gene of dataPoint.genesInCommon) {
             if (targetGenes.some(targetGene => targetGene.gene_symbol === gene.gene_symbol && targetGene.relevant === true)) {
-                symbol.type(d3.symbolStar).size(50);
+                symbol.type(d3.symbolStar).size(60);
             }
         }
     }
