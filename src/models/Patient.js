@@ -12,11 +12,8 @@ export default class Patient {
         let geneNames = patientObject["Genes"]
         //turn geneNames into a string
         let geneNamesString = JSON.stringify(geneNames)
-        if (geneNamesString.includes(",")) {
-            geneNamesString = geneNamesString.replace(/[\[\]"']/g, "")
-            this.geneNamesList = geneNamesString.split(",")
-            //if any are empty strings or a space remove them
-            this.geneNamesList = this.geneNamesList.filter(geneName => geneName != "" && geneName != " ")
+        if (geneNamesString.includes(",") || geneNamesString.includes(";")) {
+            this.geneNamesList = geneNamesString.replace(/[\[\]"']/g, "").split(/[,;]+/).filter(geneName => geneName != "" && geneName != " ");
         } else {
             //remove [] from the string by replacing them with nothing
             geneNamesString = geneNamesString.replace(/[\[\]"']/g, "")
