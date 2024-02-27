@@ -72,20 +72,25 @@
             }
         },
         async mounted() {
-            this.ptMapObj = await Be.getPatientMap();
-            this.udnPatientIds = Object.keys(this.ptMapObj);
-            this.initMosaicSession();
-        },
-        created(){
-            // let access_token='f77e77f1bf35364bf0c5db506c7e9c0bacb5d608' //TESTING
 
-            this.mosaicUrlParams = new URLSearchParams(window.location.search);
-            if (this.mosaicUrlParams.get('access_token')){
-                localStorage.setItem('mosaic-iobio-tkn', this.mosaicUrlParams.get('access_token'));
-            } else {
-                localStorage.setItem('mosaic-iobio-tkn', '');
+            //grab the hpo terms from the session
+            try {
+                await this.mosaicSession.promiseGetSampleHpoTerms(this.mosaicProjectId, this.mosaicSampleId);
+
+                // turn the terms into just the hpo ids
+                terms = terms.map(term => term.hpo_id);
+
+                // set the target patient and get the matches
+                this.targetId = 'custom'
+                this.targetGenes = []
+                this.targetTerms = terms
+                this.setPatientAndGetMatches(this.targetId, this.targetTerms, this.targetGenes);
+            } catch (error) {
+                this.showErrorToast();
+                this.ptMapObj = await Be.getPatientMap();
+                this.udnPatientIds = Object.keys(this.ptMapObj);
+                this.showPtSelectOverlay = true;
             }
-            // localStorage.setItem('mosaic-iobio-tkn', access_token); //TESTING
         },
         methods: {
             async initMosaicSession() {
