@@ -34,7 +34,7 @@
       this.initMosaicSession();
     },
     created(){
-            // let access_token= '7d5e4bdcf03a4264b468cfefb0e48e5069e9d8ff' //TESTING
+            // let access_token= '2871b49725ff4e205fad66fd88678bbfa587d7a5' //TESTING
             this.mosaicUrlParams = new URLSearchParams(window.location.search);
             if (this.mosaicUrlParams.get('access_token')){
                 localStorage.setItem('mosaic-iobio-tkn', this.mosaicUrlParams.get('access_token'));
@@ -47,11 +47,11 @@
       async initMosaicSession() {
         if (localStorage.getItem('mosaic-iobio-tkn') && localStorage.getItem('mosaic-iobio-tkn').length > 0){
           // let tokenType = 'Bearer' //TESTING
-          // let source = 'https%3A%2F%2Fmosaic.chpc.utah.edu' //TESTING
+          // let source = 'https%3A%2F%2Fmosaic-staging.chpc.utah.edu' //TESTING
           // source = decodeURIComponent(source) //TESTING
-          // this.mosaicProjectId = 1281 //TESTING
-          // let clientAppNumber = 2 //TESTING
-          // this.mosaicSampleId = 56980 //TESTING
+          // this.mosaicProjectId = 920 //TESTING
+          // let clientAppNumber = 18 //TESTING
+          // this.mosaicSampleId = 56784 //TESTING
 
           //Gets everything from the URL and assigns what is needed
           this.mosaicProjectId = Number(this.mosaicUrlParams.get('project_id'));

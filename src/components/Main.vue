@@ -75,18 +75,23 @@
         },
         async mounted() {
             //grab the hpo terms from the session
-            let terms = await this.mosaicSession.promiseGetSampleHpoTerms(this.mosaicProjectId, this.mosaicSampleId);
-            // turn the terms into just the hpo ids
-            terms = terms.map(term => term.hpo_id);
-            // set the target patient and get the matches
-            this.targetId = 'custom'
-            this.targetGenes = []
-            this.targetTerms = terms
-            this.setPatientAndGetMatches(this.targetId, this.targetTerms, this.targetGenes);
+            try {
+                await this.mosaicSession.promiseGetSampleHpoTerms(this.mosaicProjectId, this.mosaicSampleId);
 
-            this.ptMapObj = await Be.getPatientMap();
-            this.udnPatientIds = Object.keys(this.ptMapObj);
-            this.showPtSelectOverlay = true;
+                // turn the terms into just the hpo ids
+                terms = terms.map(term => term.hpo_id);
+
+                // set the target patient and get the matches
+                this.targetId = 'custom'
+                this.targetGenes = []
+                this.targetTerms = terms
+                this.setPatientAndGetMatches(this.targetId, this.targetTerms, this.targetGenes);
+            } catch (error) {
+                this.showErrorToast();
+                this.ptMapObj = await Be.getPatientMap();
+                this.udnPatientIds = Object.keys(this.ptMapObj);
+                this.showPtSelectOverlay = true;
+            }
         },
         methods: {
             showErrorToast() {
