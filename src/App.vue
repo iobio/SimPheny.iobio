@@ -14,7 +14,6 @@
 
 <script>
   import Main from './components/Main.vue'
-  import MosaicSession from './models/MosaicSession.js';
 
   export default {
     name: 'App',
@@ -79,14 +78,5 @@
 </script>
 
 <style>
-  #non-auth-message-container {
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
 
 </style>

@@ -34,5 +34,3 @@ SimilarityMatrix.csv
 
 #the environment folder
 .venv/
-#the env file
-.env
