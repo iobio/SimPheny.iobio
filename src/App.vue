@@ -1,14 +1,12 @@
 <template>
-  <v-app v-if="validFromMosaic && mosaicSession">
-    <Main
+  <v-app >
+    <Main v-if="validFromMosaic && mosaicSession"
       :mosaicSession="mosaicSession"
       :mosaicProjectId="mosaicProjectId"
       :mosaicSampleId="mosaicSampleId"
       :fromMosaic="validFromMosaic"></Main>
-  </v-app>
 
-  <v-app else>
-    <div id="non-auth-message-container">
+    <div v-else id="non-auth-message-container">
       <p>This application is only available to certain Mosaic users.</p>
     </div>
   </v-app>
@@ -36,7 +34,7 @@
       this.initMosaicSession();
     },
     created(){
-            // let access_token='75566e71f3450312472b82f08aebfc2dfaf65156' //TESTING
+            // let access_token= '7d5e4bdcf03a4264b468cfefb0e48e5069e9d8ff' //TESTING
             this.mosaicUrlParams = new URLSearchParams(window.location.search);
             if (this.mosaicUrlParams.get('access_token')){
                 localStorage.setItem('mosaic-iobio-tkn', this.mosaicUrlParams.get('access_token'));
@@ -49,7 +47,7 @@
       async initMosaicSession() {
         if (localStorage.getItem('mosaic-iobio-tkn') && localStorage.getItem('mosaic-iobio-tkn').length > 0){
           // let tokenType = 'Bearer' //TESTING
-          // let source = 'https%3A%2F%2Fmosaic-staging.chpc.utah.edu' //TESTING
+          // let source = 'https%3A%2F%2Fmosaic.chpc.utah.edu' //TESTING
           // source = decodeURIComponent(source) //TESTING
           // this.mosaicProjectId = 1281 //TESTING
           // let clientAppNumber = 2 //TESTING
@@ -65,7 +63,12 @@
 
           //Create a new MosaicSession object
           this.mosaicSession = new MosaicSession(clientAppNumber);
-          this.mosaicSession.promiseInit(source, this.mosaicProjectId, tokenType, this.mosaicSampleId);
+          try {
+            await this.mosaicSession.promiseInit(source, this.mosaicProjectId, tokenType, this.mosaicSampleId);
+          } catch (error) {
+            console.error('Error initializing MosaicSession', error);
+            this.validFromMosaic = false;
+          }
         } else {
             //set not launched from mosaic or not valid
             this.validFromMosaic = false;

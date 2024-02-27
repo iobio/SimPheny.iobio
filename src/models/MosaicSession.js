@@ -37,6 +37,15 @@ export default class MosaicSession {
         console.log(error)
         reject(error)
       })
+      //PROJECT
+      self.promiseGetProject(projectId)
+      .then(function(data) {
+        self.project = data; // get the project and store that here as part of our session object
+      })
+      .catch(function(error) {
+        console.log(error)
+        reject(error)
+      })
 
     })
   }
@@ -68,6 +77,35 @@ export default class MosaicSession {
       },
     });
   } 
+
+  promiseGetProject(projectId) {
+    let self = this;
+    return new Promise((resolve, reject) => {
+      self.getProject(projectId)
+      .done(response => {
+        resolve(response)
+      })
+      .fail(error => {
+        let errorMsg = self.getErrorMessage(error);
+        console.log("Error getting project from Mosaic with project_id " + projectId);
+        console.log(errorMsg)
+        reject("Error getting project " + projectId + ": " + errorMsg);
+      }
+      )
+    })
+  }
+
+  getProject(projectId) {
+    let self = this;
+    return $.ajax({
+      url: self.api + '/projects/' + projectId,
+      type: 'GET',
+      headers: {
+        Authorization: self.authorizationString,
+        accept: 'application/json',
+      },
+    });
+  }
 
   //----Get the sample hpo terms
   promiseGetSampleHpoTerms(projectId, sampleId) {
