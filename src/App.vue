@@ -14,6 +14,7 @@
 
 <script>
   import Main from './components/Main.vue'
+  import MosaicSession from './models/MosaicSession';
 
   export default {
     name: 'App',
