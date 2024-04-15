@@ -19,6 +19,7 @@ export async function transformPatientMap(targetPatientId, targetTerms, targetGe
   }
 
   let targetPatient = new TargetPatient(targetPatientId, patientObject, simObject);
+
   targetPatient.setUserInputGenesList(targetGenes);
   targetPatient.setUserInputHpoIdList(targetTerms);
   targetPatient.genPhenotypeList(phenotypesMap);
@@ -26,13 +27,23 @@ export async function transformPatientMap(targetPatientId, targetTerms, targetGe
 
   patientMap[targetPatientId] = targetPatient;
 
+  console.log("simScoresObj: ", simScoresObj);
+
   for(let patientId in patientMapRes){
     if (patientMapRes.hasOwnProperty(patientId)){
       if (patientId != targetPatientId){
         let patientObject = patientMapRes[patientId];
         let simObject = simScoresObj[patientId];
+        
+        if (simObject === undefined) {
+          console.log("Error: simObject is undefined for patientId " + patientId);
+          console.log("patient", patientObject);
+        } else{
+          console.log('okay', patientId, patientObject)
+        }
 
         let matchPatient = new MatchPatient(patientId, patientObject, simObject);
+
         matchPatient.genPhenotypeList(phenotypesMap);
         matchPatient.genPhenotypesInCommon(targetPatient.getPhenotypeList());
         await matchPatient.genGenesList();

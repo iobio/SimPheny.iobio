@@ -5,8 +5,14 @@ import Gene from './Gene.js';
 export default class Patient {
     constructor(patientId, patientObject, simObject) {
         this.id = patientId
-        this.similarityScore = simObject["score"]
-        this.rank = simObject["rank"] - 1
+
+        if (simObject) {
+            this.similarityScore = simObject["score"]
+            this.rank = simObject["rank"] - 1
+        } else {
+            this.similarityScore = 0
+            this.rank = 0
+        }
         this.dx = patientObject["Dx/Udx"]
 
         let geneNames = patientObject["Genes"]

@@ -34,7 +34,7 @@
       this.initMosaicSession();
     },
     created(){
-            // let access_token= '2871b49725ff4e205fad66fd88678bbfa587d7a5' //TESTING
+            // let access_token= '' //TESTING
             this.mosaicUrlParams = new URLSearchParams(window.location.search);
             if (this.mosaicUrlParams.get('access_token')){
                 localStorage.setItem('mosaic-iobio-tkn', this.mosaicUrlParams.get('access_token'));

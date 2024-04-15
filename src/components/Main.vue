@@ -1,42 +1,44 @@
 <template>
-    <div v-if="showLoading" id="loading-container">
-        <!-- Loading indicator -->
-        <v-progress-circular indeterminate="disable-shrink" color="#19354D" :size="110" :width="10">
-            <template v-slot:default>Loading...</template>
-        </v-progress-circular>
-    </div>
+    <div id="main-parent-container">
+        <div v-if="showLoading" id="loading-container">
+            <!-- Loading indicator -->
+            <v-progress-circular indeterminate="disable-shrink" color="#19354D" :size="110" :width="10">
+                <template v-slot:default>Loading...</template>
+            </v-progress-circular>
+        </div>
 
-    <div id="error-toast">
-        <div>Unable to load patient matches from provided phenotypes or genes.</div>
-    </div>
+        <div id="error-toast">
+            <div>Unable to load patient matches from provided phenotypes or genes.</div>
+        </div>
 
-    <NavBar
-        :udnPatientIdsList="udnPatientIds"
-        :showPtSelectOverlay="showPtSelectOverlay"
-        :targetPatient="targetPatient"
-        :patientMap="ptMapObj"
-        @set-target-patient="setPatientAndGetMatches"
-        @set-mosaic-false="fromMosaic = false"></NavBar>
-
-    <div id="main-content-container">
-        <LeftBar
-            :targetPtProp="targetPatient"
-            :fromMosaic="fromMosaic"
-            @patientInfoChanged="reloadMatches"></LeftBar>
-            
-        <MatchesPane
+        <NavBar
+            :udnPatientIdsList="udnPatientIds"
+            :showPtSelectOverlay="showPtSelectOverlay"
             :targetPatient="targetPatient"
-            :patientMap="patientMap"
-            :chartScales="chartScales"></MatchesPane>
+            :patientMap="ptMapObj"
+            @set-target-patient="setPatientAndGetMatches"
+            @set-mosaic-false="fromMosaic = false"></NavBar>
 
+        <div id="main-content-container">
+            <LeftBar
+                :targetPtProp="targetPatient"
+                :fromMosaic="fromMosaic"
+                @patientInfoChanged="reloadMatches"></LeftBar>
+                
+            <MatchesPane
+                :targetPatient="targetPatient"
+                :patientMap="patientMap"
+                :chartScales="chartScales"></MatchesPane>
+
+        </div>
     </div>
+
 </template>
 
 <script>
     import NavBar from './NavBar.vue';
     import LeftBar from './LeftBar.vue';
     import MatchesPane from './MatchesPane.vue';
-    import MosaicSession from '../models/MosaicSession.js';
     import * as Be from '../data/fetchFromBackend.js';
     import { transformPatientMap, updatePatientMap } from '../data/getData';
 
@@ -47,12 +49,14 @@
             LeftBar,
             MatchesPane,
         },
+        props: {
+            mosaicUrlParams: Object,
+            mosaicProjectId: Number,
+            mosaicSampleId: Number,
+            fromMosaic: Boolean,
+        },
         data() {
             return {
-                mosaicUrlParams: null,
-                mosaicProjectId: null,
-                mosaicSampleId: null,
-                fromMosaic: false,
                 patientMap: {},
                 ptMapObj: {},
                 similarityMap: {},
@@ -72,7 +76,6 @@
             }
         },
         async mounted() {
-
             //grab the hpo terms from the session
             try {
                 await this.mosaicSession.promiseGetSampleHpoTerms(this.mosaicProjectId, this.mosaicSampleId);
@@ -93,41 +96,6 @@
             }
         },
         methods: {
-            async initMosaicSession() {
-                if (localStorage.getItem('mosaic-iobio-tkn') && localStorage.getItem('mosaic-iobio-tkn').length > 0){
-                    // let tokenType = 'Bearer' //TESTING
-                    // let source = 'https%3A%2F%2Fmosaic.chpc.utah.edu' //TESTING
-                    // source = decodeURIComponent(source) //TESTING
-                    // this.mosaicProjectId = 1281 //TESTING
-                    // let clientAppNumber = 2 //TESTING
-                    // this.mosaicSampleId = 56980 //TESTING
-
-                    //Gets everything from the URL and assigns what is needed
-                    this.mosaicProjectId = Number(this.mosaicUrlParams.get('project_id'));
-                    this.mosaicSampleId = Number(this.mosaicUrlParams.get('sample_id'));
-                    let tokenType = this.mosaicUrlParams.get('token_type');
-                    let source = this.mosaicUrlParams.get('source');
-                    source = decodeURIComponent(source);
-                    let clientAppNumber = this.mosaicUrlParams.get('client_application_id');
-
-                    //Create a new MosaicSession object
-                    let session = new MosaicSession(clientAppNumber);
-                    session.promiseInit(source, this.mosaicProjectId, tokenType, this.mosaicSampleId);
-
-                    //grab the hpo terms from the session
-                    let terms = await session.promiseGetSampleHpoTerms(this.mosaicProjectId, this.mosaicSampleId);
-                    // turn the terms into just the hpo ids
-                    terms = terms.map(term => term.hpo_id);
-                    // set the target patient and get the matches
-                    this.targetId = 'custom'
-                    this.targetGenes = []
-                    this.targetTerms = terms
-                    this.fromMosaic = true;
-                    this.setPatientAndGetMatches(this.targetId, this.targetTerms, this.targetGenes);
-                } else {
-                    this.showPtSelectOverlay = true;
-                }
-            },
             showErrorToast() {
                 let toast = document.getElementById('error-toast');
                 toast.style.height = '100px';
@@ -158,7 +126,6 @@
 
                 try {
                     await this.calcScores(this.targetTerms);
-
                     this.patientMap = await transformPatientMap(this.targetId, targetTerms, targetGenes, this.similarityMap, this.hpoTermsMap);
 
                     this.ptMapObj = this.patientMap; //this is passed to the chooser overlay so will have all patients
@@ -200,6 +167,13 @@
 </script>
 
 <style lang="sass">
+    #main-parent-container
+        height: 100%
+        width: 100%
+        display: flex
+        flex-direction: column
+        justify-content: flex-start
+        align-items: center
     #error-toast
         position: fixed
         top: 0

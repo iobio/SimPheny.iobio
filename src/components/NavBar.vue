@@ -3,7 +3,7 @@
         <v-app-bar density="compact" color="#19354D">
             <v-btn @click="showOverlay=true" v-if="!targetPatient" variant="outlined">Add/Select Patient</v-btn>
             <v-btn @click="showOverlay=true" v-if="targetPatient" variant="outlined">Edit Patient</v-btn>
-            <v-toolbar-title>Pheno-Matcher.iobio</v-toolbar-title>
+            <v-toolbar-title>SimPheny.iobio</v-toolbar-title>
         </v-app-bar>
 
         <v-overlay id="add-select-patient" v-model="showOverlay" persistent>
@@ -188,7 +188,6 @@
     #nav-bar
         .v-toolbar__content
             .v-toolbar-title
-                text-transform: uppercase
                 text-align: end
                 font-weight: bolder
                 padding-right: 20px
