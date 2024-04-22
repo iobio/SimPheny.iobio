@@ -27,20 +27,11 @@ export async function transformPatientMap(targetPatientId, targetTerms, targetGe
 
   patientMap[targetPatientId] = targetPatient;
 
-  console.log("simScoresObj: ", simScoresObj);
-
   for(let patientId in patientMapRes){
     if (patientMapRes.hasOwnProperty(patientId)){
       if (patientId != targetPatientId){
         let patientObject = patientMapRes[patientId];
         let simObject = simScoresObj[patientId];
-        
-        if (simObject === undefined) {
-          console.log("Error: simObject is undefined for patientId " + patientId);
-          console.log("patient", patientObject);
-        } else{
-          console.log('okay', patientId, patientObject)
-        }
 
         let matchPatient = new MatchPatient(patientId, patientObject, simObject);
 
@@ -53,8 +44,6 @@ export async function transformPatientMap(targetPatientId, targetTerms, targetGe
       } else {
         //skip the target patient
       }
-    } else {
-      console.log("Error: patientMapRes does not have property " + patientId);
     }
   }
   return patientMap;

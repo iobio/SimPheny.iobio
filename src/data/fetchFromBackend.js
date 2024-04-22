@@ -1,4 +1,4 @@
-// var baseURL = "http://localhost:8911/"
+// var baseURL = "http://localhost:8911/" //for local testing
 var baseURL = import.meta.env.VITE_APP_BACKEND_URL;
 //url for compare data
 var compareURL = baseURL + "compare/"

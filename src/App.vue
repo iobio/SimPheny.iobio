@@ -1,14 +1,14 @@
 <template>
   <v-app >
-    <Main v-if="validFromMosaic && mosaicSession"
+    <Main
       :mosaicSession="mosaicSession"
       :mosaicProjectId="mosaicProjectId"
       :mosaicSampleId="mosaicSampleId"
       :fromMosaic="validFromMosaic"></Main>
 
-    <div v-else id="non-auth-message-container">
-      <p>This application is only available to certain Mosaic users.</p>
-    </div>
+    <!-- <div v-else id="non-auth-message-container"> -->
+      <!-- <p>This application is only available to certain Mosaic users.</p> -->
+    <!-- </div> -->
   </v-app>
 </template>
 

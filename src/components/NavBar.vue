@@ -15,7 +15,7 @@
                     v-model="udnId"
                     :items="udnPatientIdsList"
                     variant="solo-filled"
-                    label="UDN Patient Id" 
+                    label="Patient/Match Code" 
                     density="compact"
                     clearable
                     @update:modelValue="checkInputPatient"

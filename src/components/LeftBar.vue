@@ -298,13 +298,11 @@
                     //get the position of the mouse for y
                     let y = event.clientY;
                     peek.style("display", "block");
-                    //get the calculated height of the peek
-                    let peekHeight = peek.node().getBoundingClientRect().height;
                     //set peek style for y
-                    peek.style("top", y - (peekHeight/2) + "px");
+                    peek.style("top", 50 + "px");
                     peek.style("right", -105 + "px");
                     peek.style("width", "100px");
-                    peek.style("z-index", 3);
+                    peek.style("z-index", 1005);
                 } else if (type == 'phenotypes') {
                     
                     for (let key in uniqueObj) {
@@ -315,12 +313,11 @@
                     //get the position of the mouse for y
                     let y = event.clientY;
                     peek.style("display", "block");
-                    let peekHeight = peek.node().getBoundingClientRect().height;
 
-                    peek.style("top", y - (peekHeight/2) + "px");
+                    peek.style("top", 50 + "px");
                     peek.style("right", -205 + "px");
                     peek.style("width", "200px")
-                    peek.style("z-index", 3);
+                    peek.style("z-index", 1005);
                 } else {
                     //hide the tip
                     peek.style("display", "none");
