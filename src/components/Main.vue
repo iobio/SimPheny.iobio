@@ -57,6 +57,7 @@
         },
         data() {
             return {
+                whichPopulation: 'both',
                 patientMap: {},
                 ptMapObj: {},
                 similarityMap: {},
@@ -90,7 +91,8 @@
                 this.setPatientAndGetMatches(this.targetId, this.targetTerms, this.targetGenes);
             } catch (error) {
                 this.showErrorToast();
-                this.ptMapObj = await Be.getPatientMap();
+                this.ptMapObj = await Be.getPatientMap(this.whichPopulation);
+
                 this.udnPatientIds = Object.keys(this.ptMapObj);
                 this.showPtSelectOverlay = true;
             }
@@ -104,7 +106,7 @@
                 }, 3000);
             },
             async calcScores(targetTerms){
-                let similarityRes = await Be.getSimScores(targetTerms);
+                let similarityRes = await Be.getSimScores(targetTerms, this.whichPopulation);
 
                 if (similarityRes === null) {
                     throw new Error('No similarity scores returned from backend');
@@ -126,7 +128,7 @@
 
                 try {
                     await this.calcScores(this.targetTerms);
-                    this.patientMap = await transformPatientMap(this.targetId, targetTerms, targetGenes, this.similarityMap, this.hpoTermsMap);
+                    this.patientMap = await transformPatientMap(this.targetId, targetTerms, targetGenes, this.similarityMap, this.hpoTermsMap, this.whichPopulation);
 
                     this.ptMapObj = this.patientMap; //this is passed to the chooser overlay so will have all patients
                     this.targetPatient = this.patientMap[this.targetId];

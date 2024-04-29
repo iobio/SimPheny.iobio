@@ -2,8 +2,8 @@ import MatchPatient from "../models/MatchPatient";
 import TargetPatient from "../models/TargetPatient";
 import * as Be from "./fetchFromBackend.js";
 
-export async function transformPatientMap(targetPatientId, targetTerms, targetGenes, simScoresObj, phenotypesMap){
-  let patientMapRes = await Be.getPatientMap();
+export async function transformPatientMap(targetPatientId, targetTerms, targetGenes, simScoresObj, phenotypesMap, whichPopulation="udn"){
+  let patientMapRes = await Be.getPatientMap(whichPopulation);
 
   let patientMap = {};
   let patientObject;

@@ -1,24 +1,73 @@
-// var baseURL = "http://localhost:8911/" //for local testing
-var baseURL = import.meta.env.VITE_APP_BACKEND_URL;
-//url for compare data
-var compareURL = baseURL + "compare/"
-//url for getting the patientMap
-var patientMapURL = baseURL + "population"
+import { json } from "d3"
 
-export async function getPatientMap() {
-    let patientMap = await fetch(patientMapURL)
-    return patientMap.json() 
+var baseURL = "http://localhost:8911/" //for local testing
+// var baseURL = import.meta.env.VITE_APP_BACKEND_URL;
+//url for compare data
+var compareURL_udn = baseURL + "compare_udn/"
+var compareURL_orpha = baseURL + "compare_orpha/"
+//url for getting the patientMap
+var patientMapURL_udn = baseURL + "udn_population"
+var patientMapURL_orpha = baseURL + "orpha_population"
+
+export async function getPatientMap(which="udn") {
+    if (which == "udn") {
+      let patientMap = await fetch(patientMapURL_udn)
+      let jsonData = await patientMap.json()
+      return jsonData
+    } else if (which == "orpha") {
+      let patientMap = await fetch(patientMapURL_orpha)
+      let jsonData = await patientMap.json()
+      return jsonData
+    } else if (which == "both") {
+      let patientMap = await fetch(patientMapURL_udn)
+      let patientMap2 = await fetch(patientMapURL_orpha)
+      let jsonData = await patientMap.json()
+      let jsonData2 = await patientMap2.json()
+
+      //these objects need to be joined up into one
+      jsonData = {...jsonData, ...jsonData2}
+
+      return jsonData
+    }
 }
 
-export async function getSimScores(terms) {
+export async function getSimScores(terms, which="udn") {
     //make terms into a comma separated string for use in url
     terms = terms.join(",")
 
-    try {
-      let simScoresResponse = await fetch(compareURL + terms);
-      return simScoresResponse.json()
-    } catch (error) {
-      return null
+    if (which == "udn") {
+      try {
+        let simScoresResponse = await fetch(compareURL_udn + terms);
+        let simScoreResJson = await simScoresResponse.json()
+        return simScoreResJson
+
+      } catch (error) {
+        return null
+      }
+    } else if (which == "orpha") {
+      try {
+        let simScoresResponse = await fetch(compareURL_orpha + terms);
+        let simScoreResJson = await simScoresResponse.json()
+        return simScoreResJson
+
+      } catch (error) {
+        return null
+      }
+    } else if (which == "both") {
+      try {
+        let simScoresResponse = await fetch(compareURL_udn + terms);
+        let simScoresResponse2 = await fetch(compareURL_orpha + terms);
+        let simScoreResJson = await simScoresResponse.json()
+        let simScoreResJson2 = await simScoresResponse2.json()
+
+        //join the two objects
+        simScoreResJson = {...simScoreResJson, ...simScoreResJson2}
+
+        return simScoreResJson
+
+      } catch (error) {
+        return null
+      }
     }
 }
 
