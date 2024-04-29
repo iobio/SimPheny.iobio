@@ -60,8 +60,12 @@ export async function getSimScores(terms, which="udn") {
         let simScoreResJson = await simScoresResponse.json()
         let simScoreResJson2 = await simScoresResponse2.json()
 
-        //join the two objects
-        simScoreResJson = {...simScoreResJson, ...simScoreResJson2}
+        //join the two objects.ranked_vec.ScoreVec which is a list of scores and score_map.ScoreMap which is a dictionary of scores        
+        let joinedRankedVec = simScoreResJson.ranked_vec.ScoreVec.concat(simScoreResJson2.ranked_vec.ScoreVec)
+        let joinedScoreMap = {...simScoreResJson.score_map.ScoreMap, ...simScoreResJson2.score_map.ScoreMap}
+
+        simScoreResJson.ranked_vec.ScoreVec = joinedRankedVec
+        simScoreResJson.score_map.ScoreMap = joinedScoreMap
 
         return simScoreResJson
 

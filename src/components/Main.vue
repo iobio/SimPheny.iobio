@@ -16,8 +16,10 @@
             :showPtSelectOverlay="showPtSelectOverlay"
             :targetPatient="targetPatient"
             :patientMap="ptMapObj"
+            :whichPopulation="whichPopulation"
             @set-target-patient="setPatientAndGetMatches"
-            @set-mosaic-false="fromMosaic = false"></NavBar>
+            @set-mosaic-false="fromMosaic = false"
+            @updatePopulationChoice="updatePopulationChoice"></NavBar>
 
         <div id="main-content-container">
             <LeftBar
@@ -98,6 +100,9 @@
             }
         },
         methods: {
+            updatePopulationChoice(choice) {
+                this.whichPopulation = choice;
+            },
             showErrorToast() {
                 let toast = document.getElementById('error-toast');
                 toast.style.height = '100px';

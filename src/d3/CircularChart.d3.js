@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import { el } from "vuetify/locale";
 
 //Setting colors for organization
 const colors = {
@@ -583,13 +584,11 @@ function determineFill(dataPoint, targetPatient={}, selectedMatches={}, hoveredM
         }
     }
     
-    //if not check if they are diagnosed or undiagnosed
-    if (dataPoint.dx === 'Undiagnosed') {
-        color = colors.fillGreen;
-    } else if (dataPoint.dx === 'Diagnosed') {
-        color = colors.fillGreen;
+    //if the data point id starts with UDN: then color it red
+    if (dataPoint.id.startsWith("UDN:")) {
+        color = colors.fillBlack;
     } else {
-        color = colors.fillGreen; 
+        color = colors.fillGreen;
     }
 
     return color;

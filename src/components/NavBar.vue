@@ -3,6 +3,12 @@
         <v-app-bar density="compact" color="#19354D">
             <v-btn @click="showOverlay=true" v-if="!targetPatient" variant="outlined">Add/Select Patient</v-btn>
             <v-btn @click="showOverlay=true" v-if="targetPatient" variant="outlined">Edit Patient</v-btn>
+            <!-- add a triplet of radio buttons one for udn, one for orphanet, one for both -->
+            <v-radio-group v-model="whichPopulationChoice" inline>
+                <v-radio label="UDN" value="udn"></v-radio>
+                <v-radio label="Orphanet" value="orpha"></v-radio>
+                <v-radio label="Both" value="both"></v-radio>
+            </v-radio-group>
             <v-toolbar-title>SimPheny.iobio</v-toolbar-title>
         </v-app-bar>
 
@@ -63,6 +69,7 @@
             patientMap: Object,
             showPtSelectOverlay: Boolean,
             targetPatient: Object,
+            whichPopulation: String
         },
         data: function() {
             return {
@@ -73,7 +80,8 @@
                 phenotypesText: '',
                 genesText: '',
                 customPatient: false,
-                firstLoading: true
+                firstLoading: true,
+                whichPopulationChoice: this.whichPopulation
             }
         },
         mounted: function() {
@@ -179,6 +187,9 @@
                     this.internalPatientMap = newVal;
                     this.firstLoading = false;
                 }
+            },
+            whichPopulationChoice(newVal, oldVal) {
+                this.$emit('updatePopulationChoice', newVal);
             }
         }
     }
