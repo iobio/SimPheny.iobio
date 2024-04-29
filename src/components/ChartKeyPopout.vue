@@ -2,15 +2,18 @@
     <p id="chart-key-popout" :class="{show: showChartKey}">
     <span>
         <svg height="10" width="10">
+            <circle cx="5" cy="5" r="4" style="fill:red; stroke: #403B3A;"></circle>
+        </svg>
+        / 
+        <svg height="10" width="10">
             <circle cx="5" cy="5" r="4" style="fill:#8B817E; stroke: #403B3A;"></circle>
-        </svg> 
-         No Genes in Common
+        </svg> UDN/Orphanet (no genes match)
     </span>
     <span>
         <svg height="15" width="15">
             <polygon points="7.5,0.75 3,14.25 14.25,5.625 0.75,5.625 12,14.25" style="fill:#FF0000; stroke: #FF0000;"></polygon>
         </svg>
-         Genes in Common
+         Gene match
     </span>
 </p>
 </template>
