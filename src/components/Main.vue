@@ -43,6 +43,7 @@
     import LeftBar from './LeftBar.vue';
     import MatchesPane from './MatchesPane.vue';
     import * as Be from '../data/fetchFromBackend.js';
+    import MosaicSession from '../models/MosaicSession';
     import { transformPatientMap, updatePatientMap } from '../data/getData';
 
     export default {
@@ -56,6 +57,7 @@
             mosaicUrlParams: Object,
             mosaicProjectId: Number,
             mosaicSampleId: Number,
+            mosaicSession: MosaicSession,
             fromMosaic: Boolean,
         },
         data() {
@@ -80,10 +82,8 @@
             }
         },
         async mounted() {
-            //grab the hpo terms from the session
             try {
-                await this.mosaicSession.promiseGetSampleHpoTerms(this.mosaicProjectId, this.mosaicSampleId);
-
+                let terms = await this.mosaicSession.promiseGetSampleHpoTerms(this.mosaicProjectId, this.mosaicSampleId);
                 // turn the terms into just the hpo ids
                 terms = terms.map(term => term.hpo_id);
 
