@@ -1,6 +1,6 @@
 
-var baseURL = "http://localhost:8911/" //for local testing
-// var baseURL = import.meta.env.VITE_APP_BACKEND_URL;
+// var baseURL = "http://localhost:8911/" //for local testing
+var baseURL = import.meta.env.VITE_APP_BACKEND_URL;
 //url for compare data
 var compareURL_udn = baseURL + "compare_udn/"
 var compareURL_orpha = baseURL + "compare_orpha/"
