@@ -2,7 +2,7 @@
     <p id="chart-key-popout" :class="{show: showChartKey}">
     <span>
         <svg height="10" width="10">
-            <circle cx="5" cy="5" r="4" style="fill:red; stroke: #403B3A;"></circle>
+            <circle cx="5" cy="5" r="4" style="fill:#90E0FF; stroke: #0089BF;"></circle>
         </svg>
         / 
         <svg height="10" width="10">

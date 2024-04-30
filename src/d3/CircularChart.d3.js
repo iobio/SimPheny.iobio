@@ -12,6 +12,9 @@ const colors = {
     "strokeBlue": "#19354D", //reflects the color darkblue
     "fillBlue": "#2E5F8A", //reflects the color lightblue
 
+    "fillUdnBlue": "#90E0FF", //reflects the color lightblue
+    "strokeUdnBlue": "#0089BF", //reflects the color darkblue
+
     "targetPurple": "#D37620", //Actually is dark orange
 
     "chartLettersGrey": "#5F5661",
@@ -584,9 +587,9 @@ function determineFill(dataPoint, targetPatient={}, selectedMatches={}, hoveredM
         }
     }
     
-    //if the data point id starts with UDN: then color it red
+    //if the data point id starts with UDN: then color it blue
     if (dataPoint.id.startsWith("UDN:")) {
-        color = colors.fillBlack;
+        color = colors.fillUdnBlue;
     } else {
         color = colors.fillGreen;
     }
@@ -612,13 +615,12 @@ function determineStroke(dataPoint, targetPatient={}, selectedMatches={}, hovere
         }
     }
     
-    //if not check if they are diagnosed or undiagnosed
-    if (dataPoint.dx === 'Undiagnosed') {
-        return colors.strokeGreen;
-    } else if (dataPoint.dx === 'Diagnosed') {
-        return colors.strokeGreen;
+    //if the data point id starts with UDN: then color it blue
+    if (dataPoint.id.startsWith("UDN:")) {
+        return colors.strokeUdnBlue;
     } else {
-        return colors.strokeGreen; 
+        return colors.strokeGreen;
+
     }
 }
 
