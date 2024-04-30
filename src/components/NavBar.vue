@@ -7,7 +7,7 @@
             <v-radio-group v-model="whichPopulationChoice" inline hide-details="true">
                 <v-radio label="UDN" value="udn"></v-radio>
                 <v-radio label="Orphanet" value="orpha"></v-radio>
-                <v-radio label="Both" value="both"></v-radio>
+                <v-radio label="UDN & Orphanet" value="both"></v-radio>
             </v-radio-group>
             <v-toolbar-title>SimPheny.iobio</v-toolbar-title>
         </v-app-bar>
@@ -16,6 +16,7 @@
             <div id="add-select-dialog">
                 <v-btn class="close-button" @click="showOverlay = false" icon="mdi-close-circle-outline" height="35px" width="35px"></v-btn>
                 <h3>Input Target Patient Details</h3>
+                <p>Showing: {{ populationLabel }}</p>
                 <div v-if="udnPatientIdsList" id="udn-id-input" class="input-container">
                     <v-autocomplete
                     v-model="udnId"
@@ -150,6 +151,15 @@
                     return true;
                 } else {
                     return false;
+                }
+            },
+            populationLabel() {
+                if (this.whichPopulationChoice === 'udn') {
+                    return 'UDN';
+                } else if (this.whichPopulationChoice === 'orpha') {
+                    return 'Orphanet';
+                } else {
+                    return 'UDN & Orphanet';
                 }
             }
         },

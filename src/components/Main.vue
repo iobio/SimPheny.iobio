@@ -100,8 +100,17 @@
             }
         },
         methods: {
-            updatePopulationChoice(choice) {
+            async updatePopulationChoice(choice) {
                 this.whichPopulation = choice;
+                //if we change this we need to reset things
+                this.ptMapObj = await Be.getPatientMap(this.whichPopulation);
+                this.udnPatientIds = Object.keys(this.ptMapObj);
+                this.showPtSelectOverlay = true;
+
+                this.targetPatient = null;
+                this.patientMap = {};
+                this.similarityMap = {};
+                this.rankedList = [];
             },
             showErrorToast() {
                 let toast = document.getElementById('error-toast');
