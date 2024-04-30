@@ -34,6 +34,24 @@
                         <p>Genes In Common Only</p>
                         <input v-model="filterOptions.showGenesInCommonOnly" type="checkbox" name="" id="">
                     </div>
+                    
+                    <div v-if="whichPopulation == 'both'" class="group">
+                        <fieldset>
+                            <legend>Filter Population:</legend>
+                            <div>
+                                <input type="radio" id="both" name="population" value="both" v-model="populationFilter">
+                                <label for="both">Orpha & UDN</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="udn" name="population" value="udn" v-model="populationFilter">
+                                <label for="udn">UDN</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="orpha" name="population" value="orpha" v-model="populationFilter">
+                                <label for="orpha">Orphanet</label>
+                            </div>
+                        </fieldset>
+                    </div>
 
                     <div class="group zoom-to-select">
                         <label v-if="!zoomed" for="zoom-to-select">Zoom on Selection</label>
@@ -118,6 +136,7 @@
         selectedMatchesProp: Array,
         chartScales: Object,
         hoveredFromMatches: Array,
+        whichPopulation: String,
     },
     data: function () {
         return {
@@ -139,6 +158,7 @@
             anglesMap: {},
             zoomed: false,
             filterByRadiosCollapsed: true,
+            populationFilter: 'both',
         };
     },
     mounted() {
@@ -767,4 +787,11 @@
         width: fit-content
 
         font-size: small
+    fieldset
+        border: 1px solid #D4DAD4
+        border-radius: 5px
+        padding: 5px
+        legend
+            padding: 0px 5px
+            font-size: 12pt
 </style>

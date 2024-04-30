@@ -30,7 +30,8 @@
             <MatchesPane
                 :targetPatient="targetPatient"
                 :patientMap="patientMap"
-                :chartScales="chartScales"></MatchesPane>
+                :chartScales="chartScales"
+                :whichPopulation="whichPopulation"></MatchesPane>
 
         </div>
     </div>

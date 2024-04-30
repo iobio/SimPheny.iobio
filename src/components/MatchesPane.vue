@@ -7,7 +7,8 @@
                 :selectedMatchesProp="selectedMatches"
                 :hoveredFromMatches="hoveredFromMatches"
                 @selectMatch="populateSelectedMatch"
-                :chartScales="chartScales"></ChartViz>
+                :chartScales="chartScales"
+                :whichPopulation="whichPopulation"></ChartViz>
         </div>
 
         <div id="lower-container">
@@ -163,6 +164,7 @@
         targetPatient: Object,
         patientMap: Object,
         chartScales: Object,
+        whichPopulation: String,
     },
     data: function() {
       return {
