@@ -103,15 +103,36 @@
         methods: {
             async updatePopulationChoice(choice) {
                 this.whichPopulation = choice;
-                //if we change this we need to reset things
-                this.ptMapObj = await Be.getPatientMap(this.whichPopulation);
-                this.udnPatientIds = Object.keys(this.ptMapObj);
-                this.showPtSelectOverlay = true;
 
-                this.targetPatient = null;
-                this.patientMap = {};
-                this.similarityMap = {};
-                this.rankedList = [];
+                if (this.fromMosaic && this.mosaicSession) {
+                    try {
+                        let terms = await this.mosaicSession.promiseGetSampleHpoTerms(this.mosaicProjectId, this.mosaicSampleId);
+                        // turn the terms into just the hpo ids
+                        terms = terms.map(term => term.hpo_id);
+
+                        // set the target patient and get the matches
+                        this.targetId = 'custom'
+                        this.targetGenes = []
+                        this.targetTerms = terms
+                        this.setPatientAndGetMatches(this.targetId, this.targetTerms, this.targetGenes);
+                    } catch (error) {
+                        this.showErrorToast();
+                        this.ptMapObj = await Be.getPatientMap(this.whichPopulation);
+
+                        this.udnPatientIds = Object.keys(this.ptMapObj);
+                        this.showPtSelectOverlay = true;
+                    }
+                } else {
+                    //if we change this we need to reset things
+                    this.targetPatient = null;
+                    this.patientMap = {};
+                    this.similarityMap = {};
+                    this.rankedList = [];
+
+                    this.ptMapObj = await Be.getPatientMap(this.whichPopulation);
+                    this.udnPatientIds = Object.keys(this.ptMapObj);
+                    this.showPtSelectOverlay = true;
+                }
             },
             showErrorToast() {
                 let toast = document.getElementById('error-toast');
@@ -143,12 +164,20 @@
 
                 try {
                     await this.calcScores(this.targetTerms);
-                    this.patientMap = await transformPatientMap(this.targetId, targetTerms, targetGenes, this.similarityMap, this.hpoTermsMap, this.whichPopulation);
+                    let res = await transformPatientMap(this.targetId, targetTerms, targetGenes, this.similarityMap, this.hpoTermsMap, this.whichPopulation);
+                    this.patientMap = res.patientMap;
+                    
+                    this.targetPatient = res.targetPatient;
 
                     this.ptMapObj = this.patientMap; //this is passed to the chooser overlay so will have all patients
-                    this.targetPatient = this.patientMap[this.targetId];
-                    //delete the target patient from the patient map
-                    delete this.patientMap[this.targetId];
+                    this.udnPatientIds = Object.keys(this.patientMap);
+
+                    //delete the target patient from the patient map if it exists
+                    if (this.patientMap.hasOwnProperty(this.targetPatient.id)) {
+                        delete this.patientMap[this.targetPatient.id];
+                    }
+
+                    console.log(this.targetPatient)
 
                     this.chartScales.xMin = this.rankedList[this.rankedList.length - 1][1];
                     this.chartScales.xMax = this.rankedList[1][1]; //for now we do this because targets are in the data set

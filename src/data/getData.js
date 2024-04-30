@@ -46,7 +46,7 @@ export async function transformPatientMap(targetPatientId, targetTerms, targetGe
       }
     }
   }
-  return patientMap;
+  return {"patientMap": patientMap, "targetPatient": targetPatient};
 }
 
 export async function updatePatientMap(newSimMap, oldPatientMap, newTargetGeneList=null) {

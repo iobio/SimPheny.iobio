@@ -86,21 +86,40 @@
             }
         },
         mounted: function() {
-            this.udnId = this.internalUdnPtIdsList[0];
+            if (!this.targetPatient){
+                this.udnId = this.internalUdnPtIdsList[0];
+            }
         },
         methods: {
             patientChanged() {
-                if (!this.internalPatientMap[String(this.udnId)]) {
+                //if the patient id just isn't in there, change to empty strings
+                if (!this.internalPatientMap[String(this.udnId)] && this.udnId !== 'custom') {
                         this.phenotypesText = '';
                         this.genesText = '';
                         return;
                 }
-                if (this.internalPatientMap[this.udnId].Terms && typeof this.internalPatientMap[this.udnId].Terms === 'string') { //When loading for the first time we have a different object
+                
+                //if it is custom but the target patient is custom, just set the text to the target patient's phenotypes and genes
+                if (this.udnId === 'custom' && this.targetPatient.id === 'custom') {
+                    this.phenotypesText = this.targetPatient.phenotypeList.map((phenotype) => {return phenotype.hpoId; }).join('; ');
+                    this.genesText = this.targetPatient.genesList.map((gene) => { return gene.gene_symbol; }).join('; ');
+                    return;
+                }
+
+                //if it is custom but the target patient is not custom, set the text to empty strings
+                if (this.udnId === 'custom' && this.targetPatient.id !== 'custom') {
+                    this.phenotypesText = '';
+                    this.genesText = '';
+                    return;
+                }
+
+                //if it is not custom, set the text to the patient's phenotypes and genes (first iteration data structure is odd)
+                if (this.internalPatientMap[this.udnId].Terms && typeof this.internalPatientMap[this.udnId].Terms === 'string') {
                     //if this happens they come in as a string we need just to replace any commas with semicolons
                     this.phenotypesText = this.internalPatientMap[String(this.udnId)].Terms.replace(/\[|\]|\'|\"/g, '').replace(/\s+/g, ' ').replace(/\s+,/g, '').replace(/,/g, ';');
-                    //also remove any spaces
                     this.genesText = this.internalPatientMap[String(this.udnId)].Genes.replace(/\[|\]|\'|\"/g, '').replace(/\s+/g, ' ').replace(/\s,/g, '').replace(/,/g, ';'); 
-                } else {
+
+                } else { //Typical case
                     this.phenotypesText = this.internalPatientMap[String(this.udnId)].phenotypeList.map((phenotype) => {return phenotype.hpoId; }).join('; ');
                     this.genesText = this.internalPatientMap[String(this.udnId)].genesList.map((gene) => { return gene.gene_symbol; }).join('; ');
                 }
