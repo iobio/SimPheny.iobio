@@ -34,20 +34,20 @@
                         <p>Genes In Common Only</p>
                         <input v-model="filterOptions.showGenesInCommonOnly" type="checkbox" name="" id="">
                     </div>
-                    
+
                     <div v-if="whichPopulation == 'both'" class="group">
                         <fieldset>
                             <legend>Filter Population:</legend>
                             <div>
-                                <input type="radio" id="both" name="population" value="both" v-model="populationFilter">
+                                <input type="radio" id="both" name="population" value="both" v-model="filterOptions.populationFilter">
                                 <label for="both">Orpha & UDN</label>
                             </div>
                             <div>
-                                <input type="radio" id="udn" name="population" value="udn" v-model="populationFilter">
+                                <input type="radio" id="udn" name="population" value="udn" v-model="filterOptions.populationFilter">
                                 <label for="udn">UDN</label>
                             </div>
                             <div>
-                                <input type="radio" id="orpha" name="population" value="orpha" v-model="populationFilter">
+                                <input type="radio" id="orpha" name="population" value="orpha" v-model="filterOptions.populationFilter">
                                 <label for="orpha">Orphanet</label>
                             </div>
                         </fieldset>
@@ -154,11 +154,11 @@
                 filterByScore: false,
                 rankCutOff: 0,
                 scoreCutOff: 0.0,
+                populationFilter: 'both',
             },
             anglesMap: {},
             zoomed: false,
             filterByRadiosCollapsed: true,
-            populationFilter: 'both',
         };
     },
     mounted() {
@@ -292,6 +292,7 @@
                 filterByScore: false,
                 rankCutOff: 0,
                 scoreCutOff: 0.0,
+                populationFilter: 'both',
             },
             this.chartScalesFiltered = this.chartScales;
             this.filteredPatientMap = this.patientMap;
@@ -366,6 +367,17 @@
                         if (this.selectedMatches && this.selectedMatches.includes(this.patientMap[patientId])) {
                             newSelectedMatches.push(this.patientMap[patientId]);
                         }
+                    }
+                }
+                if (this.filterOptions.populationFilter !== 'both') {
+                    filterNeverFired = false;
+                    if (this.filterOptions.populationFilter === 'udn' && this.patientMap[patientId].id.startsWith('ORPHA:')) {
+                        delete filteredPatientMap[patientId];
+                        continue;
+                    }
+                    else if (this.filterOptions.populationFilter === 'orpha' && this.patientMap[patientId].id.startsWith('UDN:')) {
+                        delete filteredPatientMap[patientId];
+                        continue;
                     }
                 }
                 if (this.filterOptions.showGenesInCommonOnly) {
