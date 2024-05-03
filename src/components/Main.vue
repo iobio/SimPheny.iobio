@@ -177,8 +177,6 @@
                         delete this.patientMap[this.targetPatient.id];
                     }
 
-                    console.log(this.targetPatient)
-
                     this.chartScales.xMin = this.rankedList[this.rankedList.length - 1][1];
                     this.chartScales.xMax = this.rankedList[1][1]; //for now we do this because targets are in the data set
 
