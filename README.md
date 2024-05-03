@@ -1,6 +1,6 @@
 # SimPheny.iobio
 
-Visit and demo/use here: [SimPheny.iobio](https://mosaic-staging.chpc.utah.edu/phenomatcher-frontend/)
+Visit and demo/use here: [SimPheny.iobio](https://simpheny.iobio.chpc.utah.edu/)
 
 ## Overview
 
