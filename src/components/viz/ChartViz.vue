@@ -682,6 +682,7 @@
         background-color: white
         opacity: 0.9
         overflow: hidden
+        overflow-y: auto
         white-space: nowrap
         transition: all .45s ease-in-out
         box-shadow: 0px 2px 4px -1px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)), 0px 4px 5px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)), 0px 1px 10px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.12))
