@@ -7,5 +7,4 @@ export default defineConfig({
     port: 8989,
   },
   plugins: [vue()],
-  base: '/phenomatcher-frontend/',
 })
