@@ -203,6 +203,10 @@
                     return 'UDN';
                 } else if (this.whichPopulationChoice === 'orpha') {
                     return 'Orphanet';
+                } else if (this.whichPopulationChoice === 'decipher') {
+                    return 'Decipher';
+                } else if (this.whichPopulationChoice === 'all') {
+                    return 'All';
                 } else {
                     return 'UDN & Orphanet';
                 }
