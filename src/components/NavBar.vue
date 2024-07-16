@@ -12,6 +12,7 @@
                 <v-radio label="All" value="all"></v-radio>
             </v-radio-group>
             <v-toolbar-title>SimPheny.iobio</v-toolbar-title>
+            <v-btn density="compact" icon="mdi-dots-vertical" @click="toggleShowDisclaimer"></v-btn>
         </v-app-bar>
 
         <v-overlay id="add-select-patient" v-model="showOverlay" persistent>
@@ -58,6 +59,25 @@
                 <v-btn @click="processPatient" :disabled="phenotypesPresent">Compare Patient</v-btn>
             </div>
         </v-overlay>
+        <v-overlay id="disclaimer-overlay" v-model="showDisclaimer">
+            <div id="disclaimer-popup">
+                <h3>Disclaimer</h3>
+                <p>The University of Utah makes no claims that iobio applications, including simpheny.iobio 
+                    are approved for clinical use. All users of iobio applications including simpheny.iobio understand 
+                    and accept that any information gained by using these applications, whether the information 
+                    comes from visualization, processing, internal or external databases, or analysis, may not in 
+                    any way be used for clinical purposes. The University of Utah makes no representation that 
+                    iobio or simpheny.iobio is either safe or effective for any intended use for which research may currently 
+                    be performed.
+                    <br>
+                    <br>
+                    Iobio, or any iobio applications ARE TO BE USED FOR RESEARCH PURPOSES ONLY. USE FOR CLINICAL PURPOSES 
+                    IS EXPRESSLY FORBIDDEN. Approval of iobio applications for clinical use has neither been applied for, nor 
+                    received, in any country, including the United States of America.
+                </p>
+                <v-btn @click="toggleShowDisclaimer">Close</v-btn>
+            </div>
+        </v-overlay>
     </div>
 </template>
 
@@ -84,7 +104,8 @@
                 genesText: '',
                 customPatient: false,
                 firstLoading: true,
-                whichPopulationChoice: this.whichPopulation
+                whichPopulationChoice: this.whichPopulation,
+                showDisclaimer: false
             }
         },
         mounted: function() {
@@ -93,6 +114,9 @@
             }
         },
         methods: {
+            toggleShowDisclaimer() {
+                this.showDisclaimer = !this.showDisclaimer;
+            },
             patientChanged() {
                 //if the patient id just isn't in there, change to empty strings
                 if (!this.internalPatientMap[String(this.udnId)] && this.udnId !== 'custom') {
@@ -234,6 +258,41 @@
                 font-weight: bolder
                 padding-right: 20px
     .v-overlay-container
+        .v-overlay#disclaimer-overlay
+            width: 100%
+            height: 100%
+            display: flex
+            flex-direction: column
+            justify-content: center
+            align-items: center
+            #disclaimer-popup
+                padding: 20px
+                background-color: white
+                display: flex
+                flex-direction: column
+                justify-content: center
+                align-items: start
+                width: 50vw
+                min-height: 50vh
+                border-radius: 5px
+                position: relative
+                h3
+                    width: 100%
+                    text-align: center
+                    margin-bottom: 20px
+                .v-btn
+                    background-color: #2E5F8A
+                    color: white
+                    &.close-button
+                        background-color: red
+                        color: white
+                        position: absolute
+                        top: 10px
+                        right: 10px
+                p
+                    width: 100%
+                    text-align: justify
+                    margin-bottom: 20px
         .v-overlay#add-select-patient
             width: 100%
             height: 100%
