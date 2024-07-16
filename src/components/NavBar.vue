@@ -7,7 +7,9 @@
             <v-radio-group v-model="whichPopulationChoice" inline hide-details="true">
                 <v-radio label="UDN" value="udn"></v-radio>
                 <v-radio label="Orphanet" value="orpha"></v-radio>
+                <v-radio label="Decipher" value="decipher"></v-radio>
                 <v-radio label="UDN & Orphanet" value="both"></v-radio>
+                <v-radio label="All" value="all"></v-radio>
             </v-radio-group>
             <v-toolbar-title>SimPheny.iobio</v-toolbar-title>
         </v-app-bar>

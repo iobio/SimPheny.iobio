@@ -62,7 +62,7 @@
         },
         data() {
             return {
-                whichPopulation: 'both',
+                whichPopulation: 'all',
                 patientMap: {},
                 ptMapObj: {},
                 similarityMap: {},
