@@ -89,7 +89,7 @@
                                         <span class="clickable" @click="toggleDiseaseDetails(gene.gene.gene_symbol)">{{ gene.numDiseases }}</span>
                                     </div>
                                     <div class="disease-inspect-div" v-if="inspectedDiseases && inspectedDiseases == gene.gene.gene_symbol">
-                                        <span v-for="disease in gene.diseases">{{ disease }}</span>
+                                        <span v-for="disease in gene.diseases">({{disease.id}}) {{ disease.name }}</span>
                                     </div>
                                 </div>
                             </v-window-item>
@@ -102,7 +102,7 @@
                                         <span class="clickable" @click="toggleDiseaseDetails(phenotype.phenotype.term_id)">{{ phenotype.numDiseases }}</span>
                                     </div>
                                     <div class="disease-inspect-div" v-if="inspectedDiseases && inspectedDiseases == phenotype.phenotype.term_id ">
-                                        <span v-for="disease in phenotype.diseases">{{ disease }}</span>
+                                        <span v-for="disease in phenotype.diseases">({{disease.id}}) {{ disease.name }}</span>
                                     </div>
                                 </div>
                             </v-window-item>
@@ -339,24 +339,25 @@
                         let uniqueGenes = {};
                         let uniqueGenesNotInTarget = {};
                         let genesIn = res.filter(gene => {
+                            let disease = { id: gene.disease_id, name: gene.disease_name };
                             if (geneSymbolList.includes(gene.gene_symbol) && !seenInTarget.has(gene.gene_symbol)) {
                                 seenInTarget.add(gene.gene_symbol);
                                 uniqueGenes[gene.gene_symbol] = {};
                                 uniqueGenes[gene.gene_symbol]['gene'] = gene;
-                                uniqueGenes[gene.gene_symbol]['diseases'] = [gene.disease_id]
+                                uniqueGenes[gene.gene_symbol]['diseases'] = [disease];
                                 uniqueGenes[gene.gene_symbol]['numDiseases'] = 1;
                                 return true;
                             } else if (geneSymbolList.includes(gene.gene_symbol)) {
-                                uniqueGenes[gene.gene_symbol]['diseases'].push(gene.disease_id);
+                                uniqueGenes[gene.gene_symbol]['diseases'].push(disease);
                                 uniqueGenes[gene.gene_symbol]['numDiseases'] += 1;
                             } else if (!seenNotInTarget.has(gene.gene_symbol)) {
                                 seenNotInTarget.add(gene.gene_symbol);
                                 uniqueGenesNotInTarget[gene.gene_symbol] = {};
                                 uniqueGenesNotInTarget[gene.gene_symbol]['gene'] = gene;
-                                uniqueGenesNotInTarget[gene.gene_symbol]['diseases'] = [gene.disease_id]
+                                uniqueGenesNotInTarget[gene.gene_symbol]['diseases'] = [disease];
                                 uniqueGenesNotInTarget[gene.gene_symbol]['numDiseases'] = 1;
                             } else {
-                                uniqueGenesNotInTarget[gene.gene_symbol]['diseases'].push(gene.disease_id);
+                                uniqueGenesNotInTarget[gene.gene_symbol]['diseases'].push(disease);
                                 uniqueGenesNotInTarget[gene.gene_symbol]['numDiseases'] += 1;
                             }
                             return false;
@@ -378,24 +379,25 @@
                         let uniquePhenotypes = {};
                         let uniquePhenotypesNotInTarget = {};
                         let phenotypesIn = res.filter(phenotype => {
+                            let disease = { id: phenotype.disease_id, name: phenotype.disease_name };
                             if (phenotypeIdList.includes(phenotype.term_id) && !seen.has(phenotype.term_id)) {
                                 seen.add(phenotype.term_id);
                                 uniquePhenotypes[phenotype.term_id] = {};
                                 uniquePhenotypes[phenotype.term_id]['phenotype'] = phenotype;
-                                uniquePhenotypes[phenotype.term_id]['diseases'] = [phenotype.disease_id];
+                                uniquePhenotypes[phenotype.term_id]['diseases'] = [disease];
                                 uniquePhenotypes[phenotype.term_id]['numDiseases'] = 1;
                                 return true;
                             } else if (phenotypeIdList.includes(phenotype.term_id)) {
-                                uniquePhenotypes[phenotype.term_id]['diseases'].push(phenotype.disease_id);
+                                uniquePhenotypes[phenotype.term_id]['diseases'].push(disease);
                                 uniquePhenotypes[phenotype.term_id]['numDiseases'] += 1;
                             } else if (!seenNotInTarget.has(phenotype.term_id)) {
                                 seenNotInTarget.add(phenotype.term_id);
                                 uniquePhenotypesNotInTarget[phenotype.term_id] = {};
                                 uniquePhenotypesNotInTarget[phenotype.term_id]['phenotype'] = phenotype;
-                                uniquePhenotypesNotInTarget[phenotype.term_id]['diseases'] = [phenotype.disease_id];
+                                uniquePhenotypesNotInTarget[phenotype.term_id]['diseases'] = [disease];
                                 uniquePhenotypesNotInTarget[phenotype.term_id]['numDiseases'] = 1;
                             } else {
-                                uniquePhenotypesNotInTarget[phenotype.term_id]['diseases'].push(phenotype.disease_id);
+                                uniquePhenotypesNotInTarget[phenotype.term_id]['diseases'].push(disease);
                                 uniquePhenotypesNotInTarget[phenotype.term_id]['numDiseases'] += 1;
                             }
                             return false;
