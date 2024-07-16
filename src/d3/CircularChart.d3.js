@@ -590,6 +590,9 @@ function determineFill(dataPoint, targetPatient={}, selectedMatches={}, hoveredM
     //if the data point id starts with UDN: then color it blue
     if (dataPoint.id.startsWith("UDN:")) {
         color = colors.fillUdnBlue;
+    }else if(dataPoint.id.startsWith("DEC:")) {
+        color = "#B2BEC3";
+
     } else {
         color = colors.fillGreen;
     }
@@ -618,9 +621,11 @@ function determineStroke(dataPoint, targetPatient={}, selectedMatches={}, hovere
     //if the data point id starts with UDN: then color it blue
     if (dataPoint.id.startsWith("UDN:")) {
         return colors.strokeUdnBlue;
+
+    } else if (dataPoint.id.startsWith("DEC:")) {
+        return "#7D98A1";
     } else {
         return colors.strokeGreen;
-
     }
 }
 

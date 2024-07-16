@@ -7,7 +7,12 @@
         / 
         <svg height="10" width="10">
             <circle cx="5" cy="5" r="4" style="fill:#8B817E; stroke: #403B3A;"></circle>
-        </svg> UDN/Orphanet (no genes match)
+        </svg> 
+        /
+        <svg height="10" width="10">
+            <circle cx="5" cy="5" r="4" style="fill:#B2BEC3; stroke: #7D98A1;"></circle>
+        </svg> 
+        UDN/Orphanet/ Decipher (no genes match)
     </span>
     <span>
         <svg height="15" width="15">
