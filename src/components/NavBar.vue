@@ -214,6 +214,9 @@
         },
         watch: {
             udnId: function(newVal, oldVal) {
+                if (newVal === 'custom' && this.customPatient === true) {
+                    return;
+                }
                 this.patientChanged();
             },
             showPtSelectOverlay: function(newVal, oldVal) {
@@ -234,17 +237,20 @@
 
                 this.udnId = this.internalUdnPtIdsList[0];
             },
-            customPatient(newVal, oldVal) {
-                if (newVal == true) {
-                    this.udnId = 'custom';
-                } else {
-                    this.udnId = this.internalUdnPtIdsList[0];
-                }
-            },
             patientMap(newVal, oldVal) {
                 if (this.firstLoading) {
                     this.internalPatientMap = newVal;
                     this.firstLoading = false;
+                }
+            },
+            customPatient(newVal) {
+                if (newVal == true) {
+                    this.udnId = 'custom';
+                    this.phenotypesText = '';
+                    this.genesText = '';
+                } else {
+                    this.udnId = this.internalUdnPtIdsList[0];
+                    this.patientChanged();
                 }
             },
             whichPopulationChoice(newVal, oldVal) {
