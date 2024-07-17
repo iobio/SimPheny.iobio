@@ -244,7 +244,11 @@
                 }
             },
             customPatient(newVal) {
-                if (newVal == true) {
+                if (newVal === true && this.udnId === 'custom') {
+                    return;
+                }
+
+                if (newVal == true ) {
                     this.udnId = 'custom';
                     this.phenotypesText = '';
                     this.genesText = '';
@@ -255,6 +259,41 @@
             },
             whichPopulationChoice(newVal, oldVal) {
                 this.$emit('updatePopulationChoice', newVal);
+            },
+            phenotypesText(newVal, oldVal) {
+                if (this.udnId !== 'custom' && this.internalPatientMap[this.udnId]) {
+                    if (this.internalPatientMap[this.udnId].Terms && typeof this.internalPatientMap[this.udnId].Terms === 'string') {
+                        let phenotypesText = this.internalPatientMap[String(this.udnId)].Terms.replace(/\[|\]|\'|\"/g, '').replace(/\s+/g, ' ').replace(/\s+,/g, '').replace(/,/g, ';');
+                        if (newVal !== phenotypesText) {
+                            this.udnId = 'custom';
+                            this.customPatient = true;
+                        }
+                    } else { //Typical case
+                        let phenotypesText = this.internalPatientMap[String(this.udnId)].phenotypeList.map((phenotype) => {return phenotype.hpoId; }).join('; ');
+                        if (newVal !== phenotypesText) {
+                            this.udnId = 'custom';
+                            this.customPatient = true;
+                        }
+                    }
+                }
+            },
+            genesText(newVal, oldVal) {
+                //get the selected patient if it is not custom
+                if (this.udnId !== 'custom' && this.internalPatientMap[this.udnId]) {
+                    if (this.internalPatientMap[this.udnId].Terms && typeof this.internalPatientMap[this.udnId].Terms === 'string') {
+                        let genesText = this.internalPatientMap[String(this.udnId)].Genes.replace(/\[|\]|\'|\"/g, '').replace(/\s+/g, ' ').replace(/\s,/g, '').replace(/,/g, ';'); 
+                        if (newVal !== genesText) {
+                            this.udnId = 'custom';
+                            this.customPatient = true;
+                        }
+                    } else { //Typical case
+                        let genesText = this.internalPatientMap[String(this.udnId)].genesList.map((gene) => { return gene.gene_symbol; }).join('; ');
+                        if (newVal !== genesText) {
+                            this.udnId = 'custom';
+                            this.customPatient = true;
+                        }
+                    }
+                }
             }
         }
     }
