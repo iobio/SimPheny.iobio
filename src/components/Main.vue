@@ -118,20 +118,38 @@
                     } catch (error) {
                         this.showErrorToast();
                         this.ptMapObj = await Be.getPatientMap(this.whichPopulation);
-
                         this.udnPatientIds = Object.keys(this.ptMapObj);
                         this.showPtSelectOverlay = true;
                     }
                 } else {
                     //if we change this we need to reset things
-                    this.targetPatient = null;
                     this.patientMap = {};
                     this.similarityMap = {};
                     this.rankedList = [];
 
+                    this.showLoading = true;
+
                     this.ptMapObj = await Be.getPatientMap(this.whichPopulation);
                     this.udnPatientIds = Object.keys(this.ptMapObj);
-                    this.showPtSelectOverlay = true;
+                    this.hpoTermsMap["byHpoId"] = await Be.getAllPhenotypesById()
+                    this.hpoTermsMap["byTerm"] = await Be.getAllPhenotypesByName()
+
+                    let usedTerms = this.targetPatient.getPhenotypeList().filter(term => term.relevant === true).map(term => term.hpoId);
+                    let usedGenes = this.targetPatient.getGenesList();
+                    await this.calcScores(usedTerms);
+
+                    let res = await transformPatientMap(this.targetId, usedTerms, usedGenes, this.similarityMap, this.hpoTermsMap, this.whichPopulation);
+                    this.patientMap = res.patientMap;
+
+                    //delete the target patient from the patient map if it exists
+                    if (this.patientMap.hasOwnProperty(this.targetPatient.id)) {
+                        delete this.patientMap[this.targetPatient.id];
+                    }
+
+                    this.chartScales.xMin = this.rankedList[this.rankedList.length - 1][1];
+                    this.chartScales.xMax = this.rankedList[1][1];
+
+                    this.showLoading = false;
                 }
             },
             showErrorToast() {
@@ -168,7 +186,7 @@
                     this.patientMap = res.patientMap;
                     
                     this.targetPatient = res.targetPatient;
-
+                    
                     this.ptMapObj = this.patientMap; //this is passed to the chooser overlay so will have all patients
                     this.udnPatientIds = Object.keys(this.patientMap);
 
@@ -193,16 +211,24 @@
                 
 
             },
-            async reloadMatches(updatedPatient) {
+            async reloadMatches(updatedPatient, whichChanged=false) {
                 this.showLoading = true;
 
-                this.targetPatient = updatedPatient;
-                let newTerms = this.targetPatient.getPhenotypeList().filter(term => term.relevant === true).map(term => term.hpoId);
-                let newGenes = this.targetPatient.getGenesList().filter(gene => gene.relevant === true); //Not used yet
-                await this.calcScores(newTerms);
-                this.chartScales.xMin = this.rankedList[this.rankedList.length - 1][1];
-                this.chartScales.xMax = this.rankedList[1][1]; //for now we do this because targets are in the data set
-                this.patientMap = await updatePatientMap(this.similarityMap, this.patientMap, newGenes);
+                if (!whichChanged) {
+                    //If triggered only by a change in selected genes or phenotypes
+                    this.targetPatient = updatedPatient;
+
+                    let newTerms = this.targetPatient.getPhenotypeList().filter(term => term.relevant === true).map(term => term.hpoId);
+                    let newGenes = this.targetPatient.getGenesList().filter(gene => gene.relevant === true);
+
+                    await this.calcScores(newTerms);
+                    this.chartScales.xMin = this.rankedList[this.rankedList.length - 1][1];
+                    this.chartScales.xMax = this.rankedList[1][1]; //for now we do this because targets are in the data set
+                    this.patientMap = await updatePatientMap(this.similarityMap, this.patientMap, newGenes);
+                } else {
+                    //if we change the population we want the patient to stay the same but the population to change
+                    
+                }
 
                 this.showLoading = false;
             }
