@@ -49,8 +49,8 @@ export default {
         overflow: hidden
         position: absolute
         background-color: white
-        top: 18px
-        right: 18px
+        bottom: 18px
+        left: 18px
         transition: all .45s ease-in-out
     #chart-key-popout.show
         height: 100px

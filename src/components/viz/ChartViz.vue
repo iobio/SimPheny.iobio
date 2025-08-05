@@ -587,8 +587,8 @@
             color: black
     #chart-key-hoverable
         position: absolute
-        top: 5px
-        right: 5px
+        bottom: 5px
+        left: 5px
         background-color: #19354D
         color: #E9EDEA
         border: 1px solid #E9EDEA

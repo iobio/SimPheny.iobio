@@ -28,9 +28,10 @@ export default function CircularChart() {
     var xMin = 1;
     var xMax = 0;
 
-    var marginRight = 30;
-    var marginBottom = 40;
-    var marginLeft = 40;
+    var marginRight = 50;
+    var marginBottom = 20;
+    var marginTop = 50;
+    var marginLeft = 20;
     var chartId = "CircularChartD3";
 
     var targetPatient;
@@ -53,8 +54,8 @@ export default function CircularChart() {
             .range([0, maxRadius]); // Output range
         
         //Calcluate the center x and y coordinate
-        var centerX = marginLeft;
-        var centerY = height - marginBottom;
+        var centerX = width - marginRight;
+        var centerY = marginTop;
 
         // Create the SVG
         const svg = d3.create("svg")
@@ -65,7 +66,7 @@ export default function CircularChart() {
         svg.attr("viewBox", [0, 0, width, height + 10]); //ViewBox
 
         //Create the chart origin and the patient symbol
-        createOriginSymbols(svg, marginLeft, height, marginBottom);
+        createOriginSymbols(svg, marginRight, height, marginTop);
 
         let xTicks = radiusScale.ticks(6);
         let xHalfTics = radiusScale.ticks(12);
@@ -98,15 +99,14 @@ export default function CircularChart() {
                 .attr("class", "arc-section")
                 .attr("fill-opacity", opacity)
                 .attr("stroke-opacity", .3)
-                .attr("transform", `translate(${marginLeft},${height - marginBottom})`)
-                //the arc needs to be behind the points so that the mouseover event can be handled
+                .attr("transform", `translate(${width - marginRight},${marginTop})`)
                 .lower();
         }
         //Create the slider
         //Slider bar should only be from the minimum radius to the max radius of the chart
         let start = radiusScale(xHalfTics[0]);
         let slider = svg.append("g")
-            .attr("transform", `translate(${marginLeft + start},${height - marginBottom + 2})`);
+            .attr("transform", `translate(${marginRight - start},${marginTop - 20})`);
 
         //Create the slider rectangle
         slider.append("rect")
@@ -120,15 +120,16 @@ export default function CircularChart() {
 
         //Add label on top that says "Slide to select range..." in italics
         slider.append("text")
-            .text("← Slide to select range (click to clear)")
+            .text("Slide to select range (click to clear) ←")
             .attr("font-size", "10px")
             .attr("font-style", "italic")
             .attr("font-weight", "bold")
-            .attr("fill", colors.chartLettersGrey)
-            .attr("transform", `translate(15, 8)`);
+            .attr("text-anchor", "end")
+            .attr("x", maxRadius - start - 10)
+            .attr("y", 8)
+            .attr("fill", colors.chartLettersGrey);
 
         //Create a shadow for the handle to use with defs
-        
         svg.append("defs")
             .append("filter")
             .attr("id", "shadowFilter")
@@ -151,6 +152,8 @@ export default function CircularChart() {
             .attr("stroke-width", 1)
             .attr("rx", 2)
             .attr("ry", 2)
+            .attr("x", maxRadius - start) // Center the handle on the start position
+            .attr("y", 0)
             .attr("transform", `translate(0, -1)`)
             .attr("cursor", "pointer")
             .attr("filter", "url(#shadowFilter)");
@@ -159,17 +162,15 @@ export default function CircularChart() {
         let drag = d3.drag()
             .on("drag", function(event) {
                 //get the x position of the mouse event at the center of the handle
-                let x = event.x - marginLeft + start + 5 + 2;
-                //if the x position is less than 0 then set it to 0
-                if (x < 0) {
-                    x = 0;
-                }
-                //if the x position is greater than the max radius then set it to the max radius
-                if (x > (maxRadius - start)) {
-                    x = maxRadius - start;
-                }
+                let x = event.x - marginRight + start;
+
+                if (x < 0) x = 0;
+                if (x > (maxRadius - start)) x = maxRadius - start;
+
                 //set the x position of the slider handle
                 sliderHandle.attr("x", x);
+                let flippedX = (maxRadius - start) - x;
+
                 //if arc path exists remove it
                 if (svg.select("#arc-path-for-slider").node()) {
                     svg.select("#arc-path-for-slider").remove();
@@ -177,7 +178,7 @@ export default function CircularChart() {
 
                 //make an arc based on the x position
                 //make sure the x position is in the middle of the slider handle
-                let arc = createArc((x + start), (centerX - start ), centerY);
+                let arc = createArc(-(flippedX + start), (centerX - start ), centerY);
                 //add the arc to the svg with an id, ensure it is in the middle of the slider handle
                 svg.append("path")
                     .attr("d", arc)
@@ -195,8 +196,13 @@ export default function CircularChart() {
                 d3.select(this).style("cursor", "grabbing");
             })
             .on( "end", function(event) {
-                let x = event.x - marginLeft + start*2 + 5 + 2; //The true x position useful for calculating the similarity score
-                let similarityScore = radiusScale.invert(x);
+                let x = event.x - marginRight + start + 5 + 2; //The true x position useful for calculating the similarity score (5 is the width of the handle and 2 is the margin on each side)
+                if (x < 0) x = 0;
+                if (x > (maxRadius - start)) x = maxRadius - start;
+                let flippedX = (maxRadius - start + marginRight - 5 - 2) - x;
+
+                let similarityScore = radiusScale.invert(flippedX);
+
                 //call the callback function
                 sliderSelectHandler(similarityScore, matchesObj);
             });
@@ -216,11 +222,10 @@ export default function CircularChart() {
                     let coords = polarToCartesian(radiusScale(d), 0, centerX, centerY);
                     return coords.x;
                 })
-                .attr("y", height - marginBottom + 20)
+                .attr("y", marginTop - 25)
                 .attr("font-size", "10px")
                 .attr("text-anchor", "middle")
                 .attr("alignment-baseline", "middle")
-                .attr("transform", `translate(3, 0)`)
                 .attr("fill", colors.chartLettersGrey);
         
         //In case there are no matches return
@@ -236,7 +241,7 @@ export default function CircularChart() {
             for (let match of selectedMatches) {
                 //create the arc based on the similarity score
                 let radius = radiusScale(match.similarityScore);
-                let arc = createArc(radius, centerX, centerY);
+                let arc = createArc(-radius, centerX, centerY);
 
                 //add the arc to the svg
                 selectedMatchesGroup.append("path")
@@ -443,7 +448,7 @@ function mouseOverMatch(event, d, targetPatient, svg, radiusScale, centerX, cent
 
     //create the arc based on the similarity score
     let radius = radiusScale(d.similarityScore);
-    let arc = createArc(radius, centerX, centerY);
+    let arc = createArc(-radius, centerX, centerY);
 
     //add a group for the arc and the point
     let arcGroup = svg.append("g");
@@ -489,15 +494,15 @@ function generateRandomAngle() {
 
 function polarToCartesian(r, angle, centerX, centerY) {
     //takes a r value uses the angle and the offsets of the chart to return the x and y coordinates in cartesian space
-    var x = centerX + r * Math.cos(angle);
-    var y = centerY - r * Math.sin(angle);
+    var x = centerX - r * Math.cos(angle);
+    var y = centerY + r * Math.sin(angle);
     return {x: x, y: y};
 }
 
 function createArc(radius, centerX, centerY) {
     //Creates an arc with the radius that is passed in returns the path the start and end are always from 0 to 90 degrees
-    let startAngle = 0;
-    let endAngle = 90;
+    let startAngle = 180;
+    let endAngle = 270;
     //convert to radians
     startAngle = startAngle * Math.PI / 180;
     endAngle = endAngle * Math.PI / 180;
@@ -515,8 +520,8 @@ function createArc(radius, centerX, centerY) {
 }
 
 function createArcSection(innerRadius, outerRadius) {
-    let startAngle = 0;
-    let endAngle = 90;
+    let startAngle = 180;
+    let endAngle = 270;
     //convert to radians
     startAngle = startAngle * Math.PI / 180;
     endAngle = endAngle * Math.PI / 180;
@@ -533,7 +538,8 @@ function createArcSection(innerRadius, outerRadius) {
 
 //CHART HELPER FUNCTIONS ----------------------------------------------------------------------------------
 
-function createOriginSymbols(svg, marginLeft, height, marginBottom) {
+function createOriginSymbols(svg, marginRight, height, marginTop) {
+        let width = svg.attr("width");
         //Add grey circle to the chart at the origin of the chart
         svg.append("g")
             .append("circle")
@@ -541,14 +547,14 @@ function createOriginSymbols(svg, marginLeft, height, marginBottom) {
             .attr("fill", "#DCE1E5")
             .attr("stroke", colors.strokeBlue)
             .attr("stroke-width", 1)
-            .attr("transform", `translate(${marginLeft - 20},${(height - marginBottom) + 18})`);
+            .attr("transform", `translate(${width - marginRight + 10},${marginTop - 10})`);
 
         //Add the person symbol for the patient on the chart
         svg.append("g")
             .append("path")
             .attr("d", "M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V22H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z")
             .attr("fill", colors.targetPurple)
-            .attr("transform", `translate(${marginLeft - 35},${(height - marginBottom) + 5}) scale(1.3)`);
+            .attr("transform", `translate(${width - marginRight - 5},${marginTop - 25}) scale(1.3)`);
 
         // put a label that says "Patient" under the person symbol
         svg.append("g")
@@ -557,7 +563,7 @@ function createOriginSymbols(svg, marginLeft, height, marginBottom) {
             .attr("font-size", "11px")
             .attr("fill", colors.strokeBlue)
             .attr("font-weight", "bold")
-            .attr("transform", `translate(${marginLeft - 37},${(height - marginBottom) + 44})`);
+            .attr("transform", `translate(${width - marginRight - 8},${marginTop - 30})`);
 }
 
 function determineFill(dataPoint, targetPatient={}, selectedMatches={}, hoveredMatches={}) {
