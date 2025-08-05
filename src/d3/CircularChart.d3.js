@@ -76,10 +76,8 @@ export default function CircularChart() {
             var radius = radiusScale(tic);
 
             if (i < xHalfTics.length - 1) {
-                var nextTic = xHalfTics[i + 1];
                 var nextRadius = radiusScale(xHalfTics[i + 1]);
             } else {
-                var nextTic = xMax;
                 var nextRadius = maxRadius; //the last tic should be the max radius
             }
 
