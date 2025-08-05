@@ -122,6 +122,7 @@
 <script>
     import CircularChart from '../../d3/CircularChart.d3';
     import ChartKeyPopout from '../ChartKeyPopout.vue';
+    import { getSimphenyScore } from '../../data/fetchFromBackend.js';
     import * as d3 from 'd3';
 
     export default {
@@ -142,14 +143,14 @@
         return {
             chart: null,
             resizeObserver: null,
-            showChartOptions: false,
+            showChartOptions: true,
             showChartKey: false,
             selectedMatches: this.selectedMatchesProp,
             chartScalesFiltered: this.chartScales,
             filteredPatientMap: this.patientMap,
             filterOptions: {
                 showUndiagnosed: false,
-                showGenesInCommonOnly: false,
+                showGenesInCommonOnly: true,
                 filterByRank: false,
                 filterByScore: false,
                 rankCutOff: 0,
@@ -287,7 +288,7 @@
             //reset the filters to default
             this.filterOptions = {
                 showUndiagnosed: false,
-                showGenesInCommonOnly: false,
+                showGenesInCommonOnly: true,
                 filterByRank: false,
                 filterByScore: false,
                 rankCutOff: 0,
@@ -346,7 +347,7 @@
             this.zoomed = true;
             this.drawChart();
         },
-        applyFilters() {
+        async applyFilters() {
             let filteredPatientMap = { ...this.patientMap };
             let ptWithGeneInCommon = {};
             let newSelectedMatches = [];
@@ -386,16 +387,6 @@
                     if (this.patientMap[patientId].genesInCommon.length !== 0) {
                         ptWithGeneInCommon[patientId] = this.patientMap[patientId];
                     }
-                    // if (this.patientMap[patientId].genesInCommon.length === 0) {
-                    //     delete filteredPatientMap[patientId];
-                    //     continue;
-                    // }
-                    // else {
-                    //     //otherwise if the patient is part of the selected matches then we need to keep them in the new selected matches
-                    //     if (this.selectedMatches && this.selectedMatches.includes(this.patientMap[patientId])) {
-                    //         newSelectedMatches.push(this.patientMap[patientId]);
-                    //     }
-                    // }
                 }
                 if (this.filterOptions.filterByRank) {
                     filterNeverFired = false;
@@ -475,6 +466,17 @@
                     }
                 }
                 filteredPatientMap = newFilteredPatientMap;
+
+                for (let patientId in filteredPatientMap) {
+                    if (patientId.startsWith('UDN:')) {
+                        let pt = filteredPatientMap[patientId];
+                        let numTargetGenes = this.targetPatient.genesList.length;
+                        let numHpoTerms = this.targetPatient.hpoIdList.length;
+                        let dataBg = "udn";
+                        let score = await getSimphenyScore(pt.hpoIdList, pt.genesInCommon[0].gene_symbol, pt.similarityScore, numTargetGenes, numHpoTerms, dataBg);
+                        console.log(`Simpheny score for ${pt.id} with gene ${pt.genesInCommon[0].gene_symbol}: ${score}`);
+                    } 
+                }
             }
 
             this.filteredPatientMap = filteredPatientMap;
@@ -510,7 +512,7 @@
                     //clear the filters
                     this.filterOptions = {
                         showUndiagnosed: false,
-                        showGenesInCommonOnly: false,
+                        showGenesInCommonOnly: true,
                         filterByRank: false,
                         filterByScore: false,
                         rankCutOff: 0,
