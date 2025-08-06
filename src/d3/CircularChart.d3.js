@@ -5,6 +5,7 @@ import { el } from "vuetify/locale";
 const colors = {
     "strokeGreen": "#403B3A", //Actually is dark grey
     "fillGreen": "#8B817E", //Actually is light grey
+    "strokeWhite": "#E9EDEA", //Actually is light grey
 
     "strokeBlack": "#FF0000",//Red
     "fillBlack": "#FF0000", //Red
@@ -90,7 +91,7 @@ export default function CircularChart() {
         
             //create the arc section
             let arcSection = createArcSection(radius, nextRadius);
-            //#DDE3E0
+
             //add the arc section to the svg
             arcSectionGroup.append("path")
                 .attr("d", arcSection)
@@ -106,7 +107,7 @@ export default function CircularChart() {
         //Slider bar should only be from the minimum radius to the max radius of the chart
         let start = radiusScale(xHalfTics[0]);
         let slider = svg.append("g")
-            .attr("transform", `translate(${marginRight - start},${marginTop - 20})`);
+            .attr("transform", `translate(${marginRight - start + 10},${marginTop - 20})`);
 
         //Create the slider rectangle
         slider.append("rect")
@@ -321,6 +322,54 @@ export default function CircularChart() {
         matchPoints.raise();
         matchPoints.selectAll(".gene-in-common").raise();
 
+        //For all the matches that have genes in common check to see if they have a simphenyScore if they do then add text on top of them
+        const scoreData = matchesArray.filter(d => {
+            if (d.genesInCommon.length === 0 || !d.simphenyScore) return false;
+            const targetGenes = targetPatient.getGenesList();
+            return d.genesInCommon.some(gene =>
+                targetGenes.some(targetGene =>
+                    targetGene.gene_symbol === gene.gene_symbol && targetGene.relevant === true
+                )
+            );
+        });
+
+        const scoreGroup = matchPoints.append("g")
+            .selectAll("g.simpheny-score-group")
+            .data(scoreData)
+            .enter()
+            .append("g")
+            .attr("class", "simpheny-score-group")
+            .attr("transform", d => {
+                let res = determineXY(d, centerX, centerY, radiusScale, anglesMap);
+                return `translate(${res.x},${res.y - 10})`; // Offset for visibility
+            });
+
+        // Add background rect
+        scoreGroup.append("rect")
+            .attr("x", -16) // Center the rect behind text
+            .attr("y", -10)
+            .attr("width", 32)
+            .attr("height", 15)
+            .attr("fill", "#fffbe6")
+            .attr("fill-opacity", 0.85)
+            .attr("stroke", "#e0c080")
+            .attr("stroke-width", .5)
+            .attr("rx", 2)
+            .attr("ry", 2)
+            .attr("transform", "translate(0, -4)"); // Adjust position to center
+
+        // Add score text
+        scoreGroup.append("text")
+            .attr("class", "simpheny-score")
+            .text(d => d.simphenyScore.toFixed(2))
+            .attr("font-size", "13px")
+            .attr("fill", "red")
+            .attr("font-weight", "bold")
+            .attr("text-anchor", "middle")
+            .attr("alignment-baseline", "middle")
+            .attr("x", 0)
+            .attr("y", -5);
+
         if (hoveredMatchesList.length > 0) {
             //raise the hovered matches to the top
             d3.selectAll(".hovered-from-matches").raise();
@@ -441,10 +490,16 @@ function mouseOverMatch(event, d, targetPatient, svg, radiusScale, centerX, cent
         .style("visibility", "visible");
 
     tooltip.append("p")
-        .text("Score: " + simScore);
+        .text("Id: " + udnId);
 
     tooltip.append("p")
-        .text("Id: " + udnId);
+        .text("Similarity Score: " + simScore);
+
+    //If the patient has a simphenyScore then add it to the tooltip
+    if (d.simphenyScore) {
+        tooltip.append("p")
+            .text("SimPheny Score: " + d.simphenyScore.toFixed(2));
+    }
 
     //create the arc based on the similarity score
     let radius = radiusScale(d.similarityScore);
@@ -661,7 +716,7 @@ function determineXY(dataPoint, centerX, centerY, radiusScale, anglesMap) {
         let angle = anglesMap[dataPoint.id];
         let radius = radiusScale(dataPoint.similarityScore);
         let coords = polarToCartesian(radius, angle, centerX, centerY);
-        return {xy: `translate(${coords.x},${coords.y})`, anglesMap: anglesMap}
+        return {x: coords.x, y: coords.y, xy: `translate(${coords.x},${coords.y})`, anglesMap: anglesMap}
     } else {
         let angle = generateRandomAngle();
         let radius = radiusScale(dataPoint.similarityScore);
@@ -672,6 +727,6 @@ function determineXY(dataPoint, centerX, centerY, radiusScale, anglesMap) {
         anglesMap[dataPoint.id] = angle;
 
         //return the path
-        return {xy: `translate(${coords.x},${coords.y})`, anglesMap: anglesMap};
+        return {x: coords.x, y: coords.y, xy: `translate(${coords.x},${coords.y})`, anglesMap: anglesMap, };
     }
 }
