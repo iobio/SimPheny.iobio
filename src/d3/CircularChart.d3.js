@@ -107,7 +107,7 @@ export default function CircularChart() {
         //Slider bar should only be from the minimum radius to the max radius of the chart
         let start = radiusScale(xHalfTics[0]);
         let slider = svg.append("g")
-            .attr("transform", `translate(${marginRight - start + 10},${marginTop - 20})`);
+            .attr("transform", `translate(${marginLeft},${marginTop - 15})`);
 
         //Create the slider rectangle
         slider.append("rect")
@@ -126,7 +126,7 @@ export default function CircularChart() {
             .attr("font-style", "italic")
             .attr("font-weight", "bold")
             .attr("text-anchor", "end")
-            .attr("x", maxRadius - start - 10)
+            .attr("x", maxRadius - start - 15)
             .attr("y", 8)
             .attr("fill", colors.chartLettersGrey);
 
@@ -153,7 +153,7 @@ export default function CircularChart() {
             .attr("stroke-width", 1)
             .attr("rx", 2)
             .attr("ry", 2)
-            .attr("x", maxRadius - start) // Center the handle on the start position
+            .attr("x", maxRadius - start - 5) // Center the handle on the start position width is 8 plus 1 border on each side
             .attr("y", 0)
             .attr("transform", `translate(0, -1)`)
             .attr("cursor", "pointer")
@@ -163,7 +163,7 @@ export default function CircularChart() {
         let drag = d3.drag()
             .on("drag", function(event) {
                 //get the x position of the mouse event at the center of the handle
-                let x = event.x - marginRight + start;
+                let x = event.x - marginRight + start + 5; //The true x position useful for calculating the similarity score (5 is the width of the handle)
 
                 if (x < 0) x = 0;
                 if (x > (maxRadius - start)) x = maxRadius - start;
