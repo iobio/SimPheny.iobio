@@ -5,6 +5,7 @@ import Gene from './Gene.js';
 export default class Patient {
     constructor(patientId, patientObject, simObject) {
         this.id = patientId
+        this.simphenyScore = null
 
         if (simObject) {
             this.similarityScore = simObject["score"]
@@ -42,6 +43,13 @@ export default class Patient {
     }
     setId(id) {
         this.id = id;
+    }
+
+    getSimphenyScore() {
+        return this.simphenyScore;
+    }
+    setSimphenyScore(simphenyScore) {
+        this.simphenyScore = simphenyScore;
     }
 
     getSimilarityScore() {
