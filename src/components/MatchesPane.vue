@@ -47,8 +47,9 @@
                         <h4>Summary</h4>
                         <div id="summary-container" class="list-box">
                             <p><b>ID:</b> {{ selectedMatches[0].id }}</p>
+                            <p><b>Similarity Score:</b> {{ Math.round(selectedMatches[0].similarityScore * 10000)/10000 }}</p>
+                            <p v-if="selectedMatches[0].simphenyScore"><b>SimPheny Score:</b> {{ selectedMatches[0].simphenyScore.toFixed(2) }}</p>
                             <p><b>Rank:</b> {{ selectedMatches[0].rank }}</p>
-                            <p><b>Score:</b> {{ Math.round(selectedMatches[0].similarityScore * 10000)/10000 }}</p>
                             <p><b>Dx Status:</b> {{ selectedMatches[0].dx }}</p>
                         </div>
                     </div>
