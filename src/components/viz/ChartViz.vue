@@ -71,7 +71,7 @@
                         <div v-if="!filterByRadiosCollapsed" class="filterby-wrapper">
                             <div>
                                 <input @click="selectFilter('rank')" type="checkbox" v-model="filterOptions.filterByRank">
-                                <label for="rank">Rank</label>
+                                <label for="rank">PhenoSim Rank</label>
                             </div>
                             <div class="filter-num-input">
                                 <v-text-field
@@ -91,7 +91,7 @@
                         <div v-if="!filterByRadiosCollapsed" class="filterby-wrapper">
                             <div>
                                 <input @click="selectFilter('score')" type="checkbox" v-model="filterOptions.filterByScore">
-                                <label for="score">Score</label> 
+                                <label for="score">PhenoSim Score</label> 
                             </div>
                             <div class="filter-num-input">
                                 <v-text-field
