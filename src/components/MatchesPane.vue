@@ -13,10 +13,10 @@
 
         <div id="lower-container">
             <div class="lower matches" :class="{ expanded: showDetailsBar, collapsed: !showDetailsBar}">
-                <h1 v-if="selectedMatches && selectedMatches.length <= 1" class="section-head">Selected Match</h1>
-                <h1 v-if="selectedMatches && selectedMatches.length > 1" class="section-head">Selected Matches ({{ selectedMatches.length }})</h1>
-                <h1 v-if="!selectedMatches" class="section-head">Selected Match</h1>
-                <h4 v-if="selectedMatches && selectedMatches.length == 0" id="no-match-alt-text">No matches selected. Select matches from the chart to display details.</h4>
+                <h1 v-if="selectedMatches && selectedMatches.length <= 1" class="section-head">Selected Case</h1>
+                <h1 v-if="selectedMatches && selectedMatches.length > 1" class="section-head">Selected Cases ({{ selectedMatches.length }})</h1>
+                <h1 v-if="!selectedMatches" class="section-head">Selected Case</h1>
+                <h4 v-if="selectedMatches && selectedMatches.length == 0" id="no-match-alt-text">No cases selected. Select cases from the chart to display details.</h4>
 
                 <div v-if="selectedMatches" class="column-container" :class="{ single: selectedMatches.length == 1 }">
                     <div v-if="selectedMatches && selectedMatches.length == 1" class="column full-height">
@@ -143,8 +143,8 @@
             <div class="button-container matches">
             <v-btn icon @click="showDetailsBar = !showDetailsBar" :class="{ expanded: showDetailsBar, collapsed: !showDetailsBar}" class="btn umbrella matches" height="35px" width="35px" color="#19354D">
                 <v-tooltip offset="3" location="right" activator="parent">
-                    <span v-if="!showDetailsBar">Expand match details</span>
-                    <span v-if="showDetailsBar">Collapse match details</span>
+                    <span v-if="!showDetailsBar">Expand case details</span>
+                    <span v-if="showDetailsBar">Collapse case details</span>
                 </v-tooltip>
                 <v-icon v-if="showDetailsBar" color="white">mdi-arrow-down-circle-outline</v-icon>
                 <v-icon v-if="!showDetailsBar" color="white">mdi-arrow-up-circle-outline</v-icon>
