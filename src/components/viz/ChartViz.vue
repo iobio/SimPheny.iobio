@@ -31,7 +31,7 @@
 
                 <div id="options-content">
                     <div class="group">
-                        <p>Genes In Common Only</p>
+                        <p>SimPheny Matches Only</p>
                         <input v-model="filterOptions.showGenesInCommonOnly" type="checkbox" name="" id="">
                     </div>
 
