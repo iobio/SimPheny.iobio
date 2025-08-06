@@ -493,7 +493,7 @@ function mouseOverMatch(event, d, targetPatient, svg, radiusScale, centerX, cent
         .text("Id: " + udnId);
 
     tooltip.append("p")
-        .text("Similarity Score: " + simScore);
+        .text("PhenoSim: " + simScore);
 
     //If the patient has a simphenyScore then add it to the tooltip
     if (d.simphenyScore) {
