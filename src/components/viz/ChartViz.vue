@@ -150,7 +150,7 @@
             filteredPatientMap: this.patientMap,
             filterOptions: {
                 showUndiagnosed: false,
-                showGenesInCommonOnly: true,
+                showGenesInCommonOnly: false,
                 filterByRank: false,
                 filterByScore: false,
                 rankCutOff: 0,
@@ -288,7 +288,7 @@
             //reset the filters to default
             this.filterOptions = {
                 showUndiagnosed: false,
-                showGenesInCommonOnly: true,
+                showGenesInCommonOnly: false,
                 filterByRank: false,
                 filterByScore: false,
                 rankCutOff: 0,
@@ -386,6 +386,9 @@
 
                     if (this.patientMap[patientId].genesInCommon.length !== 0) {
                         ptWithGeneInCommon[patientId] = this.patientMap[patientId];
+                    } else {
+                        delete filteredPatientMap[patientId];
+                        continue;
                     }
                 }
                 if (this.filterOptions.filterByRank) {
@@ -456,29 +459,6 @@
                 sortedFilteredPatientMap[i].rank = i + 1;
             }
 
-            //if we are filtering by genes in common only then we need to update the filtered patient map
-            if (this.filterOptions.showGenesInCommonOnly) {
-                //We need to check the genes in common map and take out any that arent in the filtered patient map
-                let newFilteredPatientMap = {};
-                for (let patientId in ptWithGeneInCommon) {
-                    if (filteredPatientMap[patientId]) {
-                        newFilteredPatientMap[patientId] = filteredPatientMap[patientId];
-                    }
-                }
-                filteredPatientMap = newFilteredPatientMap;
-
-                for (let patientId in filteredPatientMap) {
-                    if (patientId.startsWith('UDN:')) {
-                        let pt = filteredPatientMap[patientId];
-                        let numTargetGenes = this.targetPatient.genesList.length;
-                        let numHpoTerms = this.targetPatient.hpoIdList.length;
-                        let dataBg = "udn";
-                        let score = await getSimphenyScore(pt.hpoIdList, pt.genesInCommon[0].gene_symbol, pt.similarityScore, numTargetGenes, numHpoTerms, dataBg);
-                        console.log(`Simpheny score for ${pt.id} with gene ${pt.genesInCommon[0].gene_symbol}: ${score}`);
-                    } 
-                }
-            }
-
             this.filteredPatientMap = filteredPatientMap;
             this.selectMatches(newSelectedMatches);
             this.drawChart();
@@ -512,7 +492,7 @@
                     //clear the filters
                     this.filterOptions = {
                         showUndiagnosed: false,
-                        showGenesInCommonOnly: true,
+                        showGenesInCommonOnly: false,
                         filterByRank: false,
                         filterByScore: false,
                         rankCutOff: 0,
@@ -800,7 +780,7 @@
         align-items: start
         height: fit-content
         width: fit-content
-
+        z-index: 3
         font-size: small
     fieldset
         border: 1px solid #D4DAD4
