@@ -346,7 +346,7 @@ export default function CircularChart() {
             .attr("class", "simpheny-score-group")
             .attr("transform", (d) => {
                 let res = determineXY(d, centerX, centerY, radiusScale, anglesMap);
-                return `translate(${res.x},${res.y - 10})`; // Offset for visibility
+                return `translate(${res.x},${res.y + 22})`; // Offset for visibility
             });
 
         // Add background rect
