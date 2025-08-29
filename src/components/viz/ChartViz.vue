@@ -1,25 +1,4 @@
 <template>
-    <div id="linear-chart-container">
-        <div id="chart-key-container">
-            <p id="chart-key-hoverable" 
-                @mouseenter="showChartKey = true" 
-                @mouseleave="showChartKey = false">
-                    <v-icon>mdi-key-variant</v-icon>
-            </p>
-            <ChartKeyPopout 
-                :showChartKey="showChartKey">
-            </ChartKeyPopout>
-        </div>
-        
-        <div ref="lin-chart-container" id="lin-chart-viz" v-if="requiredPresent()"></div>
-        <div v-else id="lin-chart-alt-text">
-            <p>No target patient defined.</p>
-            <p>Input target patient to view matches.</p>
-        </div>
-        
-    </div>
-    
-    <div id="lin-chart-tip"></div>
     <div id="chart-opt-and-button">
         <button @mouseenter="showToggleOptTip" @mouseleave="unshowToggleOptTip" @click="showChartOptions = !showChartOptions" id="chart-options-btn">
             <v-icon color="white">mdi-dots-horizontal-circle-outline</v-icon>
@@ -116,13 +95,40 @@
                     <button @click="resetChart()">Reset <v-icon>mdi-reload-alert</v-icon></button>
                 </div>
         </div>
+    </div>    
+    <div id="chart-wrapper">
+    <div id="linear-chart-container">
+        <div id="chart-key-container">
+            <p id="chart-key-hoverable" 
+                @mouseenter="showChartKey = true" 
+                @mouseleave="showChartKey = false">
+                    <v-icon>mdi-key-variant</v-icon>
+            </p>
+            <ChartKeyPopout 
+                :showChartKey="showChartKey">
+            </ChartKeyPopout>
+        </div>
+        
+        <div ref="lin-chart-container" id="lin-chart-viz" v-if="requiredPresent()"></div>
+        <div v-else id="lin-chart-alt-text">
+            <p>No target patient defined.</p>
+            <p>Input target patient to view matches.</p>
+        </div>
+        
+    </div>        
     </div>
+
+    <div id="ranked-list-section">
+        <div id="inner-section">List</div>
+    </div>
+    
+    <div id="lin-chart-tip"></div>
+
 </template>
 
 <script>
     import CircularChart from '../../d3/CircularChart.d3';
     import ChartKeyPopout from '../ChartKeyPopout.vue';
-    import { getSimphenyScore } from '../../data/fetchFromBackend.js';
     import * as d3 from 'd3';
 
     export default {
@@ -143,14 +149,14 @@
         return {
             chart: null,
             resizeObserver: null,
-            showChartOptions: true,
+            showChartOptions: false,
             showChartKey: false,
             selectedMatches: this.selectedMatchesProp,
             chartScalesFiltered: this.chartScales,
             filteredPatientMap: this.patientMap,
             filterOptions: {
                 showUndiagnosed: false,
-                showGenesInCommonOnly: false,
+                showGenesInCommonOnly: true,
                 filterByRank: false,
                 filterByScore: false,
                 rankCutOff: 0,
@@ -288,7 +294,7 @@
             //reset the filters to default
             this.filterOptions = {
                 showUndiagnosed: false,
-                showGenesInCommonOnly: false,
+                showGenesInCommonOnly: true,
                 filterByRank: false,
                 filterByScore: false,
                 rankCutOff: 0,
@@ -492,7 +498,7 @@
                     //clear the filters
                     this.filterOptions = {
                         showUndiagnosed: false,
-                        showGenesInCommonOnly: false,
+                        showGenesInCommonOnly: true,
                         filterByRank: false,
                         filterByScore: false,
                         rankCutOff: 0,
@@ -552,6 +558,25 @@
 </script>
 
 <style lang="sass">
+    #chart-wrapper
+        display: flex
+        flex-direction: row
+        justify-content: center
+        align-items: center
+        height: 100%
+    #ranked-list-section
+        height: 90%
+        padding: 8px
+        display: flex
+        width: 200px
+        flex-shrink: 1
+        #inner-section
+            border: 1px solid black
+            height: 100%
+            border-radius: 5px
+            overflow-y: auto
+            width: 100%
+            max-width: 200px
     .collapse-btn.radios
         cursor: pointer
         color: black
@@ -588,6 +613,7 @@
             font-size: 14pt
     #chart-opt-and-button
         width: fit-content
+        min-width: 50px
         height: 90%
         max-height: 700px
         display: flex
@@ -598,9 +624,9 @@
         position: relative
     #chart-options-btn
         background-color: #19354D
-        position: relative
-        top: 0px
-        left: 10px
+        position: absolute
+        top: -20px
+        right: 0px
         border-radius: 50%
         height: 35px
         width: 35px
@@ -648,8 +674,8 @@
                 color: black
     #chart-options-container
         position: relative
-        top: 5px
-        left: 10px
+        top: 20px
+        right: 10px
         border-radius: 5px
         display: flex
         flex-direction: column
