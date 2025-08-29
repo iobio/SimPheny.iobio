@@ -12,10 +12,8 @@
         </div>
 
         <NavBar
-            :udnPatientIdsList="udnPatientIds"
             :showPtSelectOverlay="showPtSelectOverlay"
             :targetPatient="targetPatient"
-            :patientMap="ptMapObj"
             :whichPopulation="whichPopulation"
             @set-target-patient="setPatientAndGetMatches"
             @set-mosaic-false="fromMosaic = false"
@@ -152,9 +150,11 @@ export default {
                 }
 
                 // Now find all the patients that have genes in common and get their simpheny scores in parallel only for UDN patients
-                let patientsWithGenesInCommon = Object.values(this.patientMap).filter((patient) => patient.genesInCommon.length > 0).filter((patient) => {
-                    return patient.id.startsWith("UDN:");
-                });
+                let patientsWithGenesInCommon = Object.values(this.patientMap)
+                    .filter((patient) => patient.genesInCommon.length > 0)
+                    .filter((patient) => {
+                        return patient.id.startsWith("UDN:");
+                    });
 
                 // Make sure the genes in common are marked as relevant
                 patientsWithGenesInCommon.forEach((patient) => {
@@ -170,7 +170,16 @@ export default {
                     let numTargetGenes = this.targetPatient.genesList.length;
                     let numHpoTerms = this.targetPatient.hpoIdList.length;
                     let dataBg = "udn";
-                    simphenyPromises.push(Be.getSimphenyScore(patient.hpoIdList, patient.genesInCommon[0].gene_symbol, patient.similarityScore, numTargetGenes, numHpoTerms, dataBg));
+                    simphenyPromises.push(
+                        Be.getSimphenyScore(
+                            patient.hpoIdList,
+                            patient.genesInCommon[0].gene_symbol,
+                            patient.similarityScore,
+                            numTargetGenes,
+                            numHpoTerms,
+                            dataBg,
+                        ),
+                    );
                 });
 
                 let simphenyScores = await Promise.all(simphenyPromises);
@@ -235,9 +244,11 @@ export default {
                 }
 
                 // Now find all the patients that have genes in common and get their simpheny scores in parallel only for UDN patients
-                let patientsWithGenesInCommon = Object.values(this.patientMap).filter((patient) => patient.genesInCommon.length > 0).filter((patient) => {
-                    return patient.id.startsWith("UDN:");
-                });
+                let patientsWithGenesInCommon = Object.values(this.patientMap)
+                    .filter((patient) => patient.genesInCommon.length > 0)
+                    .filter((patient) => {
+                        return patient.id.startsWith("UDN:");
+                    });
 
                 // Make sure the genes in common are marked as relevant
                 patientsWithGenesInCommon.forEach((patient) => {
@@ -253,7 +264,16 @@ export default {
                     let numTargetGenes = this.targetPatient.genesList.length;
                     let numHpoTerms = this.targetPatient.hpoIdList.length;
                     let dataBg = "udn";
-                    simphenyPromises.push(Be.getSimphenyScore(patient.hpoIdList, patient.genesInCommon[0].gene_symbol, patient.similarityScore, numTargetGenes, numHpoTerms, dataBg));
+                    simphenyPromises.push(
+                        Be.getSimphenyScore(
+                            patient.hpoIdList,
+                            patient.genesInCommon[0].gene_symbol,
+                            patient.similarityScore,
+                            numTargetGenes,
+                            numHpoTerms,
+                            dataBg,
+                        ),
+                    );
                 });
 
                 let simphenyScores = await Promise.all(simphenyPromises);
