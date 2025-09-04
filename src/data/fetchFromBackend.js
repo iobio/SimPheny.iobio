@@ -5,14 +5,21 @@ var baseURL = import.meta.env.VITE_APP_BACKEND_URL;
 var compareURL_udn = baseURL + "compare_udn/";
 var compareURL_orpha = baseURL + "compare_orpha/";
 var compareURL_decipher = baseURL + "compare_decipher/";
+var compareURL_clinvar = baseURL + "compare_clinvar/";
 //url for getting the patientMap
 var patientMapURL_udn = baseURL + "udn_population";
 var patientMapURL_orpha = baseURL + "orpha_population";
 var patientMapURL_decipher = baseURL + "decipher_population";
+var patientMapURL_clinvar = baseURL + "clinvar_population";
 
 export async function getPatientMap(which = "udn") {
     if (which == "udn") {
         let patientMap = await fetch(patientMapURL_udn);
+        let jsonData = await patientMap.json();
+
+        return jsonData;
+    } else if (which == "clinvar") {
+        let patientMap = await fetch(patientMapURL_clinvar);
         let jsonData = await patientMap.json();
 
         return jsonData;
@@ -52,6 +59,11 @@ export async function getPatientMap(which = "udn") {
 }
 
 export async function getSimphenyScore(hit_terms, hit_gene, sim_score, num_query_genes, num_hpo_terms, data_bg = "udn") {
+    //if the population is not one of the allowed values then return null
+    if (!["udn", "clinvar"].includes(data_bg)) {
+        return null;
+    }
+
     let url = baseURL + "simpheny_score";
     let request_body = {
         hit_terms: hit_terms,
@@ -88,6 +100,14 @@ export async function getSimScores(terms, which = "udn") {
         } catch (error) {
             return null;
         }
+    } else if (which == "clinvar") {
+        try {
+            let simScoresResponse = await fetch(compareURL_clinvar + terms);
+            let simScoreResJson = await simScoresResponse.json();
+            return simScoreResJson;
+        } catch (error) {
+            return null;
+        }
     } else if (which == "orpha") {
         try {
             let simScoresResponse = await fetch(compareURL_orpha + terms);
@@ -100,50 +120,6 @@ export async function getSimScores(terms, which = "udn") {
         try {
             let simScoresResponse = await fetch(compareURL_decipher + terms);
             let simScoreResJson = await simScoresResponse.json();
-            return simScoreResJson;
-        } catch (error) {
-            return null;
-        }
-    } else if (which == "all") {
-        try {
-            let simScoresResponse = await fetch(compareURL_udn + terms);
-            let simScoresResponse2 = await fetch(compareURL_orpha + terms);
-            let simScoresResponse3 = await fetch(compareURL_decipher + terms);
-            let simScoreResJson = await simScoresResponse.json();
-            let simScoreResJson2 = await simScoresResponse2.json();
-            let simScoreResJson3 = await simScoresResponse3.json();
-
-            //Join all the objects together
-            let joinedRankedVec = simScoreResJson.ranked_vec.ScoreVec.concat(simScoreResJson2.ranked_vec.ScoreVec).concat(
-                simScoreResJson3.ranked_vec.ScoreVec,
-            );
-            let joinedScoreMap = {
-                ...simScoreResJson.score_map.ScoreMap,
-                ...simScoreResJson2.score_map.ScoreMap,
-                ...simScoreResJson3.score_map.ScoreMap,
-            };
-
-            simScoreResJson.ranked_vec.ScoreVec = joinedRankedVec;
-            simScoreResJson.score_map.ScoreMap = joinedScoreMap;
-
-            return simScoreResJson;
-        } catch (error) {
-            return null;
-        }
-    } else if (which == "both") {
-        try {
-            let simScoresResponse = await fetch(compareURL_udn + terms);
-            let simScoresResponse2 = await fetch(compareURL_orpha + terms);
-            let simScoreResJson = await simScoresResponse.json();
-            let simScoreResJson2 = await simScoresResponse2.json();
-
-            //join the two objects.ranked_vec.ScoreVec which is a list of scores and score_map.ScoreMap which is a dictionary of scores
-            let joinedRankedVec = simScoreResJson.ranked_vec.ScoreVec.concat(simScoreResJson2.ranked_vec.ScoreVec);
-            let joinedScoreMap = { ...simScoreResJson.score_map.ScoreMap, ...simScoreResJson2.score_map.ScoreMap };
-
-            simScoreResJson.ranked_vec.ScoreVec = joinedRankedVec;
-            simScoreResJson.score_map.ScoreMap = joinedScoreMap;
-
             return simScoreResJson;
         } catch (error) {
             return null;

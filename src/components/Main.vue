@@ -150,26 +150,44 @@ export default {
                 }
 
                 // Now find all the patients that have genes in common and get their simpheny scores in parallel only for UDN patients
-                let patientsWithGenesInCommon = Object.values(this.patientMap)
-                    .filter((patient) => patient.genesInCommon.length > 0)
-                    .filter((patient) => {
-                        return patient.id.startsWith("UDN:");
-                    });
+                let patientsWithGenesInCommon = [];
+                if (this.whichPopulation === "udn") {
+                    patientsWithGenesInCommon = Object.values(this.patientMap)
+                        .filter((patient) => patient.genesInCommon.length > 0)
+                        .filter((patient) => {
+                            return patient.id.startsWith("UDN:");
+                        });
 
-                // Make sure the genes in common are marked as relevant
-                patientsWithGenesInCommon.forEach((patient) => {
-                    patient.getGenesList().forEach((gene) => {
-                        if (this.targetGenes.includes(gene.name)) {
-                            gene.relevant = true;
-                        }
+                    // Make sure the genes in common are marked as relevant
+                    patientsWithGenesInCommon.forEach((patient) => {
+                        patient.getGenesList().forEach((gene) => {
+                            if (this.targetGenes.includes(gene.name)) {
+                                gene.relevant = true;
+                            }
+                        });
                     });
-                });
+                } else if (this.whichPopulation === "clinvar") {
+                    patientsWithGenesInCommon = Object.values(this.patientMap)
+                        .filter((patient) => patient.genesInCommon.length > 0)
+                        .filter((patient) => {
+                            return patient.id.startsWith("CLIN:");
+                        });
+
+                    // Make sure the genes in common are marked as relevant
+                    patientsWithGenesInCommon.forEach((patient) => {
+                        patient.getGenesList().forEach((gene) => {
+                            if (this.targetGenes.includes(gene.name)) {
+                                gene.relevant = true;
+                            }
+                        });
+                    });
+                }
 
                 let simphenyPromises = [];
                 patientsWithGenesInCommon.forEach((patient) => {
                     let numTargetGenes = this.targetPatient.genesList.length;
                     let numHpoTerms = this.targetPatient.hpoIdList.length;
-                    let dataBg = "udn";
+                    let dataBg = this.whichPopulation;
                     simphenyPromises.push(
                         Be.getSimphenyScore(
                             patient.hpoIdList,
@@ -244,26 +262,44 @@ export default {
                 }
 
                 // Now find all the patients that have genes in common and get their simpheny scores in parallel only for UDN patients
-                let patientsWithGenesInCommon = Object.values(this.patientMap)
-                    .filter((patient) => patient.genesInCommon.length > 0)
-                    .filter((patient) => {
-                        return patient.id.startsWith("UDN:");
-                    });
+                let patientsWithGenesInCommon = [];
+                if (this.whichPopulation === "udn") {
+                    patientsWithGenesInCommon = Object.values(this.patientMap)
+                        .filter((patient) => patient.genesInCommon.length > 0)
+                        .filter((patient) => {
+                            return patient.id.startsWith("UDN:");
+                        });
 
-                // Make sure the genes in common are marked as relevant
-                patientsWithGenesInCommon.forEach((patient) => {
-                    patient.getGenesList().forEach((gene) => {
-                        if (this.targetGenes.includes(gene.name)) {
-                            gene.relevant = true;
-                        }
+                    // Make sure the genes in common are marked as relevant
+                    patientsWithGenesInCommon.forEach((patient) => {
+                        patient.getGenesList().forEach((gene) => {
+                            if (this.targetGenes.includes(gene.name)) {
+                                gene.relevant = true;
+                            }
+                        });
                     });
-                });
+                } else if (this.whichPopulation === "clinvar") {
+                    patientsWithGenesInCommon = Object.values(this.patientMap)
+                        .filter((patient) => patient.genesInCommon.length > 0)
+                        .filter((patient) => {
+                            return patient.id.startsWith("CLIN:");
+                        });
+
+                    // Make sure the genes in common are marked as relevant
+                    patientsWithGenesInCommon.forEach((patient) => {
+                        patient.getGenesList().forEach((gene) => {
+                            if (this.targetGenes.includes(gene.name)) {
+                                gene.relevant = true;
+                            }
+                        });
+                    });
+                }
 
                 let simphenyPromises = [];
                 patientsWithGenesInCommon.forEach((patient) => {
                     let numTargetGenes = this.targetPatient.genesList.length;
                     let numHpoTerms = this.targetPatient.hpoIdList.length;
-                    let dataBg = "udn";
+                    let dataBg = this.whichPopulation;
                     simphenyPromises.push(
                         Be.getSimphenyScore(
                             patient.hpoIdList,
