@@ -104,7 +104,7 @@ export default function CircularChart() {
         //Create the slider
         //Slider bar should only be from the minimum radius to the max radius of the chart
         let start = radiusScale(xHalfTics[0]);
-        let slider = svg.append("g").attr("transform", `translate(${marginLeft},${marginTop - 15})`);
+        let slider = svg.append("g").attr("transform", `translate(${marginLeft},${marginTop - 23})`);
 
         //Create the slider rectangle
         slider
@@ -224,7 +224,7 @@ export default function CircularChart() {
                 let coords = polarToCartesian(radiusScale(d), 0, centerX, centerY);
                 return coords.x;
             })
-            .attr("y", marginTop - 25)
+            .attr("y", marginTop - 30)
             .attr("font-size", "10px")
             .attr("text-anchor", "middle")
             .attr("alignment-baseline", "middle")
@@ -605,7 +605,7 @@ function createOriginSymbols(svg, marginRight, height, marginTop) {
         .attr("fill", "#DCE1E5")
         .attr("stroke", colors.strokeBlue)
         .attr("stroke-width", 1)
-        .attr("transform", `translate(${width - marginRight + 10},${marginTop - 10})`);
+        .attr("transform", `translate(${width - marginRight + 20},${marginTop - 20})`);
 
     //Add the person symbol for the patient on the chart
     svg.append("g")
@@ -615,7 +615,7 @@ function createOriginSymbols(svg, marginRight, height, marginTop) {
             "M12,2A2,2 0 0,1 14,4A2,2 0 0,1 12,6A2,2 0 0,1 10,4A2,2 0 0,1 12,2M10.5,7H13.5A2,2 0 0,1 15.5,9V14.5H14V22H10V14.5H8.5V9A2,2 0 0,1 10.5,7Z",
         )
         .attr("fill", colors.targetPurple)
-        .attr("transform", `translate(${width - marginRight - 5},${marginTop - 25}) scale(1.3)`);
+        .attr("transform", `translate(${width - marginRight + 4},${marginTop - 35}) scale(1.3)`);
 
     // put a label that says "Patient" under the person symbol
     svg.append("g")
@@ -624,7 +624,7 @@ function createOriginSymbols(svg, marginRight, height, marginTop) {
         .attr("font-size", "11px")
         .attr("fill", colors.strokeBlue)
         .attr("font-weight", "bold")
-        .attr("transform", `translate(${width - marginRight - 8},${marginTop - 30})`);
+        .attr("transform", `translate(${width - marginRight - 1},${marginTop - 38})`);
 }
 
 function determineFill(dataPoint, targetPatient = {}, selectedMatches = {}, hoveredMatches = {}) {
