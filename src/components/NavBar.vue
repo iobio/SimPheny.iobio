@@ -6,7 +6,7 @@
             <!-- add a triplet of radio buttons one for udn, one for orphanet, one for both -->
             <v-radio-group v-model="whichPopulationChoice" inline hide-details="true">
                 <v-radio label="UDN" value="udn"></v-radio>
-                <v-radio :disabled="true" label="ClinVar" value="clinvar"></v-radio>
+                <v-radio label="ClinVar" value="clinvar"></v-radio>
                 <v-radio label="Orphanet" value="orpha"></v-radio>
                 <v-radio label="Decipher" value="decipher"></v-radio>
             </v-radio-group>
