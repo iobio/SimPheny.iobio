@@ -119,7 +119,29 @@
     </div>
 
     <div id="ranked-list-section">
-        <div id="inner-section">List</div>
+        <div id="inner-section">
+            <h4 class="gene-hits-title">Gene Candidates</h4>
+            <div v-for="(gene, i) in geneHits" :key="gene.gene" class="gene-hit-item" @click="selectPatientsForGene(gene.patients)">
+                <div class="rank" v-if="gene.patients[0].simphenyScore">{{ i + 1 }}</div>
+                <div class="gene-hit-details">
+                    <div class="gene-and-count">
+                        <div class="gene-name">{{ gene.gene }}</div>
+                        <div class="avg-score" v-if="gene.patients[0].simphenyScore">Top2 Avg {{ gene.averageScore.toFixed(2) }}</div>
+                    </div>
+                    <div class="patient-count">{{ gene.patients.length }} Match{{ gene.patients.length > 1 ? 'es' : '' }}</div>
+                    <div class="patients-scores">
+                        <span 
+                            v-for="(pt, index) in gene.patients.slice(0, 3)" 
+                            :key="pt.id"
+                            class="score-badge"
+                        >
+                            <span v-if="pt.simphenyScore">{{ pt.simphenyScore.toFixed(2) }}</span>
+                        </span>
+                        <span v-if="gene.patients.length > 3 && gene.patients[0].simphenyScore" class="more-patients">+{{ gene.patients.length - 3 }}</span>
+                    </div>                    
+                </div>
+            </div>
+        </div>
     </div>
     
     <div id="lin-chart-tip"></div>
@@ -257,6 +279,10 @@
                 this.chart(container, this.filteredPatientMap);
                 this.anglesMap = this.chart.getXYCoords();
             }
+        },
+        selectPatientsForGene(patients) {
+            // Select all patients associated with the clicked gene
+            this.selectMatches(patients);
         },
         selectMatches(matches = null) {
             if (matches && Array.isArray(matches) && matches.length === 0) {
@@ -553,6 +579,52 @@
             deep: true
         },
     },
+    computed: {
+      geneHits() {
+        // Essentially we will look at the filteredPatient map and catch all the ones that have genes in common put those into a new list here
+        let geneHits = [];
+        if (this.filteredPatientMap) {
+            for (let ptId in this.filteredPatientMap) {
+                let pt = this.filteredPatientMap[ptId] || null;
+                if (pt && pt.genesInCommon && pt.genesInCommon.length > 0) {
+                    // Loop over the genes in common for this patient and add them to the geneHits list if they are not already there
+                    for (let gene of pt.genesInCommon) {
+                        let geneInList = geneHits.find(g => g.gene === gene.gene_symbol);
+                        if (!geneInList) {
+                            let geneObject = {
+                                gene: gene.gene_symbol,
+                                patients: [],
+                                averageScore: 0
+                            };
+                            geneObject.patients.push(pt);
+                            geneHits.push(geneObject);
+                        // If the gene is already in the list, add the patient to the patients array for that gene
+                        } else {
+                            // The only way we get here is if the gene is already in the list so we can safely assume it exists
+                            let existingGene = geneHits.find(g => g.gene === gene.gene_symbol);
+                            existingGene.patients.push(pt);
+                        }
+                    }
+                }
+            }
+        }    
+        
+        // Sort patients by simphenyScore and calculate average score for each gene based on top 2 patients' simphenyScores
+        geneHits.forEach(geneHit => {
+            // Sort patients by simphenyScore in descending order
+            geneHit.patients.sort((a, b) => (b.simphenyScore || 0) - (a.simphenyScore || 0));
+            
+            let scores = geneHit.patients.map(pt => pt.simphenyScore).sort((x, y) => y - x);
+            geneHit.averageScore = (scores[0] + (scores[1] || 0)) / (scores.length >= 2 ? 2 : 1);
+        });
+        
+        // Sorting gene hits by the average simphenyScore of the top two patients for each gene (if just one then just that one score)
+        geneHits.sort((a, b) => {
+            return b.averageScore - a.averageScore;
+        });
+        return geneHits;
+      }  
+    },
 }
 
 </script>
@@ -566,17 +638,85 @@
         height: 100%
     #ranked-list-section
         height: 90%
-        padding: 8px
+        max-height: 50vh
+        padding: 8px 8px 8px 20px
         display: flex
-        width: 200px
+        width: 248px
         flex-shrink: 1
         #inner-section
-            border: 1px solid black
             height: 100%
-            border-radius: 5px
+            border-radius: 8px
             overflow-y: auto
             width: 100%
-            max-width: 200px
+            max-width: 220px
+            padding: 5px
+            box-shadow: 0px 2px 4px -1px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)), 0px 4px 5px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)), 0px 1px 10px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.12))
+        .gene-hits-title
+            text-align: center
+            padding: 10px
+        .gene-hit-item
+            margin-bottom: 5px
+            display: flex
+            flex-direction: row
+            justify-content: space-between
+            align-items: center
+            padding: 5px 10px
+            border: 1px solid #D4DAD4
+            border-radius: 5px
+            cursor: pointer
+            transition: all 0.2s ease-in-out
+            &:hover
+                background-color: #E6EBEF
+                border-color: #19354D
+                transform: translateY(-1px)
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1)
+            .rank
+                font-weight: bold
+                font-size: 12pt
+                color: #19354D
+                margin-right: 10px
+                align-self: flex-start
+            .gene-hit-details
+                display: flex
+                flex-direction: column
+                flex-grow: 1
+                .gene-name
+                    font-weight: bold
+                    flex-basis: 40%
+                    text-overflow: ellipsis
+                    overflow: hidden
+                    white-space: nowrap
+                .avg-score
+                    font-size: 10pt
+                    color: gray
+                .gene-and-count
+                    display: flex
+                    flex-direction: row
+                    justify-content: space-between
+                    align-items: center
+                .patients-scores
+                    flex-basis: 40%
+                    display: flex
+                    flex-wrap: wrap
+                    align-items: center
+                    .score-badge
+                        background: #19354D
+                        color: white
+                        border-radius: 12px
+                        padding: 0px 5px
+                        margin: 2px
+                        font-size: 10pt
+                    .more-patients
+                        font-size: 10pt
+                        color: gray
+                        border: 1px solid gray
+                        border-radius: 12px
+                        padding: 0px 5px
+                .patient-count
+                    text-align: left
+                    font-size: 10pt
+                    color: gray
+                    margin-bottom: 5px
     .collapse-btn.radios
         cursor: pointer
         color: black
