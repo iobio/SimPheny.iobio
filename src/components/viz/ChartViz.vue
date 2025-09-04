@@ -119,7 +119,7 @@
     </div>
 
     <div id="ranked-list-section">
-        <div id="inner-section">
+        <div v-if="geneHits.length > 0" id="inner-section">
             <h4 class="gene-hits-title">Gene Candidates</h4>
             <div v-for="(gene, i) in geneHits" :key="gene.gene" class="gene-hit-item" @click="selectPatientsForGene(gene.patients)">
                 <div class="rank" v-if="gene.patients[0].simphenyScore">{{ i + 1 }}</div>
@@ -140,6 +140,16 @@
                         <span v-if="gene.patients.length > 3 && gene.patients[0].simphenyScore" class="more-patients">+{{ gene.patients.length - 3 }}</span>
                     </div>                    
                 </div>
+            </div>
+        </div>
+        <div v-else id="inner-section">
+            <h4 class="gene-hits-title">Gene Candidates</h4>
+            <div class="no-candidates-container">
+                <p class="no-candidates-text">No gene candidates available.</p>
+                <button v-if="filterOptions.showGenesInCommonOnly" @click="showNonMatches" class="show-non-matches-btn">
+                    Show Non-Matches
+                    <v-icon>mdi-eye-outline</v-icon>
+                </button>
             </div>
         </div>
     </div>
@@ -239,6 +249,10 @@
         },
         validScore(v) {
             return !isNaN(v) && v >= 0.0 && v <= 1.0;
+        },
+        showNonMatches() {
+            this.filterOptions.showGenesInCommonOnly = false;
+            this.applyFilters();
         },
         drawChart() {
             let container = this.$refs['lin-chart-container'];
@@ -717,6 +731,36 @@
                     font-size: 10pt
                     color: gray
                     margin-bottom: 5px
+        .no-candidates-container
+            display: flex
+            flex-direction: column
+            align-items: center
+            justify-content: center
+            padding: 20px
+            height: 150px
+            .no-candidates-text
+                color: gray
+                font-style: italic
+                text-align: center
+                margin-bottom: 15px
+                font-size: 11pt
+            .show-non-matches-btn
+                background-color: #19354D
+                color: white
+                border: none
+                border-radius: 5px
+                padding: 3px 8px
+                font-size: 10pt
+                cursor: pointer
+                display: flex
+                align-items: center
+                gap: 5px
+                transition: all 0.2s ease-in-out
+                &:hover
+                    background-color: #2E5F8A
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1)
+                .v-icon
+                    font-size: 12pt
     .collapse-btn.radios
         cursor: pointer
         color: black
