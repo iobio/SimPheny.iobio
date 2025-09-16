@@ -181,6 +181,51 @@ export default {
                             }
                         });
                     });
+                } else if (this.whichPopulation === "decipher") {
+                    patientsWithGenesInCommon = Object.values(this.patientMap)
+                        .filter((patient) => patient.genesInCommon.length > 0)
+                        .filter((patient) => {
+                            return patient.id.startsWith("DEC:");
+                        });
+
+                    // Make sure the genes in common are marked as relevant
+                    patientsWithGenesInCommon.forEach((patient) => {
+                        patient.getGenesList().forEach((gene) => {
+                            if (this.targetGenes.includes(gene.name)) {
+                                gene.relevant = true;
+                            }
+                        });
+                    });
+                } else if (this.whichPopulation === "orpha") {
+                    patientsWithGenesInCommon = Object.values(this.patientMap)
+                        .filter((patient) => patient.genesInCommon.length > 0)
+                        .filter((patient) => {
+                            return patient.id.startsWith("ORPHA:")
+                        });
+
+                    // Make sure the genes in common are marked as relevant
+                    patientsWithGenesInCommon.forEach((patient) => {
+                        patient.getGenesList().forEach((gene) => {
+                            if (this.targetGenes.includes(gene.name)) {
+                                gene.relevant = true;
+                            }
+                        });
+                    });
+                } else if (this.whichPopulation === "pheno") {
+                    patientsWithGenesInCommon = Object.values(this.patientMap)
+                        .filter((patient) => patient.genesInCommon.length > 0)
+                        .filter((patient) => {
+                            return patient.id.startsWith("PHENO:")
+                        })
+
+                    // Make sure the genes in common are marked as relevant
+                    patientsWithGenesInCommon.forEach((patient) => {
+                        patient.getGenesList().forEach((gene) => {
+                            if (this.targetGenes.includes(gene.name)) {
+                                gene.relevant = true;
+                            }
+                        });
+                    });
                 }
 
                 let simphenyPromises = [];
@@ -293,7 +338,54 @@ export default {
                             }
                         });
                     });
+                } else if (this.whichPopulation === "decipher") {
+                    patientsWithGenesInCommon = Object.values(this.patientMap)
+                        .filter((patient) => patient.genesInCommon.length > 0)
+                        .filter((patient) => {
+                            return patient.id.startsWith("D_");
+                        });
+
+                    // Make sure the genes in common are marked as relevant
+                    patientsWithGenesInCommon.forEach((patient) => {
+                        patient.getGenesList().forEach((gene) => {
+                            if (this.targetGenes.includes(gene.name)) {
+                                gene.relevant = true;
+                            }
+                        });
+                    });
+                } else if (this.whichPopulation === "orpha") {
+                    patientsWithGenesInCommon = Object.values(this.patientMap)
+                        .filter((patient) => patient.genesInCommon.length > 0)
+                        .filter((patient) => {
+                            const id = String(patient.id).trim();
+                            return /^\d+$/.test(id); // Check if the ID consists only of digits
+                        });
+
+                    // Make sure the genes in common are marked as relevant
+                    patientsWithGenesInCommon.forEach((patient) => {
+                        patient.getGenesList().forEach((gene) => {
+                            if (this.targetGenes.includes(gene.name)) {
+                                gene.relevant = true;
+                            }
+                        });
+                    });
+                } else if (this.whichPopulation === "pheno") {
+                    patientsWithGenesInCommon = Object.values(this.patientMap)
+                        .filter((patient) => patient.genesInCommon.length > 0)
+                        .filter((patient) => {
+                            return patient.id.startsWith("PHENO:")
+                        })
+
+                    // Make sure the genes in common are marked as relevant
+                    patientsWithGenesInCommon.forEach((patient) => {
+                        patient.getGenesList().forEach((gene) => {
+                            if (this.targetGenes.includes(gene.name)) {
+                                gene.relevant = true;
+                            }
+                        });
+                    });
                 }
+                
 
                 let simphenyPromises = [];
                 patientsWithGenesInCommon.forEach((patient) => {

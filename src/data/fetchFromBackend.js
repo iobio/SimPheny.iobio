@@ -1,16 +1,18 @@
-// var baseURL = "http://localhost:8911/"; //for local testing
-var baseURL = import.meta.env.VITE_APP_BACKEND_URL;
+var baseURL = "http://localhost:8911/"; //for local testing
+// var baseURL = import.meta.env.VITE_APP_BACKEND_URL;
 
 //url for compare data
 var compareURL_udn = baseURL + "compare_udn/";
 var compareURL_orpha = baseURL + "compare_orpha/";
 var compareURL_decipher = baseURL + "compare_decipher/";
 var compareURL_clinvar = baseURL + "compare_clinvar/";
+var compareURL_pheno = baseURL + "compare_phenopackets/";
 //url for getting the patientMap
 var patientMapURL_udn = baseURL + "udn_population";
 var patientMapURL_orpha = baseURL + "orpha_population";
 var patientMapURL_decipher = baseURL + "decipher_population";
 var patientMapURL_clinvar = baseURL + "clinvar_population";
+var patientMapURL_pheno = baseURL + "phenopackets_population";
 
 export async function getPatientMap(which = "udn") {
     if (which == "udn") {
@@ -33,34 +35,19 @@ export async function getPatientMap(which = "udn") {
         let jsonData = await patientMap.json();
 
         return jsonData;
-    } else if (which == "all") {
-        let patientMap = await fetch(patientMapURL_udn);
-        let patientMap2 = await fetch(patientMapURL_orpha);
-        let patientMap3 = await fetch(patientMapURL_decipher);
+    } else if (which == "pheno") {
+        let patientMap = await fetch(patientMapURL_pheno);
         let jsonData = await patientMap.json();
-        let jsonData2 = await patientMap2.json();
-        let jsonData3 = await patientMap3.json();
-
-        //these objects need to be joined up into one
-        jsonData = { ...jsonData, ...jsonData2, ...jsonData3 };
 
         return jsonData;
-    } else if (which == "both") {
-        let patientMap = await fetch(patientMapURL_udn);
-        let patientMap2 = await fetch(patientMapURL_orpha);
-        let jsonData = await patientMap.json();
-        let jsonData2 = await patientMap2.json();
-
-        //these objects need to be joined up into one
-        jsonData = { ...jsonData, ...jsonData2 };
-
-        return jsonData;
+    } else {
+        return null;
     }
 }
 
 export async function getSimphenyScore(hit_terms, hit_gene, sim_score, num_query_genes, num_hpo_terms, data_bg = "udn") {
     //if the population is not one of the allowed values then return null
-    if (!["udn", "clinvar"].includes(data_bg)) {
+    if (!["udn", "clinvar", "decipher", "orpha", "pheno"].includes(data_bg)) {
         return null;
     }
 
@@ -124,6 +111,16 @@ export async function getSimScores(terms, which = "udn") {
         } catch (error) {
             return null;
         }
+    } else if (which == "pheno") {
+        try {
+            let simScoresResponse = await fetch(compareURL_pheno + terms);
+            let simScoreResJson = await simScoresResponse.json();
+            return simScoreResJson;
+        } catch (error) {
+            return null;
+        }
+    } else {
+        return null;
     }
 }
 
