@@ -8,8 +8,8 @@
                 <v-radio label="UDN" value="udn"></v-radio>
                 <v-radio label="ClinVar" value="clinvar"></v-radio>
                 <v-radio label="Orphanet" value="orpha"></v-radio>
-                <v-radio label="Decipher" value="decipher"></v-radio>
-                <v-radio label="PhenoPackets" value="pheno"></v-radio>
+                <v-radio label="DECIPHER" value="decipher"></v-radio>
+                <v-radio label="Phenopacket Store" value="pheno"></v-radio>
             </v-radio-group>
             <v-toolbar-title>SimPheny.iobio</v-toolbar-title>
             <v-btn density="compact" icon="mdi-dots-vertical" @click="toggleShowDisclaimer"></v-btn>
