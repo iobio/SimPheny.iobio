@@ -636,6 +636,14 @@
         geneHits.sort((a, b) => {
             return b.averageScore - a.averageScore;
         });
+
+        // We need to make sure all these gene hits are still "in" the target patient's genes list
+        if (this.targetPatient && this.targetPatient.genesList) {
+            // All gene hits must be in the target patient's genes list (identified by gene_symbol) and that gene must have relevant == true
+            geneHits = geneHits.filter(geneHit => {
+                return this.targetPatient.genesList.some(gene => gene.gene_symbol === geneHit.gene && gene.relevant === true);
+            });
+        } 
         return geneHits;
       }  
     },
