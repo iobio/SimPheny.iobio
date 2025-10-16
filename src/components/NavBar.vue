@@ -252,17 +252,19 @@ export default {
         targetPatient: {
             handler: function (newVal, oldVal) {
                 if (newVal) {
-                    this.udnId = newVal.id;
-                    this.phenotypesText = newVal.phenotypeList
+                    this.udnId = "custom";
+                    this.phenotypesText = this.targetPatient.phenotypeList
                         .map((phenotype) => {
                             return phenotype.hpoId;
                         })
                         .join("; ");
-                    this.genesText = newVal.genesList
+                    this.genesText = this.targetPatient.genesList
                         .map((gene) => {
                             return gene.gene_symbol;
                         })
                         .join("; ");
+                    
+                    this.customPatient = true;
                 }
             },
             deep: true,
