@@ -145,6 +145,20 @@ export default {
     mounted: function () {
         if (!this.targetPatient) {
             this.udnId = "example-1";
+        } else {
+            this.udnId = "custom";
+            this.phenotypesText = this.targetPatient.phenotypeList
+                .map((phenotype) => {
+                    return phenotype.hpoId;
+                })
+                .join("; ");
+            this.genesText = this.targetPatient.genesList
+                .map((gene) => {
+                    return gene.gene_symbol;
+                })
+                .join("; ");
+            
+            this.customPatient = true;
         }
     },
     methods: {
