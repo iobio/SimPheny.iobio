@@ -68,11 +68,11 @@
             <div id="disclaimer-popup">
                 <h3>Disclaimer</h3>
                 <p>
-                    The University of Utah makes no claims that iobio applications, including simpheny.iobio are approved for
-                    clinical use. All users of iobio applications including simpheny.iobio understand and accept that any
+                    The University of Utah makes no claims that iobio applications, including SimPheny.iobio are approved for
+                    clinical use. All users of iobio applications including SimPheny.iobio understand and accept that any
                     information gained by using these applications, whether the information comes from visualization, processing,
                     internal or external databases, or analysis, may not in any way be used for clinical purposes. The University
-                    of Utah makes no representation that iobio or simpheny.iobio is either safe or effective for any intended use
+                    of Utah makes no representation that iobio or SimPheny.iobio is either safe or effective for any intended use
                     for which research may currently be performed.
                     <br />
                     <br />
