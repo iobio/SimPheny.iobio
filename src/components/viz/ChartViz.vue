@@ -37,7 +37,7 @@
                         <button v-if="!zoomed" @click="zoomToSelect()" :disabled="!selectedMatches || selectedMatches.length == 0"><v-icon>mdi-magnify-plus-outline</v-icon></button>
                         
                         <label v-if="zoomed" for="zoom-to-select">Return to Origin</label>
-                        <button v-if="zoomed" @click="applyFilters()"><v-icon>mdi-magnify-minus-outline</v-icon></button>
+                        <button v-if="zoomed" @click="applyFilters(true)"><v-icon>mdi-magnify-minus-outline</v-icon></button>
                     </div> 
 
                     <div class="group" id="filter-by-radios" :class="{filterByCollapsed: filterByRadiosCollapsed}">
@@ -91,7 +91,7 @@
                 </div>
 
                 <div id="options-buttons">
-                    <button @click="applyFilters()" :disabled="!canApplyFilters()">Apply<v-icon v-if="zoomed">mdi-magnify-minus-outline</v-icon></button>
+                    <button @click="applyFilters(true)" :disabled="!canApplyFilters()">Apply<v-icon v-if="zoomed">mdi-magnify-minus-outline</v-icon></button>
                     <button @click="resetChart()">Reset <v-icon>mdi-reload-alert</v-icon></button>
                 </div>
         </div>
@@ -146,9 +146,12 @@
             <h4 class="gene-hits-title">Gene Candidates</h4>
             <div class="no-candidates-container">
                 <p class="no-candidates-text">No gene candidates available.</p>
+                <div v-if="targetPatient.genesList.length == 0" class="gene-notification">
+                    <v-icon class="notification-icon">mdi-information-outline</v-icon>
+                    <p>Click 'Edit Patient' and add genes to see candidates and SimPheny matches</p>
+                </div>
                 <button v-if="filterOptions.showGenesInCommonOnly" @click="showNonMatches" class="show-non-matches-btn">
-                    Show Non-Matches
-                    <v-icon>mdi-eye-outline</v-icon>
+                    Show Non-SimPheny Matches
                 </button>
             </div>
         </div>
@@ -252,7 +255,7 @@
         },
         showNonMatches() {
             this.filterOptions.showGenesInCommonOnly = false;
-            this.applyFilters();
+            this.applyFilters(true);
         },
         drawChart() {
             let container = this.$refs['lin-chart-container'];
@@ -343,7 +346,7 @@
             },
             this.chartScalesFiltered = this.chartScales;
             this.filteredPatientMap = this.patientMap;
-            this.applyFilters();
+            this.applyFilters(true);
         },
         clearSelection() {
             //select all the matches
@@ -393,7 +396,15 @@
             this.zoomed = true;
             this.drawChart();
         },
-        async applyFilters() {
+        async applyFilters(isManualCall = false) {
+            // Check if target patient has no genes if it doesnt we can default to showing all patients not just gene matches
+            if (!isManualCall && this.filterOptions.showGenesInCommonOnly && this.targetPatient) {
+                const hasTargetPatientGenes = this.targetPatient.genesList && this.targetPatient.genesList.length > 0;
+                if (!hasTargetPatientGenes) {
+                    this.filterOptions.showGenesInCommonOnly = false;
+                }
+            }
+
             let filteredPatientMap = { ...this.patientMap };
             let ptWithGeneInCommon = {};
             let newSelectedMatches = [];
@@ -543,7 +554,7 @@
                         filterByScore: false,
                         rankCutOff: 0,
                         scoreCutOff: 0.0,
-                    },
+                    };
                     
                     this.chartScalesFiltered = this.chartScales;
                     this.filteredPatientMap = this.patientMap;
@@ -752,6 +763,34 @@
                 text-align: center
                 margin-bottom: 15px
                 font-size: 11pt
+            .gene-notification
+                display: flex
+                flex-direction: row
+                align-items: center
+                gap: 8px
+                background-color: #E0EBF5
+                border: 1px solid #1A364D
+                border-radius: 5px
+                padding: 5px 5px 3px 5px
+                margin-bottom: 10px
+                position: relative
+                .edit-pt-emphasis
+                    border: 1px solid #1A364D
+                    border-radius: 3px
+                    padding: 1px 4px
+                .notification-icon
+                    color: #1A364D
+                    background-color: #E0EBF5
+                    border-radius: 50%
+                    font-size: 12pt
+                    position: absolute
+                    top: -6px
+                    left: -6px
+                p
+                    color: #1A364D
+                    font-size: 10pt
+                    margin: 0
+                    font-weight: 500
             .show-non-matches-btn
                 background-color: #19354D
                 color: white

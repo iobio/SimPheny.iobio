@@ -261,6 +261,37 @@ export default function CircularChart() {
         //The array of matches objects
         let matchesArray = Object.values(matchesObj);
         //Add all the matches to their group and the svg
+        if (matchesArray.length === 0) {
+            let noMatchesText = svg.append("text")
+                .attr("x", width / 2)
+                .attr("y", height / 2)
+                .attr("text-anchor", "middle")
+                .attr("font-size", "16px")
+                .attr("fill", colors.chartLettersGrey);
+            
+            noMatchesText.append("tspan")
+                .attr("x", width / 2)
+                .attr("dy", "-0.6em")
+                .text("No matches to display");
+
+            noMatchesText.append("tspan")
+                .attr("x", width / 2)
+                .attr("dy", "1.3em")
+                .attr("font-size", "12px")
+                .text("Adjust filters");
+
+            noMatchesText.append("tspan")
+                .attr("x", width / 2)
+                .attr("dy", "1.6em")
+                .text("OR");
+
+            noMatchesText.append("tspan")
+                .attr("x", width / 2)
+                .attr("dy", "1.8em")
+                .attr("font-size", "12px")
+                .text("Click 'show non-SimPheny matches' to view all patients");
+        }
+
         matchPoints
             .append("g")
             .selectAll("matches")
