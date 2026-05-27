@@ -1,6 +1,6 @@
 # SimPheny.iobio
 
-Visit and demo/use here: [SimPheny.iobio](https://simpheny.iobio.chpc.utah.edu/)
+Visit and demo/use here: [SimPheny.iobio](https://simpheny.iobio.io/)
 
 ## Overview
 
